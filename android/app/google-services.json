@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "296040710102",
+    "project_id": "hi-push-f21c5",
+    "storage_bucket": "hi-push-f21c5.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:296040710102:android:35213023fe46eb2c862e77",
+        "android_client_info": {
+          "package_name": "com.hicenter"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "296040710102-77t80q018c5spsa5q7sqvip6qf2tmrof.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDBEF7iidqInMilIFEAIEclbfCkVE2-NtY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "296040710102-77t80q018c5spsa5q7sqvip6qf2tmrof.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "296040710102-62g2tq1ib2b6he0s3ifigi20gi9laibs.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "org.reactjs.native.example.HICenter"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
