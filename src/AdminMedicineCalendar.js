@@ -1,5 +1,9 @@
 import React from 'react';
-import {SafeAreaView, View, Text, Image, ScrollView, StatusBar, StyleSheet,TouchableWithoutFeedback, LogBox, Modal, BackHandler} from 'react-native';
+import {SafeAreaView, View, Text, Image, ScrollView, StatusBar, StyleSheet,TouchableWithoutFeedback, LogBox, Modal, BackHandler, ActivityIndicator} from 'react-native';
+import {SafeAreaProvider, useSafeAreaInsets} from 'react-native-safe-area-context';
+import Elevations from 'react-native-elevation';
+import SwitchToggle from 'react-native-switch-toggle';
+import FetchingIndicator from 'react-native-fetching-indicator'
 
 import Moment from 'moment';
 import Users from './Common/User'
@@ -55,9 +59,12 @@ export default class AdminMedicineCalendar extends React.Component{
         type : 1,
         oneBtnDialogVisible : false,
         twoDialogVisible : false,
+        exceptTwoDialogVisible : false,
         calendarVisible : false,
         datas : [],
         includes : [],
+        scheduleNo : [],
+        namesList : [],
         selectPosition : 0,
         selectMedicineName : '',
         eatingTime : '',
@@ -68,12 +75,10 @@ export default class AdminMedicineCalendar extends React.Component{
         holidayColor : '#ec407a',
         routePush : false,
         scroll : true,
-        userNo : '',
+        isFetching : true,
     }
 
     componentDidMount(){
-        console.log(this.props.route.params.userNo)
-        this.state.userNo = this.props.route.params.userNo;
         this._MedcineInfo();
     }
 
@@ -84,12 +89,20 @@ export default class AdminMedicineCalendar extends React.Component{
     _MedcineInfo(){
         var details = null;
         var url = "";
-
+        this.setState({isFetching : true})
         if(this.state.requestType == 1){
-            url = ServerUrl.medicineInfoList;
+            url = ServerUrl.AdminMedicineList;
             details = {
-                'user_no' : this.state.userNo,
+                'user_no' : this.props.route.params.userNo,
                 'cel_date' : this.state.today.format('YYYYMM')+"00",
+            };
+        }else if(this.state.requestType == 2){
+            url = ServerUrl.medicineUpdate;
+            details = {
+                'access_token' : Users.AccessToken,
+                'refresh_token' : Users.RefreshToken,
+                'schedule_no' : this.state.includes[0].schedule_no,
+                'medicine_info' : JSON.stringify(this.state.includes),
             };
         }
         
@@ -120,6 +133,11 @@ export default class AdminMedicineCalendar extends React.Component{
                     if(this.state.requestType == 1){
                         this.state.datas = [];
                         this.state.dateList = [];
+                        this.state.scheduleNo = [];
+                        this.state.namesList = [];
+                        this.state.et_start_date = '';
+                        this.state.et_end_date = ''; 
+                        console.log(json.Luteal)
                         for(let i = 0; i < Object.keys(json.Resources).length; i++){
                             const obj = ({
                                 abbreviation : json.Resources[i].abbreviation || '',
@@ -137,21 +155,95 @@ export default class AdminMedicineCalendar extends React.Component{
                                 type : json.Resources[i].type || '',
                                 take_time : json.Resources[i].take_time || '', 
                                 schedule_no : json.Resources[i].schedule_no || '',
+                                
                             })
+                            this.state.scheduleNo.push(json.Resources[i].schedule_no || '');
+                            this.state.namesList.push(json.Resources[i].medicine_name || '');
                             this.state.datas.push(obj);
                             this.state.dateList.push(json.Resources[i].cel_date || '');
                         }
+
+                        for(let i = 0; i < Object.keys(json.Luteal).length; i++){
+                            console.log(json.Luteal[i].medicine_info);
+                            for(let j = 0; j < Object.keys(json.Luteal[i].medicine_info).length; j++){
+                                if(this.state.scheduleNo.includes(json.Luteal[i].schedule_no) == true){
+                                    if(this.state.namesList.includes(json.Luteal[i].medicine_info[j].medicine_name) === true){
+
+                                    }else{
+                                        const obj = ({
+                                            abbreviation : json.Luteal[i].medicine_info[j].abbreviation || '',
+                                            amount : json.Luteal[i].medicine_info[j].amount || '', 
+                                            cel_date : json.Luteal[i].cel_date || '',
+                                            every_other_day : json.Luteal[i].medicine_info[j].every_other_day || '',
+                                            idx :  '',
+                                            medicine_name : json.Luteal[i].medicine_info[j].medicine_name || '', 
+                                            medicine_no : json.Luteal[i].medicine_info[j].medicine_no || '',
+                                            memo : json.Luteal[i].medicine_info[j].memo || '',
+                                            purpose : json.Luteal[i].medicine_info[j].purpose || '',
+                                            reg_date : json.Luteal[i].medicine_info[j].reg_date || '',
+                                            reg_id : json.Luteal[i].medicine_info[j].reg_id || '',
+                                            unit : json.Luteal[i].medicine_info[j].unit || '', 
+                                            type : json.Luteal[i].medicine_info[j].medicine_type || '',
+                                            take_time : json.Luteal[i].medicine_info[j].take_time || '', 
+                                            schedule_no : json.Luteal[i].schedule_no || '',
+                                        })
+                                        if(json.Luteal[i].medicine_info[j].every_other_day == 1){
+                                            if(i % 2 == 0){
+                                                this.state.datas.push(obj);
+                                                this.state.dateList.push(json.Luteal[i].cel_date || '');
+                                            }
+                                        }else{
+                                            this.state.datas.push(obj);
+                                            this.state.dateList.push(json.Luteal[i].cel_date || '');
+                                        }
+                                    }
+                                }else{
+                                    const obj = ({
+                                        abbreviation : json.Luteal[i].medicine_info[j].abbreviation || '',
+                                        amount : json.Luteal[i].medicine_info[j].amount || '', 
+                                        cel_date : json.Luteal[i].cel_date || '',
+                                        every_other_day : json.Luteal[i].medicine_info[j].every_other_day || '',
+                                        idx :  '',
+                                        medicine_name : json.Luteal[i].medicine_info[j].medicine_name || '', 
+                                        medicine_no : json.Luteal[i].medicine_info[j].medicine_no || '',
+                                        memo : json.Luteal[i].medicine_info[j].memo || '',
+                                        purpose : json.Luteal[i].medicine_info[j].purpose || '',
+                                        reg_date : json.Luteal[i].medicine_info[j].reg_date || '',
+                                        reg_id : json.Luteal[i].medicine_info[j].reg_id || '',
+                                        unit : json.Luteal[i].medicine_info[j].unit || '', 
+                                        type : json.Luteal[i].medicine_info[j].medicine_type || '',
+                                        take_time : json.Luteal[i].medicine_info[j].take_time || '', 
+                                        schedule_no : json.Luteal[i].schedule_no || '',
+                                    })
+                                    if(json.Luteal[i].medicine_info[j].every_other_day == 1){
+                                        if(i % 2 == 0){
+                                            this.state.datas.push(obj);
+                                            this.state.dateList.push(json.Luteal[i].cel_date || '');
+                                        }
+                                    }else{
+                                        this.state.datas.push(obj);
+                                        this.state.dateList.push(json.Luteal[i].cel_date || '');
+                                    }
+                                }
+                            }
+                        }
+
                         this._MakeListItem(this.state.selectedDay);
 
                         this.setState({
                             isLoading : true,
                         })
+                    }else if(this.state.requestType == 2){
+                        this.state.requestType = 1;
+                        this.state.resultCode = true;
+                        this._MedcineInfo();
                     }
                 }else{
 
                 }
             }
         )
+        this.setState({isFetching : false})
     }
 
     _CalendarArr = () => {
@@ -206,10 +298,9 @@ export default class AdminMedicineCalendar extends React.Component{
                         }
                         position = this.state.dateList.indexOf(days.format('YYYY-MM-DD'), position + 1);
                     }                    
-
-                    if(Moment().format('YYYYMMDD') === days.format('YYYYMMDD')){        //today
+                    if(Moment().format('YYYYMMDD') === days.format('YYYYMMDD') && days.format('MM') === this.state.today.format('MM')){        //today
                         return(
-                            <TouchableWithoutFeedback onPress = {() => this._MakeListItem(days)}>
+                            <TouchableWithoutFeedback onPress = {() => this._MakeListItem(days.format('YYYYMMDD'))}>
                                 <View key={index} style = {{flex : 1, alignItems : 'center', justifyContent : 'flex-end', backgroundColor : (this.state.selectedDay == days.format('YYYYMMDD') ? '#F1F1F1' : '#fff'), borderBottomLeftRadius : (index == 0 && week == this.state.lastWeek ? 12 : 0), borderBottomRightRadius : (index == 6 && week == this.state.lastWeek ? 12 : 0), marginLeft : (index == 0 ? 0 : 0.5)}}>
                                      {this.state.dateList.includes(days.format('YYYY-MM-DD')) && <View style = {{flexDirection : 'row', alignItems : 'center', justifyContent : 'center',width : '100%', height : 30}}>
                                      {pink && <Image source = {pinkCheck == 1 ? imgCirclePinkCheck : imgCirclePink} style = {{width : 10, height : 10, resizeMode : 'contain',}}></Image>}
@@ -222,7 +313,7 @@ export default class AdminMedicineCalendar extends React.Component{
                     }else if(days.format('MM') !== this.state.today.format('MM')){      //disable
                         return(
                             <TouchableWithoutFeedback onPress = {() => this.setState({oneBtnDialogVisible : true})}>
-                                <View key={index} style = {{flex : 1, alignItems : 'center', justifyContent : 'flex-end', backgroundColor : (this.state.selectedDay == days.format('YYYYMMDD') ? '#F1F1F1' : '#fff'), borderBottomLeftRadius : (index == 0 && week == this.state.lastWeek ? 12 : 0), borderBottomRightRadius : (index == 6 && week == this.state.lastWeek ? 12 : 0), marginLeft : (index == 0 ? 0 : 0.5)}}>
+                                <View key={index} style = {{flex : 1, alignItems : 'center', justifyContent : 'flex-end', backgroundColor : ((this.state.selectedDay == days.format('YYYYMMDD') && days.format('MM') === this.state.today.format('MM')) ? '#F1F1F1' : '#fff'), borderBottomLeftRadius : (index == 0 && week == this.state.lastWeek ? 12 : 0), borderBottomRightRadius : (index == 6 && week == this.state.lastWeek ? 12 : 0), marginLeft : (index == 0 ? 0 : 0.5)}}>
                                     
                                     <Text style = {{color : '#AFAFAF', paddingBottom : 5,fontSize : 12, fontFamily : 'KHNPHDotfR'}}>{days.format('D')}</Text>
                                 </View>
@@ -285,9 +376,28 @@ export default class AdminMedicineCalendar extends React.Component{
             console.log(TAG,'time : ' + this.state.eatingTime);
             this.setState({
                 calendarVisible : false, 
-                twoDialogVisible : true
+                twoDialogVisible : true,
+                exceptTwoDialogVisible : false,
             })
       }
+
+      _ExceptTwoDialogVisible = value =>{
+        if(value != undefined){
+            this.setState({
+                exceptTwoDialogVisible : value.visible,
+            })
+            if(value.status == "done"){
+                this._UpdateTakeTime(this.state.selectTime);
+            }
+        }
+    
+        if(this.state.exceptTwoDialogVisible){
+            console.log(TAG,'time2 : ' + this.state.eatingTime)
+          return <TowBtnDialog title = {"투약등록"} contents = {this.state.selectMedicineName+ "를 투약하셨나요?"} leftBtnText = {"취소"} rightBtnText = {"확인"} clcik = {this._ExceptTwoDialogVisible}></TowBtnDialog>
+        }else{
+          return null;
+        }
+    }
 
     _TwoDialogVisible = value =>{
         if(value != undefined){
@@ -342,6 +452,7 @@ export default class AdminMedicineCalendar extends React.Component{
     }
 
     _MakeListItem(value){
+        console.log(TAG,"value : " + value);
         let position = this.state.dateList.indexOf(Moment(value).format('YYYY-MM-DD'));
         this.state.includes = [];
         console.log(TAG,"position : " + position);
@@ -375,7 +486,8 @@ export default class AdminMedicineCalendar extends React.Component{
         schedule_no : data.schedule_no || '',} : data)
         console.log(TAG,this.state.includes);
         this.state.requestType = 2;
-        this.setState({twoDialogVisible : false,})
+        this.setState({twoDialogVisible : false, exceptTwoDialogVisible : false})
+        this._MedcineInfo();
     }
 
     goBack(){
@@ -392,6 +504,7 @@ export default class AdminMedicineCalendar extends React.Component{
                     {this._OneDialogVisible()}
                     {this._DatePicker()}
                     {this._TwoDialogVisible()}
+                    {this._ExceptTwoDialogVisible()}
                     <View style = {{width : '100%', height : 48}}>
                         <TouchableWithoutFeedback onPress = {() => this.goBack()}>
                             <View style = {{width : 40, height : 48, justifyContent : 'center'}}>
@@ -454,16 +567,25 @@ export default class AdminMedicineCalendar extends React.Component{
                             </View>
                             <View style = {{marginBottom : 28}}>
                                 {this.state.includes.length > 0 ? this.state.includes.map((item,index) => <View key={index} style = {{marginTop : index == 0 ? 16 : 8,}}>
-                                    <TouchableWithoutFeedback onPress = {() => this.setState({calendarVisible : true, selectPosition : index, selectMedicineName : item.medicine_name, eatingTime : Moment().format("a HH:mm"), selectTime : Moment().format("HH:mm")})}>
+                                    <TouchableWithoutFeedback onPress = {() => ((item.medicine_name == '오비드렐' || item.medicine_name == '데카펩틸') ? this.setState({calendarVisible : true, selectPosition : index, selectMedicineName : item.medicine_name, eatingTime : Moment().format("a HH:mm"), selectTime : Moment().format("HH:mm")}) : item.take_time.length == 0 && this.setState({exceptTwoDialogVisible : true, selectPosition : index, selectMedicineName : item.medicine_name, eatingTime : Moment().format("a HH:mm"), selectTime : Moment().format("HH:mm")}))}>
                                         <View style = {{ flexDirection : 'row', backgroundColor : '#fff', height : 40, borderRadius : 16, alignItems : 'center', justifyContent : 'center', paddingLeft : 12, paddingRight : 12}}>
-                                          <Image source = {imgCircle} style = {{width : 8 , height : 8, resizeMode : 'contain',}}></Image>
-                                          <Text style = {{marginLeft : 8, fontSize : 14, fontFamily : 'KHNPHDotfR', color : '#000', flex : 1}}>{item.medicine_name}</Text>
-                                          <Text style = {{fontSize : 14, fontFamily : 'KHNPHDotfR', color : '#000', flex : 1}}>{item.amount + item.unit}</Text>
-                                          {item.take_time.length > 0 ? <View style = {{flex : 1.5, justifyContent : 'flex-end', flexDirection : 'row', flexWrap : 'wrap', marginRight : 11.5}}>
+                                          <Image source = {(item.type == '주사' ? imgCirclePink : (item.type == '약' ? imgCircleGreen : imgCircleBlue))} style = {{width : 8 , height : 8, resizeMode : 'contain',}}></Image>
+                                          <Text style = {{marginLeft : 8, fontSize : 14, fontFamily : 'KHNPHDotfR', color : '#000', flex : 0.6}}>{item.medicine_name}</Text>
+                                          <Text style = {{fontSize : 14, fontFamily : 'KHNPHDotfR', color : '#000', flex : 0.6}}>{item.amount + item.unit}</Text>
+                                          {(item.take_time.length > 0) ? (
+                                              (item.medicine_name == '오비드렐' || item.medicine_name == '데카펩틸') ? 
+                                          <View style = {{flex : 1, justifyContent : 'flex-end', flexDirection : 'row', flexWrap : 'wrap'}}>
                                                 <Image source = {imgClock} style = {{width : 12, height : 12, resizeMode : 'contain',}}></Image>
                                                 <Text style = {{marginLeft : 7, fontSize : 12, fontFamily : 'KHNPHUotfR', color : '#000'}}>{Moment(Moment().format('YYYY-MM-DD') + " " + item.take_time).format('a h시 mm분')}</Text>
-                                          </View>
-                                           : <View style = {{flex : 1.5, alignItems : 'flex-end'}}><Image source = {imgArrow} style = {{width : 8, height : 12, marginRight : 11.5}}></Image></View>}
+                                          </View> 
+                                          : 
+                                          <View style = {{flex : 1, alignItems : 'flex-end', justifyContent : 'flex-end'}}>
+                                              <Text style = {{fontSize : 12, fontFamily : 'KHNPHUotfR', color : '#000'}}>복용 완료</Text>
+                                          </View> )
+                                           : 
+                                           <View style = {{flex : 1, alignItems : 'flex-end'}}>
+                                               <Image source = {imgArrow} style = {{width : 8, height : 12, marginRight : 11.5}}></Image>
+                                            </View>}
                                         </View>
                                     </TouchableWithoutFeedback>
                                 </View>) : <View style = {{width : '100%', alignItems : 'center', justifyContent : 'center', marginTop : 20}}><Text style = {{fontSize : 14, fontFamily : 'KHNPHDotfB', color : '#000'}}>{"해당일에는 복약정보가 없습니다."}</Text></View>}
@@ -477,7 +599,7 @@ export default class AdminMedicineCalendar extends React.Component{
                         <View style = {{height : 20}}></View>
                         
                     </ScrollView>
-                        
+                    <FetchingIndicator isFetching={this.state.isFetching} message='' color='#4a50ca' />
                 </View>
             </SafeAreaView>
         )

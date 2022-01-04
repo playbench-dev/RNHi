@@ -1,0 +1,14 @@
+com/hicenter/MainApplication.java
+ com.hicenter.MainApplication
+ com.hicenter.MainApplication$1
+com/hicenter/ReactNativeFlipper.java
+ com.hicenter.ReactNativeFlipper
+ com.hicenter.ReactNativeFlipper$1
+ com.hicenter.ReactNativeFlipper$2
+ com.hicenter.ReactNativeFlipper$2$1
+com/hicenter/MainActivity.java
+ com.hicenter.MainActivity
+com/hicenter/BuildConfig.java
+ com.hicenter.BuildConfig
+com/facebook/react/PackageList.java
+ com.facebook.react.PackageList

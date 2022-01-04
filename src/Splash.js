@@ -1,14 +1,29 @@
 import React from 'react';
-import {SafeAreaView, View, Text, Image, Animated} from 'react-native';
+import {SafeAreaView, View, Text, Image, Animated,Linking} from 'react-native';
 import {StatusBar} from 'react-native';
 import AsyncStorage from '@react-native-community/async-storage';
 import {SafeAreaProvider, useSafeAreaInsets} from 'react-native-safe-area-context';
 import Users from '../src/Common/User'
 import ServerUrl from './Common/ServerUrl'
+import OneBtnDialog from './Common/OneBtnDialog'
+import remoteConfig from '@react-native-firebase/remote-config';
+import VersionInfo from 'react-native-version-info';
 
 const TAG = "Splash";
 const imgLogoText = require('../assets/img_logo_text.png');
 const imgLogo = require('../assets/ic_logo.png');
+
+// 구글 플레이 스토어 링크
+const GOOGLE_PLAY_STORE_LINK = 'market://details?id=com.hicenter';
+// 구글 플레이 스토어가 설치되어 있지 않을 때 웹 링크
+const GOOGLE_PLAY_STORE_WEB_LINK =
+  'https://play.google.com/store/apps/details?id=com.hicenter';
+// 애플 앱 스토어 링크
+const APPLE_APP_STORE_LINK =
+  'itms-apps://itunes.apple.com/us/app/id1585606989?mt=8';
+// 애플 앱 스토어가 설치되어 있지 않을 때 웹 링크
+const APPLE_APP_STORE_WEB_LINK =
+  'https://apps.apple.com/us/app/antodo-%EC%8B%AC%ED%94%8C%ED%95%9C-%EC%86%90%EA%B8%80%EC%94%A8-%ED%95%A0%EC%9D%BC-%EA%B3%84%ED%9A%8D-%EB%A9%94%EB%AA%A8/id1585606989';
 
 const CustomStatusBare = ({
     backgroundColor,
@@ -33,6 +48,8 @@ export default class Splash extends React.Component{
       animation : new Animated.Value(0),
       name : '',
       patientNo : '',
+      checking : false,
+      oneBtnDialogVisible : false,
     }
 
     _Login(){
@@ -66,7 +83,6 @@ export default class Splash extends React.Component{
               response => response.json()  
           ).then(
               json => {
-              console.log(TAG,json);
               if(json.Error_Cd == "0000"){
                   AsyncStorage.setItem('userInfo',JSON.stringify({'user_no': json.Resources[0].user_no || '', 
                   'user_name' : json.Resources[0].user_name || '','phone_num' : json.Resources[0].phone_num || '', 'patient_no' : json.Resources[0].patient_no || '',
@@ -91,7 +107,6 @@ export default class Splash extends React.Component{
 
                   
                   if(this.props.route.params != undefined){
-                    console.log(TAG,this.props.route.params.channelId);
                     if(this.props.route.params.channelId == 'medicine'){
                       this.props.navigation.reset({index:0, routes:[{name: 'MedicineCalendar', params : {push : true}}]});
                     }else if(this.props.route.params.channelId == 'embryo'){
@@ -119,6 +134,41 @@ export default class Splash extends React.Component{
           }
       )
   }
+  _UrlCheck(url, mUrl){
+    // const supported = Linking.canOpenURL(url); 
+    // console.log(TAG,supported);
+    Linking.canOpenURL(url).then((supported) => {
+      console.log(TAG,supported)
+      if (supported) { // 설치되어 있으면
+        Linking.openURL(url);   
+      } else { // 앱이 없으면
+        Linking.openURL(mUrl);
+      }
+    })
+
+    // try{
+    //   Linking.openURL(url); 
+    // }catch(err){
+    //   Linking.openURL(mUrl);
+    // }
+  }
+
+  _OneDialogVisible = value =>{
+    if(value != undefined){
+        console.log(TAG,'click')
+        if(Platform.OS === 'android'){
+          this._UrlCheck(GOOGLE_PLAY_STORE_LINK,GOOGLE_PLAY_STORE_WEB_LINK)
+        }else{
+          this._UrlCheck(APPLE_APP_STORE_LINK,APPLE_APP_STORE_WEB_LINK)
+        }
+        
+    }
+    if(this.state.oneBtnDialogVisible){
+      return <OneBtnDialog title = {"업데이트"} contents = {"현재앱이 최신버전이 아닙니다.\n업데이트 후 사용해주세요."} leftBtnText = {"확인"} clcik = {this._OneDialogVisible}></OneBtnDialog>
+    }else{
+      return null;
+    }
+}
 
     componentDidMount(){
       Animated.timing(
@@ -130,19 +180,84 @@ export default class Splash extends React.Component{
         }
       ).start((o) => {
         if(o.finished){
-          AsyncStorage.getItem('userInfo', (err, result) => {
-            console.log(TAG,result);
-            if(result != null){
-              const UserInfo = JSON.parse(result);
-              console.log(TAG,UserInfo.user_name + " " + UserInfo.patient_no);
-              this.state.name = UserInfo.user_name;
-              this.state.patientNo = UserInfo.patient_no;
-              this._Login();
-              // this.props.navigation.reset({index:0, routes:[{name: 'AgreeDetail',mode : '2'}]})
+
+          remoteConfig().setDefaults({version : '1.0', check : false})
+          .then(() => remoteConfig().fetchAndActivate())
+          .then((fetchedRemotely) => {
+            if(Platform.OS === 'android'){
+              if(!fetchedRemotely){
+                console.log(TAG,remoteConfig().getValue('version'));
+                console.log(TAG,remoteConfig().getValue('check'));
+                if(parseInt(remoteConfig().getValue('version').asString().replace('.','')) <= parseInt(VersionInfo.appVersion.replace('.',''))){
+                  AsyncStorage.getItem('userInfo', (err, result) => {
+                    if(result != null){
+                      const UserInfo = JSON.parse(result);
+                      console.log(TAG,UserInfo.user_name + " " + UserInfo.patient_no);
+                      this.state.name = UserInfo.user_name;
+                      this.state.patientNo = UserInfo.patient_no;
+                      this._Login();
+                      // this.props.navigation.reset({index:0, routes:[{name: 'AgreeDetail',mode : '2'}]})
+                    }else{
+                      this.props.navigation.reset({index:0, routes:[{name: 'Login'}]})
+                    }
+                  });
+                }else{
+                  this.setState({
+                    oneBtnDialogVisible : true,
+                  })
+                }
+              }else{
+                AsyncStorage.getItem('userInfo', (err, result) => {
+                  if(result != null){
+                    const UserInfo = JSON.parse(result);
+                    console.log(TAG,UserInfo.user_name + " " + UserInfo.patient_no);
+                    this.state.name = UserInfo.user_name;
+                    this.state.patientNo = UserInfo.patient_no;
+                    this._Login();
+                    // this.props.navigation.reset({index:0, routes:[{name: 'AgreeDetail',mode : '2'}]})
+                  }else{
+                    this.props.navigation.reset({index:0, routes:[{name: 'Login'}]})
+                  }
+                });
+              }
             }else{
-              this.props.navigation.reset({index:0, routes:[{name: 'Login'}]})
+              if(fetchedRemotely){
+                console.log(TAG,remoteConfig().getValue('version').asString().replace('.',''));
+                console.log(TAG,parseInt(VersionInfo.appVersion.replace('.','')));
+                if(parseInt(remoteConfig().getValue('version').asString().replace('.','')) <= parseInt(VersionInfo.appVersion.replace('.',''))){
+                  AsyncStorage.getItem('userInfo', (err, result) => {
+                    if(result != null){
+                      const UserInfo = JSON.parse(result);
+                      console.log(TAG,UserInfo.user_name + " " + UserInfo.patient_no);
+                      this.state.name = UserInfo.user_name;
+                      this.state.patientNo = UserInfo.patient_no;
+                      this._Login();
+                      // this.props.navigation.reset({index:0, routes:[{name: 'AgreeDetail',mode : '2'}]})
+                    }else{
+                      this.props.navigation.reset({index:0, routes:[{name: 'Login'}]})
+                    }
+                  });
+                }else{
+                  this.setState({
+                    oneBtnDialogVisible : true,
+                  })
+                }
+              }else{
+                AsyncStorage.getItem('userInfo', (err, result) => {
+                  if(result != null){
+                    const UserInfo = JSON.parse(result);
+                    console.log(TAG,UserInfo.user_name + " " + UserInfo.patient_no);
+                    this.state.name = UserInfo.user_name;
+                    this.state.patientNo = UserInfo.patient_no;
+                    this._Login();
+                    // this.props.navigation.reset({index:0, routes:[{name: 'AgreeDetail',mode : '2'}]})
+                  }else{
+                    this.props.navigation.reset({index:0, routes:[{name: 'Login'}]})
+                  }
+                });
+              }
             }
-          });
+        })
         }
       });
     }
@@ -152,15 +267,10 @@ export default class Splash extends React.Component{
     }
 
     render(){
-        Users.userName = "kims";
-        console.log(TAG,"userName : " + Users.userName)
-        if(this.props.route.params != undefined){
-          console.log(TAG,'no : ' + this.props.route.params.no);
-        }
-        
         return(
           <SafeAreaView>
                 <View style = {{width : '100%', height : '100%', alignItems : 'center', justifyContent : 'center', backgroundColor : '#fff'}}>
+                    {this._OneDialogVisible()}
                     <Animated.Image style = {{alignItems : 'center', height : 81, resizeMode : 'contain', opacity: this.state.animation}} source = {imgLogo}></Animated.Image>
                     <Image style = {{position : 'absolute', bottom : 40, height : 44, resizeMode : 'contain'}} source = {imgLogoText} ></Image>
                 </View>

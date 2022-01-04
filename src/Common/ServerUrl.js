@@ -14,7 +14,7 @@ export default class ServerUrl{
     static hopeMessagesUrl = "https://www.hifertility.co.kr/api/pregnancy?page=1&pageSize=4";             //희망메세지
 
     //medicine
-    static medicineInfoList = ServerUrl.Server2 + "/userApi/select-shedule-medicine-info";                 //투약 리스트
+    static medicineInfoList = ServerUrl.Server + "/userApi/select-shedule-medicine-info";                 //투약 리스트
     static medicineUpdate = ServerUrl.Server + "/userApi/take-time-update";                               //투약 업데이트
 
     //MyPage
@@ -60,5 +60,6 @@ export default class ServerUrl{
     // category = 8 THEN '난임 지원사업관리'
 
     //admin 
-    static UserList = ServerUrl.Server2 + "/userApi/select-admin-patient-list"                             //환자 리스트
+    static UserList = ServerUrl.Server + "/userApi/select-admin-patient-list"                             //환자 리스트
+    static AdminMedicineList = ServerUrl.Server + "/userApi/select-admin-schedule-medicine-info"         //환자 캘린더
 }

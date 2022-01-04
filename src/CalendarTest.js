@@ -8,6 +8,8 @@ import 'moment/locale/ko';
 import OneBtnDialog from './Common/OneBtnDialog'
 import Users from './Common/User'
 import ServerUrl from './Common/ServerUrl'
+import GestureRecognizer from 'react-native-swipe-gestures';
+import FetchingIndicator from 'react-native-fetching-indicator'
 
 const TAG = "CalendarTest";
 const imgBack = require('../assets/ic_calendar_back.png');
@@ -79,6 +81,7 @@ export default class CalendarTest extends React.Component{
         requestType : 1, //1 - list, 2 - insert, 3 - update
         conditionNo : '',
         holidayColor : '#ec407a',
+        isFetching : true,
     }
 
     componentDidMount(){
@@ -89,6 +92,7 @@ export default class CalendarTest extends React.Component{
     _ConditionList(){
         var details = null;
         var url = '';
+        this.setState({isFetching : true})
         if(this.state.requestType == 1){//list
             url = ServerUrl.ConditionInfoUrl;
             details = {
@@ -200,8 +204,30 @@ export default class CalendarTest extends React.Component{
                 }else{
 
                 }
+                this.setState({isFetching : false})
             }
         )
+    }
+
+    _CalendarMove(value){
+        if(value != undefined){
+            if(value == "1"){//저번달
+                console.log(TAG,"today : " + this.state.today.clone().subtract(1, 'month'));
+                this.state.today = this.state.today.clone().subtract(1, 'month');
+                this.state.requestType = 1;
+                this.setState({
+                    isLoading : true,
+                })
+                this._MedcineInfo();
+            }else {//다음달
+                this.state.today = this.state.today.clone().add(1, 'month');
+                this.state.requestType = 1;
+                this.setState({
+                    isLoading : true,
+                })
+                this._MedcineInfo();
+            }
+        }
     }
 
     _CalendarArr = () => {
@@ -405,7 +431,19 @@ export default class CalendarTest extends React.Component{
                                         <Text style = {{color : '#fff', fontSize : 12, fontFamily : 'KHNPHUotfR'}}>{this.state.dayTitleText[index]}</Text>
                                     </View>)}
                                 </View>
-                            {this._CalendarArr()}
+                            <GestureRecognizer onSwipe={(gestureName, gestureState) => {
+                                console.log(TAG,"dx : " + JSON.stringify(gestureState) );
+                                const {dx,dy} = gestureState;
+                                console.log(TAG,"dx : " + dx + " dy : " + dy);
+                                if (dx > 50) {
+                                    this._CalendarMove("1");
+                                }
+                                else if (dx < -50) {
+                                    this._CalendarMove("2")
+                                }
+                                }}>
+                                {this._CalendarArr()}
+                            </GestureRecognizer>
                         </View>
 
                         <Text style={{marginTop : 32, fontSize : 24, color : (holidayKr.isSolarHoliday(new Date(Moment(this.state.selectedDay))) == true ? this.state.holidayColor : '#4A50CA'), fontFamily : 'KHNPHDotfR'}}>{Moment(this.state.selectedDay).format('D')}</Text>
@@ -484,7 +522,7 @@ export default class CalendarTest extends React.Component{
                         <View style = {{height : 20}}></View>
                         
                     </ScrollView>
-                        
+                    <FetchingIndicator isFetching={this.state.isFetching} message='' color='#4a50ca' />
                 </View>
             </SafeAreaView>
         )

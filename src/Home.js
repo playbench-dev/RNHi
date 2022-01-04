@@ -7,6 +7,8 @@ import Moment from 'moment'
 import AsyncStorage from '@react-native-community/async-storage';
 import DatePicker from 'react-native-date-picker'
 import TowBtnDialog from './Common/TwoBtnDialog'
+import FetchingIndicator from 'react-native-fetching-indicator'
+import remoteConfig from '@react-native-firebase/remote-config';
 
 import ServerUrl from './Common/ServerUrl'
 const TAG = "Home";
@@ -21,6 +23,9 @@ const imgInjector = require('../assets/ic_main_injector.png');
 const imgDrug = require('../assets/ic_main_drug.png');
 const imgPlantain = require('../assets/ic_main_plantain.png');
 const imgCircle = require('../assets/ic_main_circle.png');
+const imgCirclePink = require('../assets/ic_pink_circle.png');
+const imgCircleGreen = require('../assets/ic_green_circle.png');
+const imgCircleBlue = require('../assets/ic_blue_circle.png');
 const imgArrow = require('../assets/ic_main_right_arrow.png');
 const imgClock = require('../assets/ic_main_clock.png');
 const imgEmbryo = require('../assets/ic_main_embryo.png');
@@ -45,10 +50,7 @@ export default class Home extends React.Component{
     constructor(props){
         super(props)
     }
-    MedicineUpdate(){
-      console.log(TAG,'aaasdasd');
-    }
-
+    
     state = {
         isLoading : false,
         headerHeight : 0,
@@ -56,6 +58,8 @@ export default class Home extends React.Component{
         balloonVisible : true,
         datas : [],
         includes : [],
+        scheduleNo : [],
+        namesList : [],
         messageDatas : [],
         messageLengthOver : false,
         noticeMessages : '',
@@ -66,8 +70,12 @@ export default class Home extends React.Component{
         selectTime : '',
         selectPosition : 0,
         twoDialogVisible : false,
+        exceptTwoDialogVisible : false,
         selectMedicineName : '',
         requestType : 1,
+        isFetching : true,
+        sunrise : '',
+        sunset : '',
     }
 
     componentDidMount(){
@@ -86,6 +94,69 @@ export default class Home extends React.Component{
           Users.RefreshToken = UserInfo.refresh_token;
         });
       }
+
+      this.onFocusTrigger = this.props.navigation.addListener('focus', () => {
+        if(Users.guest == false){
+          this._MedcineInfo();
+        }
+     });
+      this.setState({isFetching : true})
+      this._SunRiseTime();
+    }
+
+    _SunRiseTime(){
+      
+      fetch("https://api.sunrise-sunset.org/json?lat=37.470645&lng=127.129323&date=today",{
+        method : 'POST',
+        headers : {
+            'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
+        },
+        mode : 'cors',
+        cache : 'default',
+        body : null,
+        }).then(
+            response => response.json()  
+        ).then(
+            json => {
+            if(json.results !== ''){
+              if(json.results.sunrise.includes('PM')){
+                let test = json.results.sunrise;
+                test = test.replace('PM','오후')
+                let now = new Date(Moment(test,'hh:mm:ss A'));
+                now.setHours(now.getHours() + 9);
+                this.state.sunrise = Moment(now).format('HH:mm');
+              }else{
+                let test = json.results.sunrise;
+                test = test.replace('AM','오전')
+                let now = new Date(Moment(test,'hh:mm:ss A'));
+                now.setHours(now.getHours() + 9);
+                this.state.sunrise = Moment(now).format('HH:mm');
+              }
+              if(json.results.sunset.includes('AM')){
+                let test = json.results.sunset;
+                test = test.replace('AM','오전')
+                let now = new Date(Moment(test,'hh:mm:ss A'));
+                now.setHours(now.getHours() + 9);
+                this.state.sunset = Moment(now).format('HH:mm');
+              }else{
+                let test = json.results.sunset;
+                test = test.replace('PM','오후')
+                let now = new Date(Moment(test,'hh:mm:ss A'));
+                now.setHours(now.getHours() + 9);
+                this.state.sunset = Moment(now).format('HH:mm');
+              }
+
+              let now = Moment().format('HH:mm');
+              if(parseInt(now.replace(':','')) > parseInt(this.state.sunrise.replace(':','')) && parseInt(now.replace(':','')) < parseInt(this.state.sunset.replace(':',''))){
+                console.log(TAG,'일출 후 일몰 전')
+              }else{
+                console.log(TAG,'일몰 후 일출 전')
+              }
+            }else{
+              //error 시 기본 스킨으로
+            }
+          }
+      )
       this._NoticeMessage();
     }
 
@@ -245,12 +316,11 @@ export default class Home extends React.Component{
               // console.log(TAG,'ㅁㄴㅇㅁㄴㅇㅁㄴㅇㅁㄴ : '+JSON.stringify(json) + ' 1111');
               if(json.Error_Cd == "0000"){
                 if(Object.keys(json.Resources).length > 0){
-                  console.log(TAG,'ㅁㄴㅇㅁㄴㅇㅁㄴㅇㅁㄴ : ' + json.Resources[0].contents);
                   this.state.randomMessage = json.Resources[0].contents;
                 }
               }
               if(Users.guest == true){
-                this.setState({isLoading : true});
+                this.setState({isLoading : true, isFetching : false});
               }else{
                 this._MedcineInfo();
               }
@@ -272,6 +342,7 @@ export default class Home extends React.Component{
             'cel_date_pick' : Moment().format('YYYYMMDD'),
         };
     }else if(this.state.requestType == 2){
+      this.setState({isFetching : true})
         url = ServerUrl.medicineUpdate;
         details = {
             'access_token' : Users.AccessToken,
@@ -307,6 +378,8 @@ export default class Home extends React.Component{
             if(json.Error_Cd == "0000"){
                 if(this.state.requestType == 1){
                     this.state.datas = [];
+                    this.state.scheduleNo = [];
+                    this.state.namesList = [];
                     for(let i = 0; i < Object.keys(json.Resources).length; i++){
                         const obj = ({
                             abbreviation : json.Resources[i].abbreviation || '',
@@ -325,10 +398,75 @@ export default class Home extends React.Component{
                             take_time : json.Resources[i].take_time || '', 
                             schedule_no : json.Resources[i].schedule_no || '',
                         })
+                        this.state.scheduleNo.push(json.Resources[i].schedule_no || '');
+                        this.state.namesList.push(json.Resources[i].medicine_name || '');
                         this.state.datas.push(obj);
                     }
+
+                    for(let i = 0; i < Object.keys(json.Luteal).length; i++){
+                      for(let j = 0; j < Object.keys(json.Luteal[i].medicine_info).length; j++){
+                          if(json.Luteal[i].cel_date == Moment().format('YYYY-MM-DD')){
+                            if(this.state.scheduleNo.includes(json.Luteal[i].schedule_no) == true){
+                              if(this.state.namesList.includes(json.Luteal[i].medicine_info[j].medicine_name) === true){
+
+                              }else{
+                                  const obj = ({
+                                      abbreviation : json.Luteal[i].medicine_info[j].abbreviation || '',
+                                      amount : json.Luteal[i].medicine_info[j].amount || '', 
+                                      cel_date : json.Luteal[i].cel_date || '',
+                                      every_other_day : json.Luteal[i].medicine_info[j].every_other_day || '',
+                                      idx :  '',
+                                      medicine_name : json.Luteal[i].medicine_info[j].medicine_name || '', 
+                                      medicine_no : json.Luteal[i].medicine_info[j].medicine_no || '',
+                                      memo : json.Luteal[i].medicine_info[j].memo || '',
+                                      purpose : json.Luteal[i].medicine_info[j].purpose || '',
+                                      reg_date : json.Luteal[i].medicine_info[j].reg_date || '',
+                                      reg_id : json.Luteal[i].medicine_info[j].reg_id || '',
+                                      unit : json.Luteal[i].medicine_info[j].unit || '', 
+                                      type : json.Luteal[i].medicine_info[j].medicine_type || '',
+                                      take_time : json.Luteal[i].medicine_info[j].take_time || '', 
+                                      schedule_no : json.Luteal[i].schedule_no || '',
+                                  })
+                                  if(json.Luteal[i].medicine_info[j].every_other_day == 1){
+                                      if(i % 2 == 0){
+                                          this.state.datas.push(obj);
+                                      }
+                                  }else{
+                                      this.state.datas.push(obj);
+                                  }
+                              }
+                          }else{
+                              const obj = ({
+                                  abbreviation : json.Luteal[i].medicine_info[j].abbreviation || '',
+                                  amount : json.Luteal[i].medicine_info[j].amount || '', 
+                                  cel_date : json.Luteal[i].cel_date || '',
+                                  every_other_day : json.Luteal[i].medicine_info[j].every_other_day || '',
+                                  idx :  '',
+                                  medicine_name : json.Luteal[i].medicine_info[j].medicine_name || '', 
+                                  medicine_no : json.Luteal[i].medicine_info[j].medicine_no || '',
+                                  memo : json.Luteal[i].medicine_info[j].memo || '',
+                                  purpose : json.Luteal[i].medicine_info[j].purpose || '',
+                                  reg_date : json.Luteal[i].medicine_info[j].reg_date || '',
+                                  reg_id : json.Luteal[i].medicine_info[j].reg_id || '',
+                                  unit : json.Luteal[i].medicine_info[j].unit || '', 
+                                  type : json.Luteal[i].medicine_info[j].medicine_type || '',
+                                  take_time : json.Luteal[i].medicine_info[j].take_time || '', 
+                                  schedule_no : json.Luteal[i].schedule_no || '',
+                              })
+                              if(json.Luteal[i].medicine_info[j].every_other_day == 1){
+                                  if(i % 2 == 0){
+                                      this.state.datas.push(obj);
+                                  }
+                              }else{
+                                  this.state.datas.push(obj);
+                              }
+                          }
+                          }
+                      }
+                  }
                     this.setState({
                         isLoading : true,
+                        isFetching : false,
                     })
                 }else if(this.state.requestType == 2){
                     this.state.requestType = 1;
@@ -337,6 +475,7 @@ export default class Home extends React.Component{
             }else{
               this.setState({
                 isLoading : true,
+                isFetching : false,
               })
             }
         }
@@ -425,6 +564,24 @@ export default class Home extends React.Component{
         }
     }
 
+    _ExceptTwoDialogVisible = value =>{
+      if(value != undefined){
+          this.setState({
+              exceptTwoDialogVisible : value.visible,
+          })
+          if(value.status == "done"){
+              this._UpdateTakeTime(this.state.selectTime);
+          }
+      }
+  
+      if(this.state.exceptTwoDialogVisible){
+          console.log(TAG,'time2 : ' + this.state.eatingTime)
+        return <TowBtnDialog title = {"투약등록"} contents = {this.state.selectMedicineName+ "를 투약하셨나요?"} leftBtnText = {"취소"} rightBtnText = {"확인"} clcik = {this._ExceptTwoDialogVisible}></TowBtnDialog>
+      }else{
+        return null;
+      }
+  }
+
     _MedicineUpdate = data =>{
       // console.log(TAG,'update ? '+data);
       if(data == true){
@@ -451,6 +608,7 @@ export default class Home extends React.Component{
                 <View style = {{width : '100%', height : '100%', backgroundColor : '#fff'}}>
                   {this._Calendar()}
                   {this._TwoDialogVisible()}
+                  {this._ExceptTwoDialogVisible()}
                     <View style = {{width : '100%', height : 48, flexWrap : 'nowrap', flexDirection : 'row', alignItems : 'center',}}>
                       
                       <Image source = {imgLogo} style = {{width : 24, height : 27, resizeMode : 'contain', marginLeft : 20}}></Image>
@@ -507,17 +665,22 @@ export default class Home extends React.Component{
                                   
                                   <View style = {{marginTop: 28, marginBottom : 20}}>
                                     {this.state.datas.map((item,index) => 
-                                    <TouchableWithoutFeedback onPress = {() => this.setState({calendarVisible : true, selectPosition : index, selectMedicineName : item.medicine_name, eatingTime : Moment().format("a HH:mm"), selectTime : Moment().format("HH:mm")})}>
+                                    <TouchableWithoutFeedback onPress = {() => ((item.medicine_name == '오비드렐' || item.medicine_name == '데카펩틸') ? this.setState({calendarVisible : true, selectPosition : index, selectMedicineName : item.medicine_name, eatingTime : Moment().format("a HH:mm"), selectTime : Moment().format("HH:mm")}) : item.take_time.length == 0 && this.setState({exceptTwoDialogVisible : true, selectPosition : index, selectMedicineName : item.medicine_name, eatingTime : Moment().format("a HH:mm"), selectTime : Moment().format("HH:mm")}))}>
                                     <View key={index} style = {{marginTop : index == 0 ? 0 : 8, backgroundColor : '#fff', height : 40, borderRadius : 16, alignItems : 'center', justifyContent : 'center'}}>
                                       <View style = {{ flexDirection : 'row', alignItems : 'center', paddingLeft : 12, paddingRight : 12}}>
-                                          <Image source = {imgCircle} style = {{width : 8 , height : 8, resizeMode : 'contain',}}></Image>
-                                          <Text style = {{marginLeft : 8, fontSize : 14, fontFamily : 'KHNPHDotfR', color : '#000', flex : 1}} ellipsizeMode = "tail" numberOfLines = {3}>{item.medicine_name}</Text>
-                                          <Text style = {{fontSize : 14, fontFamily : 'KHNPHDotfR', color : '#000', flex : 1}}>{item.amount + item.unit}</Text>
-                                          {item.take_time.length > 0 ? 
+                                          <Image source = {(item.type == '주사' ? imgCirclePink : (item.type == '약' ? imgCircleGreen : imgCircleBlue))} style = {{width : 8 , height : 8, resizeMode : 'contain',}}></Image>
+                                          <Text style = {{marginLeft : 8, fontSize : 14, fontFamily : 'KHNPHDotfR', color : '#000', flex : 0.6}} ellipsizeMode = "tail" numberOfLines = {3}>{item.medicine_name}</Text>
+                                          <Text style = {{fontSize : 14, fontFamily : 'KHNPHDotfR', color : '#000', flex : 0.6}}>{item.amount + item.unit}</Text>
+                                          {item.take_time.length > 0 ? (
+                                            (item.medicine_name == '오비드렐' || item.medicine_name == '데카펩틸') ?
                                             <View style = {{flex : 1, justifyContent : 'flex-end', flexDirection : 'row', flexWrap : 'wrap'}}>
                                               <Image source = {imgClock} style = {{width : 12, height : 12, resizeMode : 'contain',}}></Image>
                                               <Text style = {{marginLeft : 7, fontSize : 12, fontFamily : 'KHNPHUotfR', color : '#000'}}>{Moment(Moment().format('YYYY-MM-DD') + " " + item.take_time).format('a h시 mm분')}</Text>
-                                          </View>
+                                            </View> 
+                                            : 
+                                            <View style = {{flex : 1, alignItems : 'flex-end', justifyContent : 'flex-end'}}>
+                                              <Text style = {{fontSize : 12, fontFamily : 'KHNPHUotfR', color : '#000'}}>복용 완료</Text>
+                                            </View>)
                                            : <View style = {{flex : 1, alignItems : 'flex-end', justifyContent : 'flex-end'}}><Image source = {imgArrow} style = {{width : 8, height : 12, marginRight : 11.5}}></Image></View>}
                                         </View>
                                     </View>
@@ -527,7 +690,7 @@ export default class Home extends React.Component{
                                 </View>
                               </TouchableWithoutFeedback>
                             
-                              <TouchableWithoutFeedback onPress = {() => this.props.navigation.navigate(guest == false ? 'AnimationTest' : 'GuestLogin')}>
+                              <TouchableWithoutFeedback onPress = {() => this.props.navigation.navigate(guest == false ? 'CellDevelop' : 'GuestLogin')}>
                                 <View style={{marginTop: 20, borderRadius : 24, backgroundColor : "#fff", paddingLeft : 20 , paddingRight : 31.5, flexDirection : 'row', width : '100%', height : 76, alignItems : 'center'}}>
                                   <Image source = {imgEmbryo} style = {{width : 52, height : 52, resizeMode : 'contain',}}></Image>
                                   <Text style = {{marginLeft : 16, fontSize : 14, fontFamily : 'KHNPHUotfR', color : '#000', flex : 1,}}>{"배아의 발달상태를 확인\n해보세요:)"}</Text>
@@ -608,7 +771,6 @@ export default class Home extends React.Component{
                                     </View>
                                   </View>
                                 </TouchableWithoutFeedback>
-                                
                               </View>
                             </View>
                             
@@ -621,18 +783,18 @@ export default class Home extends React.Component{
                                 <Text style = {{fontSize : 18, fontFamily : 'KHNPHDotfB', color : '#000', marginTop : 13}}>{(item.kind == 1 ? "아이를 기다리는 난임부부에게 전하고 싶은 말" : "주치의에게 전하고 싶은 말")}</Text>
                                 <Text style = {{flex : 1, fontSize : 14, color : '#000', marginTop : 20, fontFamily : 'NotoSansCJKkr-Regular'}} ellipsizeMode = "tail" numberOfLines = {3}>{(item.kind == 1 ? item.cont1 : item.cont2)}</Text>
                                 <TouchableWithoutFeedback onPress = {() => this.props.navigation.navigate('HopeMessageDetail',{datas : this.state.messageDatas[index]})}>
-                                  <View style = {{justifyContent : 'flex-end', width : '100%', flexDirection : 'row', alignItems : 'center'}}>
+                                  <View style = {{justifyContent : 'flex-end', width : '100%', flexDirection : 'row', alignItems : 'center', height : 30}}>
                                     <Text style = {{fontSize : 14, fontFamily : 'NotoSansCJKkr-Bold', color : '#AFAFAF'}}>more</Text>
-                                    <Image source = {imgArrow} style = {{width : 4, height : 8, resizeMode : 'contain', marginLeft : 10}}></Image>
+                                    <Image source = {imgArrow} style = {{width : 4, height : 8, resizeMode : 'contain', marginLeft : 10, marginTop : 2}}></Image>
                                   </View>
                                 </TouchableWithoutFeedback>
                               </View> : <View key={index} style={{width : 292, height : 232, backgroundColor : 'rgb(236,233,228)', borderRadius : 24, marginLeft : index == 0 ? 0 : 20, marginRight : index == this.state.messageDatas.length-1 ? 20 : 0, paddingTop : 24, paddingLeft : 20, paddingRight : 18, paddingBottom : 15}}>
                                 <TouchableWithoutFeedback onPress = {() => this.props.navigation.navigate('AboutWebview',{tag : "pregnancy"})}>
                                   <View style = {{flex : 1, paddingTop : 0}}>
                                     <Text style = {{flex : 1, fontSize : 18, fontFamily : 'KHNPHDotfB', color : '#000', lineHeight : 30}}>{"HI홈페이지에서\n더 많은 메시지를\n확인해보세요."}</Text>
-                                    <View style = {{justifyContent : 'flex-end', width : '100%', flexDirection : 'row', alignItems : 'center'}}>
+                                    <View style = {{justifyContent : 'flex-end', width : '100%', flexDirection : 'row', alignItems : 'center', height : 30}}>
                                       <Text style = {{fontSize : 14, fontFamily : 'NotoSansCJKkr-Bold', color : '#AFAFAF'}}>more</Text>
-                                      <Image source = {imgArrow} style = {{width : 4, height : 8, resizeMode : 'contain', marginLeft : 10}}></Image>
+                                      <Image source = {imgArrow} style = {{width : 4, height : 8, resizeMode : 'contain', marginLeft : 10, marginTop : 2}}></Image>
                                     </View>
                                   </View>
                                 </TouchableWithoutFeedback>
@@ -695,6 +857,7 @@ export default class Home extends React.Component{
                         </View>
 
                     </ScrollView>
+                    <FetchingIndicator isFetching={this.state.isFetching} message='' color='#4a50ca' />
                 </View>
             </SafeAreaView>       
         );

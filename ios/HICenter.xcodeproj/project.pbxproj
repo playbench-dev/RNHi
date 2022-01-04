@@ -692,8 +692,8 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = HICenter/HICenter.entitlements;
-				CURRENT_PROJECT_VERSION = 0.0.4;
-				DEVELOPMENT_TEAM = 6M5JDFK9T7;
+				CURRENT_PROJECT_VERSION = 0.0.5;
+				DEVELOPMENT_TEAM = ZL8254FRU4;
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = HICenter/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
@@ -701,6 +701,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
+				MARKETING_VERSION = 1.2;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",
@@ -723,14 +724,15 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = HICenter/HICenter.entitlements;
-				CURRENT_PROJECT_VERSION = 0.0.4;
-				DEVELOPMENT_TEAM = 6M5JDFK9T7;
+				CURRENT_PROJECT_VERSION = 0.0.5;
+				DEVELOPMENT_TEAM = ZL8254FRU4;
 				INFOPLIST_FILE = HICenter/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
+				MARKETING_VERSION = 1.2;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",

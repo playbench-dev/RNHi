@@ -48,7 +48,7 @@ const styles = StyleSheet.create({
         backgroundColor: 'rgba(0,0,0,0.3)',
     },
     dialogBg : {
-        height : 180,
+        height : 190,
         width : '90%',
         backgroundColor : "#fff",
         borderRadius : 12,
