@@ -1,0 +1,6 @@
+module Pods_HICenter {
+  umbrella header "Pods-HICenter-umbrella.h"
+
+  export *
+  module * { export * }
+}
