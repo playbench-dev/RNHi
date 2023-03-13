@@ -170,15 +170,15 @@ export default class AdminAlarmList extends React.Component {
         return (
             <SafeAreaView>
                 <View style={{ width: '100%', height: '100%', backgroundColor: '#F6F7F9' }}>
-                    <View style={{ width: '100%', height: 48, flexDirection: 'row' }}>
+                    <View style={{ width: '100%', height: 48, flexDirection: 'row', alignItems: 'center', }}>
                         <TouchableWithoutFeedback onPress={() => this._goBack()}>
-                            <View style={{ width: 40, height: 48, justifyContent: 'center' }}>
+                            <View style={{ width: 40, height: 48, justifyContent: 'center', }}>
                                 <Image source={imgBack} style={{ width: 24, height: 24, resizeMode: 'contain', marginLeft: 24 }}></Image>
                             </View>
                         </TouchableWithoutFeedback>
-
-                        <View style={{ flex: 1 }}></View>
-
+                        <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', marginRight: 40 }}>
+                            <Text style={{ fontSize: 14, fontFamily: 'KHNPHDotfR' }}>{this.props.route.params.userName + " " + this.props.route.params.patientNo}</Text>
+                        </View>
                     </View>
 
                     <View style={{ marginTop: 12, paddingLeft: 20 }}>

@@ -35,7 +35,7 @@ PODS:
   - Base64 (1.1.2)
   - boost-for-react-native (1.63.0)
   - CocoaAsyncSocket (7.6.5)
-  - CodePush (7.0.4):
+  - CodePush (7.0.5):
     - Base64 (~> 1.1)
     - JWT (~> 3.0.0-beta.12)
     - React-Core
@@ -374,7 +374,7 @@ PODS:
     - React-Core
   - react-native-version-info (1.1.1):
     - React-Core
-  - react-native-webview (11.13.0):
+  - react-native-webview (11.26.0):
     - React-Core
   - React-perflogger (0.64.2)
   - React-RCTActionSheet (0.64.2):
@@ -457,13 +457,13 @@ PODS:
     - Firebase/Messaging (= 8.6.0)
     - React-Core
     - RNFBApp
-  - RNFBRemoteConfig (14.9.3):
+  - RNFBRemoteConfig (12.7.5):
     - Firebase/RemoteConfig (= 8.6.0)
     - React-Core
     - RNFBApp
-  - RNGestureHandler (1.10.3):
+  - RNGestureHandler (2.5.0):
     - React-Core
-  - RNScreens (3.4.0):
+  - RNScreens (3.18.2):
     - React-Core
     - React-RCTImage
   - RNSslPinning (1.5.4):
@@ -694,7 +694,7 @@ SPEC CHECKSUMS:
   Base64: cecfb41a004124895a7bcee567a89bae5a89d49b
   boost-for-react-native: 39c7adb57c4e60d6c5479dd8623128eb5b3f0f2c
   CocoaAsyncSocket: 065fd1e645c7abab64f7a6a2007a48038fdc6a99
-  CodePush: 35a0d8be82686010ee70b510c3549ba8df5ca737
+  CodePush: 7e699d8c8039f67afb2193fad0b1e52219d82693
   DoubleConversion: cf9b38bf0b2d048436d9a82ad2abe1404f11e7de
   FBLazyVector: e686045572151edef46010a6f819ade377dfeb4b
   FBReactNativeSpec: 1becbb5fc2c2c4f353e8ef40c03090cb72837106
@@ -735,7 +735,7 @@ SPEC CHECKSUMS:
   react-native-date-picker: 201b481c94dcb7678f4712477ad026dd7793305b
   react-native-safe-area-context: e471852c5ed67eea4b10c5d9d43c1cebae3b231d
   react-native-version-info: 7dc1baf8ffc7de4c65432d8277004ec88b2ca65b
-  react-native-webview: b176c6404ad40d10cfc818be41c053f85a72d751
+  react-native-webview: 9737b411a470f100d3cfc14eaf58513f05218138
   React-perflogger: 25373e382fed75ce768a443822f07098a15ab737
   React-RCTActionSheet: af7796ba49ffe4ca92e7277a5d992d37203f7da5
   React-RCTAnimation: 6a2e76ab50c6f25b428d81b76a5a45351c4d77aa
@@ -754,9 +754,9 @@ SPEC CHECKSUMS:
   RNFastImage: a7384db75df352500261e8e8f1ac2026def26102
   RNFBApp: 46a6918f6b1bbb0b332fafb07ef1362bd96ca857
   RNFBMessaging: 3008c3634974b8ddd9e58f27ee1f65aa71c3ff84
-  RNFBRemoteConfig: 4d46c93cc65a52c07944635b446109c522115299
-  RNGestureHandler: a479ebd5ed4221a810967000735517df0d2db211
-  RNScreens: 21b73c94c9117e1110a79ee0ee80c93ccefed8ce
+  RNFBRemoteConfig: d96cb22e74a7526fd587cbc9b3c2280f7b6bb421
+  RNGestureHandler: bad495418bcbd3ab47017a38d93d290ebd406f50
+  RNScreens: 34cc502acf1b916c582c60003dc3089fa01dc66d
   RNSslPinning: ff07fbbcb047c672cf9cb846e3c075eaafed3609
   RNVectorIcons: 4143ba35feebab8fdbe6bc43d1e776b393d47ac8
   SDWebImage: a7f831e1a65eb5e285e3fb046a23fcfbf08e696d
@@ -765,6 +765,6 @@ SPEC CHECKSUMS:
   Yoga: 575c581c63e0d35c9a83f4b46d01d63abc1100ac
   YogaKit: f782866e155069a2cca2517aafea43200b01fd5a
 
-PODFILE CHECKSUM: 953e5c985262df79422a57c1ea4f931cca9b71f8
+PODFILE CHECKSUM: e1025aa7ad17c72ab5305b1e29cb14885c2c5ade
 
 COCOAPODS: 1.11.2

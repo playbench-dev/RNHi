@@ -29,8 +29,8 @@ export default class GuestLogin extends React.Component {
 
     _Login() {
         var details = {
-            'patient_no': this.state.number,
-            'user_name': this.state.name,
+            'patient_no': this.state.number.trim(),
+            'user_name': this.state.name.trim(),
             'token': Users.token,
         };
 

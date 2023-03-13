@@ -1,6 +1,5 @@
 import React from 'react';
 import { SafeAreaView, View, Text, Image, ScrollView, StatusBar, StyleSheet, TouchableWithoutFeedback, TextInput, LogBox } from 'react-native';
-import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
 import Elevations from 'react-native-elevation';
 import SwitchToggle from 'react-native-switch-toggle';
 import Moment from 'moment';

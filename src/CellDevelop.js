@@ -1,6 +1,5 @@
 import React from 'react';
-import { SafeAreaView, View, Text, Image, ScrollView, StatusBar, StyleSheet, TouchableWithoutFeedback, Dimensions, Modal, BackHandler, Animated, Easing, ImageBackground, Platform, FlatList } from 'react-native';
-import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { SafeAreaView, View, Text, Image, ScrollView, StatusBar, StyleSheet, TouchableWithoutFeedback, Dimensions, Modal, BackHandler, Animated, Easing, ImageBackground, Platform, FlatList, RefreshControl } from 'react-native';
 import AsyncStorage from '@react-native-community/async-storage';
 import Elevations from 'react-native-elevation';
 import Carousel, { ParallaxImage } from 'react-native-snap-carousel';
@@ -40,13 +39,18 @@ const imgSuccessBtn = require('../assets/cell_success_btn.png');
 const imgBook = require('../assets/ic_cell_book.png')
 const imgCategory = require('../assets/ic_cell_category.png')
 const imgCell = require('../assets/ic_cell_cell.png')
+const imgPrevious2 = require('../assets/ic_previous2.png')
+const imgRefresh = require('../assets/ic_refresh.png');
 
 const TAG = "CellDevelop";
 
 export default class CellDevelop extends React.Component {
     constructor(props) {
         super(props)
+        this.scrFirst = React.createRef();
+        this.scrSecond = React.createRef();
         this.scrollX = new Animated.Value(0);
+        this.scrollX2 = new Animated.Value(0);
         this.backAction = this.backAction.bind(this);
     }
 
@@ -93,6 +97,15 @@ export default class CellDevelop extends React.Component {
         oocyteDates: [],
         dayStr: '',
         chartNo: '',
+        embryoAllTotal: 0,
+        embryoAllWarming: 0,
+        embryoAllRemaining: 0,
+        oOcyteAllTotal: 0,
+        oOcyteAllWarming: 0,
+        oOcyteAllRemaining: 0,
+        embryoAllDatas: [],
+        oOcyteAllDatas: [],
+        refreshing: false,
     }
 
     componentDidMount() {
@@ -107,7 +120,6 @@ export default class CellDevelop extends React.Component {
     }
 
     backAction() {
-        console.log(TAG, 'aaasdas');
         if (this.state.imgMagnify == true) {
             this.setState({ imgMagnify: false });
         } else {
@@ -159,7 +171,6 @@ export default class CellDevelop extends React.Component {
             response => response.json()
         ).then(
             json => {
-                console.log(TAG, json);
                 if (json.Error_Cd == "0000") {
                     AsyncStorage.setItem('userInfo', JSON.stringify({
                         'user_no': json.Resources[0].user_no || '',
@@ -204,7 +215,6 @@ export default class CellDevelop extends React.Component {
             };
         } else if (this.state.requestType == 2) {
             url = ServerUrl.IVFDetailUrl;
-            console.log(TAG, this.state.chartDatas[this.state.selectPosition].value);
             details = {
                 'access_token': Users.AccessToken,
                 'refresh_token': Users.RefreshToken,
@@ -240,8 +250,7 @@ export default class CellDevelop extends React.Component {
             response => response.json()
         ).then(
             json => {
-                console.log(TAG, json);
-                console.log('this.state.requestType : ' + this.state.requestType)
+                // console.log(`this.state.requestType : ${this.state.requestType} \n json : ${JSON.stringify(json)}`);
                 if (json.Error_Cd == "0000") {
                     if (this.state.requestType == 1) {
                         this.state.chartDatas = [];
@@ -255,12 +264,13 @@ export default class CellDevelop extends React.Component {
                             })
                             this.state.chartDatas.push(obj);
                         }
-                        this.state.requestType = 2;
+                        this.state.requestType = 3;
                         this.state.selectedChartText = this.state.chartDatas[0].label;
                         this.state.chartNo = this.state.chartDatas[0].value;
 
                         this.setState({
                             isLoading: true,
+                            refreshing: false,
                         })
                         this._IVFInfo();
 
@@ -300,14 +310,23 @@ export default class CellDevelop extends React.Component {
                             embryoDates: [],
                             oocyteDates: [],
                             dayStr: '',
+                            // embryoAllTotal: 0,
+                            // embryoAllWarming: 0,
+                            // embryoAllRemaining: 0,
+                            // oOcyteAllTotal: 0,
+                            // oOcyteAllWarming: 0,
+                            // oOcyteAllRemaining: 0,
+                            // embryoAllDatas: [],
+                            // oOcyteAllDatas: [],
                         })
+
                         for (let i = 0; i < Object.keys(json.Resources).length; i++) {
 
                             this.state.opuDate = json.Resources[i].OPU_date;
                             if (json.Resources[i].ET_date.length > 0) {
                                 this.state.etDate = json.Resources[i].ET_date;
                             }
-                            console.log(`opuL : ${parseInt(json.Resources[i].OPU_L)} , opuR : ${parseInt(json.Resources[i].OPU_R)}`)
+
                             this.state.totalOpu = ((json.Resources[i].OPU_L.length > 0 ? parseInt(json.Resources[i].OPU_L) : 0) + (json.Resources[i].OPU_R.length > 0 ? parseInt(json.Resources[i].OPU_R) : 0)) || '0';
                             if (json.Resources[i].normal_push === "1") {
                                 this.state.normal_push = 1;
@@ -324,9 +343,7 @@ export default class CellDevelop extends React.Component {
                                 this.state.dIcsi2PN = json.Resources[i].D_ICSI_2PN || '0';
                             }
 
-                            console.log(TAG, json.Resources[i].Cryo);
                             if (json.Resources[i].Cryo.length > 0) {
-                                console.log(TAG, "Cryo")
                                 for (let j = 0; j < json.Resources[i].Cryo.length; j++) {
                                     if (json.Resources[i].Cryo[j].no_stage_info != undefined) {
                                         if (json.Resources[i].Cryo[j].no_stage_info.length > 0) {
@@ -334,7 +351,7 @@ export default class CellDevelop extends React.Component {
                                             let totalCnt = 0;
 
                                             for (let x = 0; x < json.Resources[i].Cryo[j].no_stage_info.length; x++) {
-                                                console.log(json.Resources[i].Cryo[j].no_stage_info[x]);
+
                                                 let total = 0;
                                                 let remaining = 0;
                                                 if (json.Resources[i].Cryo[j].no_stage_info[x].push == 1) {
@@ -353,7 +370,7 @@ export default class CellDevelop extends React.Component {
                                                         }
                                                     }
                                                     for (let y = 0; y < json.Resources[i].Cryo[j].no_stage_info[x].noStage.length; y++) {
-                                                        console.log(json.Resources[i].Cryo[j].no_stage_info[x].noStage[y]);
+
                                                         total += json.Resources[i].Cryo[j].no_stage_info[x].noStage[y].count;
                                                         totalCnt += json.Resources[i].Cryo[j].no_stage_info[x].noStage[y].count;
                                                         if (json.Resources[i].Cryo[j].no_stage_info[x].noStage[y].warming.value.length == 0) {
@@ -381,12 +398,12 @@ export default class CellDevelop extends React.Component {
                                                 }
                                             }
                                             if (json.Resources[i].Cryo[j].cryo_type == 1) {
-                                                this.state.embryoDates = this.state.cryoDate.split(',');
+                                                if (this.state.cryoDate.length > 0)
+                                                    this.state.embryoDates = this.state.cryoDate.split(',');
                                             } else {
-                                                this.state.oocyteDates = this.state.oocyteDate.split(',');
+                                                if (this.state.oocyteDate.length > 0)
+                                                    this.state.oocyteDates = this.state.oocyteDate.split(',');
                                             }
-
-
                                         }
                                     }
                                 }
@@ -504,21 +521,96 @@ export default class CellDevelop extends React.Component {
                                     this.state.datas.push(obj);
                                 }
                             }
-
                         }
                         this.setState({
                             isLoading: true,
+                            refreshing: false,
                         })
-
                     } else if (this.state.requestType == 3) {
+                        console.log(json)
+                        this.state.embryoAllTotal = json.embryoTotal.total;
+                        this.state.embryoAllRemaining = json.embryoTotal.remaining;
+                        this.state.embryoAllWarming = json.embryoTotal.warming;
+
+                        this.state.oOcyteAllTotal = json.oOcyteTotal.total;
+                        this.state.oOcyteAllRemaining = json.oOcyteTotal.remaining;
+                        this.state.oOcyteAllWarming = json.oOcyteTotal.warming;
+
+                        const objEmbryo = {
+                            total: json.embryoTotal.total,
+                            warming: json.embryoTotal.warming,
+                            remaining: json.embryoTotal.remaining,
+                            opuDate: '',
+                            expiredDate: '',
+                        }
+                        this.state.embryoAllDatas.push(objEmbryo)
+
+                        const objoOcyte = {
+                            total: json.oOcyteTotal.total,
+                            warming: json.oOcyteTotal.warming,
+                            remaining: json.oOcyteTotal.remaining,
+                            opuDate: '',
+                            expiredDate: '',
+                        }
+                        this.state.oOcyteAllDatas.push(objoOcyte)
+
+                        for (let i = 0; i < json.oOcyteData.length; i++) {
+                            if (json.oOcyteData[i].remaining != 0) {
+                                const obj = {
+                                    total: json.oOcyteData[i].total,
+                                    warming: json.oOcyteData[i].warming,
+                                    remaining: json.oOcyteData[i].remaining,
+                                    opuDate: (json.oOcyteData[i].opu_date == '0000-00-00' ? "" : json.oOcyteData[i].opu_date),
+                                    expiredDate: json.oOcyteData[i].expired_date,
+                                }
+                                this.state.oOcyteAllDatas.push(obj)
+                            }
+                        }
+
+                        for (let i = 0; i < json.embryoData.length; i++) {
+                            if (json.embryoData[i].remaining != 0) {
+                                const obj = {
+                                    total: json.embryoData[i].total,
+                                    warming: json.embryoData[i].warming,
+                                    remaining: json.embryoData[i].remaining,
+                                    opuDate: (json.embryoData[i].opu_date == '0000-00-00' ? "" : json.embryoData[i].opu_date),
+                                    expiredDate: json.embryoData[i].expired_date,
+                                }
+                                this.state.embryoAllDatas.push(obj)
+                            }
+                        }
+
                         this.state.requestType = 2;
                         this.setState({
                             isLoading: true,
+                            refreshing: false,
                         })
                         this._IVFInfo();
                     }
                 } else if (json.Error_Cd == "1001") {
                     this._Login();
+                } else if (json.Error_Cd == "0005") {
+                    if (this.state.requestType == 3) {
+                        const objEmbryo = {
+                            total: 0,
+                            warming: 0,
+                            remaining: 0,
+                            opuDate: '',
+                            expiredDate: '',
+                        }
+                        this.state.embryoAllDatas.push(objEmbryo)
+
+                        const objoOcyte = {
+                            total: 0,
+                            warming: 0,
+                            remaining: 0,
+                            opuDate: '',
+                            expiredDate: '',
+                        }
+                        this.state.oOcyteAllDatas.push(objoOcyte)
+                        this.state.requestType = 2;
+                        this._IVFInfo();
+                    }
                 } else {
                     if (this.state.requestType == 2) {
                         this.setState({
@@ -547,10 +639,18 @@ export default class CellDevelop extends React.Component {
                             cryo2: [],
                             lastFertilisationPosition: 0,
                             dayStr: '',
+                            // embryoAllTotal: 0,
+                            // embryoAllWarming: 0,
+                            // embryoAllRemaining: 0,
+                            // oOcyteAllTotal: 0,
+                            // oOcyteAllWarming: 0,
+                            // oOcyteAllRemaining: 0,
+                            // embryoAllDatas: [],
+                            // oOcyteAllDatas: [],
                         })
                     }
                 }
-                this.setState({ isFetching: false })
+                this.setState({ isFetching: false, refreshing: false, })
             }
         )
     }
@@ -694,7 +794,7 @@ export default class CellDevelop extends React.Component {
     _OneDialogVisible = value => {
         if (value != undefined) {
             if (value.position != undefined) {
-                console.log(TAG, value.position);
+
                 this.state.selectedChartText = this.state.chartDatas[value.position].label;
                 this.state.requestType = 2;
                 this.state.selectPosition = value.position;
@@ -718,8 +818,7 @@ export default class CellDevelop extends React.Component {
     }
 
     _ChartSelect = value => {
-        console.log(TAG, value);
-        console.log(TAG, this.state.chartXPosition[value]);
+
         this.state.requestType = 2;
         this.state.selectPosition = value;
         this.scrChart.scrollTo({ x: ((20 * value) + (160 * value)) - 100, animated: true })
@@ -763,7 +862,6 @@ export default class CellDevelop extends React.Component {
     }
 
     _ChartXPosition(event) {
-        console.log(event.nativeEvent.layout.x)
         this.state.chartXPosition.push(event.nativeEvent.layout.x)
     }
 
@@ -823,10 +921,14 @@ export default class CellDevelop extends React.Component {
         }
     }
 
+    _onRefresh = () => {
+        this.setState({ refreshing: true });
+        this._IVFInfo();
+    }
+
     render() {
         if (this.props.route.params != undefined) {
             this.state.routePush = this.props.route.params.push;
-            console.log(TAG, "push : " + this.props.route.params.push);
         }
         return (
             <SafeAreaView>
@@ -834,16 +936,25 @@ export default class CellDevelop extends React.Component {
                     {this._OneDialogVisible()}
                     {this._ImageMagnify()}
                     {this._InformationPopup()}
-                    <View style={{ width: '100%', height: 48 }}>
+                    <View style={{ width: '100%', height: 48, justifyContent: 'center' }}>
                         <TouchableWithoutFeedback onPress={() => this._goBack()}>
                             <View style={{ width: 40, height: 48, justifyContent: 'center' }}>
                                 <Image source={imgBack} style={{ width: 24, height: 24, resizeMode: 'contain', marginLeft: 24 }}></Image>
                             </View>
                         </TouchableWithoutFeedback>
+
+                        <TouchableWithoutFeedback onPress={() => this._onRefresh()}>
+                            <Image source={imgRefresh} style={{ width: 20, height: 20, resizeMode: 'contain', position: 'absolute', right: 12 }}></Image>
+                        </TouchableWithoutFeedback>
                     </View>
 
                     {/* 20220503 변경될 부분 */
-                        <ScrollView>
+                        <ScrollView refreshControl={
+                            <RefreshControl
+                                refreshing={this.state.refreshing}
+                                onRefresh={this._onRefresh}
+                            />
+                        }>
                             <View style={{}}>
                                 <View style={{ width: '100%', height: 48, alignItems: 'center', flexDirection: 'row' }}>
                                     <Text style={{ flex: 1, color: 'black', fontSize: 22, fontFamily: 'KHNPHDotfR', marginLeft: 20, lineHeight: 24 }}>{"배아의 발달상태를 확인\n해보세요:)"}</Text>
@@ -947,19 +1058,12 @@ export default class CellDevelop extends React.Component {
                                                         </View>
                                                     )}
 
-                                                    {this.state.delay_push == 1 && this.state.dIcsiNo !== '0' && (
-                                                        <View style={{ marginTop: 15, padding: 14, width: screenWidth - 120, backgroundColor: '#fff', borderRadius: 24, alignItems: 'center', justifyContent: 'center' }}>
-                                                            <Text style={{ fontSize: 14, fontFamily: 'KHNPHDotfB' }}>{"*미성숙한 난자 채취로 인해 난자 채취"}</Text>
-                                                            <View style={{ flexDirection: 'row', marginTop: 5 }}>
-                                                                <Text style={{ opacity: 0, fontSize: 14, fontFamily: 'KHNPHDotfB' }}>{"*"}</Text>
-                                                                <Text style={{ fontSize: 14, fontFamily: 'KHNPHDotfB' }}>{"다음날 추가 "}</Text>
-                                                                <Text style={{ fontSize: 14, fontFamily: 'KHNPHDotfB', color: "#4A50CA" }}>{"미세수정 "}</Text>
-                                                                <Text style={{ fontSize: 14, fontFamily: 'KHNPHDotfB' }}>{"진행하였습니다."}</Text>
-                                                            </View>
-                                                            <Text style={{ marginTop: 24, fontSize: 14, fontFamily: 'KHNPHDotfR', color: "#000", lineHeight: 25 }}>{"추가미세수정 " + this.state.dIcsiNo + "개 -> " + this.state.dIcsi2PN + "개 수정되어,"}</Text>
-                                                            <Text style={{ marginTop: 18, fontSize: 14, fontFamily: 'KHNPHDotfB', color: "#4A50CA", }}>{"총 " + (parseInt(this.state.icsi2PN) + parseInt(this.state.ivf2PN) + parseInt(this.state.dIvf2PN) + parseInt(this.state.dIcsi2PN)) + "개 수정되었습니다."}</Text>
-                                                        </View>
-                                                    )}
+                                                    {this.state.normal_push == 1 && (
+                                                        <View style={{ marginTop: 15, padding: 14, width: screenWidth - 120, backgroundColor: '#fff', borderRadius: 24, alignItems: 'center', justifyContent: 'center', resizeMode: 'contain', }}>
+                                                            <Text style={{ fontSize: 14, fontFamily: 'KHNPHDotfR', color: "#000" }}>{"채취된 난자는 총 " + this.state.totalOpu + "개 입니다."}</Text>
+                                                            <Text style={{ marginTop: 24, fontSize: 14, fontFamily: 'KHNPHDotfR', color: "#000", lineHeight: 25 }}>{"미세수정 " + this.state.icsiNo + "개 -> " + this.state.icsi2PN + "개\n" + "자연수정 " + this.state.ivfNo + "개 -> " + this.state.ivf2PN + "개"}</Text>
+                                                            {(this.state.dIvfNo == 0 && this.state.dIcsiNo == 0) && <Text style={{ marginTop: 18, fontSize: 14, fontFamily: 'KHNPHDotfB', color: "#4A50CA", }}>{"총 " + (parseInt(this.state.icsi2PN) + parseInt(this.state.ivf2PN)) + "개 수정되었습니다."}</Text>}
+                                                        </View>)}
 
                                                     {this.state.delay_push == 1 && this.state.dIvfNo !== '0' && (
                                                         <View style={{ marginTop: 15, padding: 14, width: screenWidth - 120, backgroundColor: '#fff', borderRadius: 24, alignItems: 'center', justifyContent: 'center' }}>
@@ -976,19 +1080,26 @@ export default class CellDevelop extends React.Component {
                                                         </View>
                                                     )}
 
-                                                    {this.state.normal_push == 1 && (
-                                                        <View style={{ marginTop: 15, padding: 14, width: screenWidth - 120, backgroundColor: '#fff', borderRadius: 24, alignItems: 'center', justifyContent: 'center', resizeMode: 'contain', }}>
-                                                            <Text style={{ fontSize: 14, fontFamily: 'KHNPHDotfR', color: "#000" }}>{"채취된 난자는 총 " + this.state.totalOpu + "개 입니다."}</Text>
-                                                            <Text style={{ marginTop: 24, fontSize: 14, fontFamily: 'KHNPHDotfR', color: "#000", lineHeight: 25 }}>{"미세수정 " + this.state.icsiNo + "개 -> " + this.state.icsi2PN + "개\n" + "자연수정 " + this.state.ivfNo + "개 -> " + this.state.ivf2PN + "개"}</Text>
-                                                            {(this.state.dIvfNo == 0 && this.state.dIcsiNo == 0) && <Text style={{ marginTop: 18, fontSize: 14, fontFamily: 'KHNPHDotfB', color: "#4A50CA", }}>{"총 " + (parseInt(this.state.icsi2PN) + parseInt(this.state.ivf2PN)) + "개 수정되었습니다."}</Text>}
-                                                        </View>)}
+                                                    {this.state.delay_push == 1 && this.state.dIcsiNo !== '0' && (
+                                                        <View style={{ marginTop: 15, padding: 14, width: screenWidth - 120, backgroundColor: '#fff', borderRadius: 24, alignItems: 'center', justifyContent: 'center' }}>
+                                                            <Text style={{ fontSize: 14, fontFamily: 'KHNPHDotfB' }}>{"*미성숙한 난자 채취로 인해 난자 채취"}</Text>
+                                                            <View style={{ flexDirection: 'row', marginTop: 5 }}>
+                                                                <Text style={{ opacity: 0, fontSize: 14, fontFamily: 'KHNPHDotfB' }}>{"*"}</Text>
+                                                                <Text style={{ fontSize: 14, fontFamily: 'KHNPHDotfB' }}>{"다음날 추가 "}</Text>
+                                                                <Text style={{ fontSize: 14, fontFamily: 'KHNPHDotfB', color: "#4A50CA" }}>{"미세수정 "}</Text>
+                                                                <Text style={{ fontSize: 14, fontFamily: 'KHNPHDotfB' }}>{"진행하였습니다."}</Text>
+                                                            </View>
+                                                            <Text style={{ marginTop: 24, fontSize: 14, fontFamily: 'KHNPHDotfR', color: "#000", lineHeight: 25 }}>{"추가미세수정 " + this.state.dIcsiNo + "개 -> " + this.state.dIcsi2PN + "개 수정되어,"}</Text>
+                                                            <Text style={{ marginTop: 18, fontSize: 14, fontFamily: 'KHNPHDotfB', color: "#4A50CA", }}>{"총 " + (parseInt(this.state.icsi2PN) + parseInt(this.state.ivf2PN) + parseInt(this.state.dIvf2PN) + parseInt(this.state.dIcsi2PN)) + "개 수정되었습니다."}</Text>
+                                                        </View>
+                                                    )}
                                                 </View>
                                             )}
                                             {this.state.selectedCategory == "2" && (
                                                 <View style={{ marginTop: 25, paddingLeft: 20, paddingRight: 20, paddingBottom: 20, }}>
                                                     {this.state.fertilication.length == 0 && (
                                                         <View>
-                                                            <Text style={{ fontSize: 14, color: '#000', fontFamily: 'KHNPHDotfR', lineHeight: 20 }}>{"수정된 배아는 1~5등급 배반포로 나누어집니다."}</Text>
+                                                            <Text style={{ fontSize: 14, color: '#000', fontFamily: 'KHNPHDotfR', lineHeight: 20 }}>{"수정된 배아는 1~5등급, 배반포로 나누어집니다."}</Text>
                                                             <Text style={{ fontSize: 12, color: '#000', fontFamily: 'KHNPHDotfR', marginTop: 6, lineHeight: 18 }}>{"*채취 2일 후부터 안내해 드리며, 이식 당일은 등록되지 않습니다."}</Text>
                                                             <Image source={icTest02} style={{ width: (screenWidth - 120), height: ((screenWidth - 120) * 0.5), resizeMode: 'contain', borderRadius: 24, marginTop: 7 }}></Image>
                                                         </View>
@@ -996,8 +1107,8 @@ export default class CellDevelop extends React.Component {
                                                     {this.state.fertilication.map((item, index) => (
                                                         <View style={{ width: screenWidth - 120, marginRight: (index == this.state.fertilication.length - 1 ? 24 : 0), backgroundColor: '#fff', borderRadius: 24, marginTop: 15 }}>
                                                             <View style={{ padding: 14 }}>
-                                                                <Text style={{ fontSize: 14, fontFamily: 'KHNPHDotfB', color: "#000" }}>{`채취 후 ${this.state.fertilication[this.state.fertilication.length - (index + 1)].dayStr} 배아 발달 상태입니다.`}</Text>
-                                                                <Text style={{ marginTop: 18, fontSize: 14, fontFamily: 'KHNPHDotfB', color: "#4A50CA", lineHeight: 25 }}>{this._DegreeText(this.state.fertilication.length - (index + 1))}</Text>
+                                                                <Text style={{ fontSize: 14, fontFamily: 'KHNPHDotfB', color: "#000" }}>{`채취 후 ${this.state.fertilication[index].dayStr} 배아 발달 상태입니다.`}</Text>
+                                                                <Text style={{ marginTop: 18, fontSize: 14, fontFamily: 'KHNPHDotfB', color: "#4A50CA", lineHeight: 25 }}>{this._DegreeText(index)}</Text>
                                                             </View>
                                                         </View>
                                                     ))}
@@ -1040,10 +1151,10 @@ export default class CellDevelop extends React.Component {
                                                     {this.state.cryo.map((item, index) => (
                                                         <View style={{ width: screenWidth - 120, backgroundColor: '#fff', padding: 14, marginTop: 15, borderRadius: 24 }}>
                                                             <View style={{ marginTop: 0 }}>
-                                                                <Text style={{ marginTop: 0, fontSize: 14, fontFamily: 'KHNPHDotfR', color: "#000" }} onPress={() => this.setState({ animation: true })}>{(this.state.cryo.length - 1 - index != 0 ? "추가로 " : "") + "배아 " + this.state.cryo[this.state.cryo.length - 1 - index].count + "개가 동결되었습니다."}</Text>
+                                                                <Text style={{ marginTop: 0, fontSize: 14, fontFamily: 'KHNPHDotfR', color: "#000" }} onPress={() => this.setState({ animation: true })}>{(index != 0 ? "추가로 " : "") + "배아 " + this.state.cryo[index].count + "개가 동결되었습니다."}</Text>
                                                                 {/* <Text style={{ marginTop: 8, fontSize: 14, fontFamily: 'KHNPHDotfR', color: "#000" }}>{"동결보존일은 " + Moment(item.cryoDate).format("YYYY년 M월 D일") + "이며"}</Text> */}
-                                                                {(index != 0 || this.state.cryo.length == 1) && <Text style={{ marginTop: 12, fontSize: 12, fontFamily: 'KHNPHDotfR', color: "#000" }}>{"*추가로 동결 가능한 " + "배아" + "가 있을 시에는 다음날 등록됩니다."}</Text>}
-                                                                {(index == 0 && this.state.cryo.length > 1) && <Text style={{ marginTop: 12, fontSize: 14, fontFamily: 'KHNPHDotfB', color: "#4A50CA" }}>{"총 " + this.state.cryo[this.state.cryo.length - 1 - index].totalCount + "개의 배아가 동결되었습니다."}</Text>}
+                                                                {(index != this.state.cryo.length - 1 && this.state.cryo.length > 1) && <Text style={{ marginTop: 12, fontSize: 12, fontFamily: 'KHNPHDotfR', color: "#000" }}>{"*추가로 동결 가능한 " + "배아" + "가 있을 시에는 다음날 등록됩니다."}</Text>}
+                                                                {(index == this.state.cryo.length - 1 || this.state.cryo.length == 1) && <Text style={{ marginTop: 12, fontSize: 14, fontFamily: 'KHNPHDotfB', color: "#4A50CA" }}>{"총 " + this.state.cryo[index].totalCount + "개의 배아가 동결되었습니다."}</Text>}
                                                             </View>
                                                         </View>
                                                     ))}
@@ -1051,10 +1162,10 @@ export default class CellDevelop extends React.Component {
                                                     {this.state.cryo2.map((item, index) => (
                                                         <View style={{ width: screenWidth - 120, backgroundColor: '#fff', padding: 14, marginTop: 15, borderRadius: 24 }}>
                                                             <View style={{ marginTop: 0 }}>
-                                                                <Text style={{ marginTop: 0, fontSize: 14, fontFamily: 'KHNPHDotfR', color: "#000" }} onPress={() => this.setState({ animation: true })}>{(this.state.cryo2.length - 1 - index != 0 ? "추가로 " : "") + "난자 " + this.state.cryo2[this.state.cryo2.length - 1 - index].count + "개가 동결되었습니다."}</Text>
+                                                                <Text style={{ marginTop: 0, fontSize: 14, fontFamily: 'KHNPHDotfR', color: "#000" }} onPress={() => this.setState({ animation: true })}>{(index != 0 ? "추가로 " : "") + "난자 " + this.state.cryo2[index].count + "개가 동결되었습니다."}</Text>
                                                                 {/* <Text style={{ marginTop: 8, fontSize: 14, fontFamily: 'KHNPHDotfR', color: "#000" }}>{"동결보존일은 " + Moment(item.cryoDate).format("YYYY년 M월 D일") + "이며"}</Text> */}
-                                                                {(index != 0 || this.state.cryo2.length == 1) && <Text style={{ marginTop: 12, fontSize: 12, fontFamily: 'KHNPHDotfR', color: "#000" }}>{"*추가로 동결 가능한 " + "난자" + "가 있을 시에는 다음날 등록됩니다."}</Text>}
-                                                                {(index == 0 && this.state.cryo2.length > 1) && <Text style={{ marginTop: 12, fontSize: 14, fontFamily: 'KHNPHDotfB', color: "#4A50CA" }}>{"총 " + this.state.cryo2[this.state.cryo2.length - 1 - index].totalCount + "개의 난자가 동결되었습니다."}</Text>}
+                                                                {(index != this.state.cryo2.length - 1 && this.state.cryo2.length > 1) && <Text style={{ marginTop: 12, fontSize: 12, fontFamily: 'KHNPHDotfR', color: "#000" }}>{"*추가로 동결 가능한 " + "난자" + "가 있을 시에는 다음날 등록됩니다."}</Text>}
+                                                                {(index == this.state.cryo2.length - 1 || this.state.cryo2.length == 1) && <Text style={{ marginTop: 12, fontSize: 14, fontFamily: 'KHNPHDotfB', color: "#4A50CA" }}>{"총 " + this.state.cryo2[index].totalCount + "개의 난자가 동결되었습니다."}</Text>}
                                                             </View>
                                                         </View>
                                                     ))}
@@ -1065,12 +1176,12 @@ export default class CellDevelop extends React.Component {
                                     </View>
                                 )}
 
-                                {this.state.cryo.length > 0 && (
+                                {this.state.embryoAllDatas.length > 0 && (
                                     <View style={{ marginTop: 15, backgroundColor: '#fff', borderRadius: 24, marginLeft: 20, marginRight: 20, paddingLeft: 20, paddingRight: 20, paddingBottom: 20, marginBottom: 20 }}>
                                         <View style={{ width: '100%', alignItems: 'center', flexDirection: 'row', marginTop: 16 }}>
                                             <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center' }}>
                                                 <Image source={imgCell} style={{ width: 28, height: 28, resizeMode: 'contain' }}></Image>
-                                                <Text style={{ fontSize: 18, fontFamily: 'KHNPHDotfR', color: "#000", marginLeft: 8 }}>{"나의 잔여 배아"}</Text>
+                                                <Text style={{ fontSize: 18, fontFamily: 'KHNPHDotfR', color: "#000", marginLeft: 8 }}>{"나의 보존 배아"}</Text>
                                             </View>
                                         </View>
 
@@ -1079,6 +1190,7 @@ export default class CellDevelop extends React.Component {
                                         </View>
 
                                         <Animated.ScrollView
+                                            ref={ref => this.scrFirst = ref}
                                             horizontal
                                             pagingEnabled
                                             showsHorizontalScrollIndicator={false}
@@ -1087,8 +1199,14 @@ export default class CellDevelop extends React.Component {
                                                 [{ nativeEvent: { contentOffset: { x: this.scrollX } } }],
                                                 { useNativeDriver: true })}
                                         >
-                                            {this.state.cryo.map((item, index) =>
-                                            (
+                                            {this.state.embryoAllDatas.map((item, index) =>
+                                            (index == 0 ? (
+                                                <View style={{ marginTop: 15, backgroundColor: '#f6f7f9', height: 120, width: screenWidth - 80 }}>
+                                                    <View style={{ padding: 15, height: '100%', alignItems: 'center', justifyContent: 'center' }}>
+                                                        <Text style={{ fontSize: 14, fontFamily: 'KHNPHDotfR', color: "#000" }}>{"나의 보존배아는 총 " + item.remaining + "개 입니다."}</Text>
+                                                    </View>
+                                                </View>
+                                            ) : (
                                                 <View style={{ marginTop: 15, backgroundColor: '#f6f7f9', height: 120, width: screenWidth - 80 }}>
                                                     <View style={{ padding: 15, height: '100%' }}>
                                                         <View style={{ flexDirection: 'row' }}>
@@ -1097,12 +1215,12 @@ export default class CellDevelop extends React.Component {
                                                         </View>
 
                                                         <View style={{ flexDirection: 'row', marginTop: 8 }}>
-                                                            <Text style={{ flex: 1, fontSize: 14, fontFamily: 'KHNPHDotfR', color: "#000" }}>{"동결일 : "}</Text>
-                                                            <Text style={{ fontSize: 14, fontFamily: 'KHNPHDotfR', color: "#000" }}>{item.cryoDate}</Text>
+                                                            <Text style={{ flex: 1, fontSize: 14, fontFamily: 'KHNPHDotfR', color: "#000" }}>{"동결 배아 갯수 : "}</Text>
+                                                            <Text style={{ fontSize: 14, fontFamily: 'KHNPHDotfR', color: "#000" }}>{item.total}</Text>
                                                         </View>
 
                                                         <View style={{ flexDirection: 'row', marginTop: 8 }}>
-                                                            <Text style={{ flex: 1, fontSize: 14, fontFamily: 'KHNPHDotfR', color: "#000" }}>{"잔여 배아 갯수 : "}</Text>
+                                                            <Text style={{ flex: 1, fontSize: 14, fontFamily: 'KHNPHDotfR', color: "#000" }}>{"보존 배아 갯수 : "}</Text>
                                                             <Text style={{ fontSize: 14, fontFamily: 'KHNPHDotfR', color: "#000" }}>{item.remaining}</Text>
                                                         </View>
 
@@ -1112,24 +1230,110 @@ export default class CellDevelop extends React.Component {
                                                         </View>
                                                     </View>
                                                 </View>
-                                            )
+                                            ))
                                             )}
                                         </Animated.ScrollView>
-                                        {this.state.cryo.length > 1 && (<View style={{
+                                        {this.state.embryoAllDatas.length > 1 && (<View style={{
                                             left: 0,
                                             right: 0,
                                             bottom: 0,
                                             zIndex: 100,
                                             marginBottom: 0,
                                             marginTop: 15,
+                                            flexDirection: 'row',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
                                         }}>
+                                            <TouchableWithoutFeedback onPress={() => this.scrFirst.scrollTo({ x: 0, animated: true })}><View style={{ marginRight: 12 }}><Image source={imgPrevious2} style={{ width: 12, height: 12, resizeMode: 'contain', tintColor: '#4a50ca' }}></Image></View></TouchableWithoutFeedback>
                                             <RNAnimatedScrollIndicators
-                                                numberOfCards={this.state.cryo.length}
+                                                numberOfCards={this.state.embryoAllDatas.length}
                                                 scrollWidth={screenWidth - 80}
                                                 activeColor={'#4a50ca'}
                                                 inActiveColor={'#e7e7e7'}
                                                 scrollAnimatedValue={this.scrollX}
                                             />
+                                            <View style={{ marginLeft: 12, width: 15, height: 15 }}></View>
+                                        </View>)}
+                                    </View>
+                                )}
+
+                                {this.state.oOcyteAllDatas.length > 0 && (
+                                    <View style={{ marginTop: 0, backgroundColor: '#fff', borderRadius: 24, marginLeft: 20, marginRight: 20, paddingLeft: 20, paddingRight: 20, paddingBottom: 20, marginBottom: 20 }}>
+                                        <View style={{ width: '100%', alignItems: 'center', flexDirection: 'row', marginTop: 16 }}>
+                                            <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center' }}>
+                                                <Image source={imgCell} style={{ width: 28, height: 28, resizeMode: 'contain' }}></Image>
+                                                <Text style={{ fontSize: 18, fontFamily: 'KHNPHDotfR', color: "#000", marginLeft: 8 }}>{"나의 보존 난자"}</Text>
+                                            </View>
+                                        </View>
+
+                                        <View style={{ marginTop: 13 }}>
+                                            <DashedLine dashLength={4} dashColor='#afafaf' />
+                                        </View>
+
+                                        <Animated.ScrollView
+                                            ref={ref => this.scrSecond = ref}
+                                            horizontal
+                                            pagingEnabled
+                                            showsHorizontalScrollIndicator={false}
+                                            contentContainerStyle={{ flexGrow: 1 }}
+                                            onScroll={Animated.event(
+                                                [{ nativeEvent: { contentOffset: { x: this.scrollX2 } } }],
+                                                { useNativeDriver: true })}
+                                        >
+                                            {this.state.oOcyteAllDatas.map((item, index) =>
+                                            (index == 0 ? (
+                                                <View style={{ marginTop: 15, backgroundColor: '#f6f7f9', height: 120, width: screenWidth - 80 }}>
+                                                    <View style={{ padding: 15, height: '100%', alignItems: 'center', justifyContent: 'center' }}>
+                                                        <Text style={{ fontSize: 14, fontFamily: 'KHNPHDotfR', color: "#000" }}>{"나의 보존난자는 총 " + item.remaining + "개 입니다."}</Text>
+                                                    </View>
+                                                </View>
+                                            ) : (item.remaining != 0 &&
+                                                <View style={{ marginTop: 15, backgroundColor: '#f6f7f9', height: 120, width: screenWidth - 80 }}>
+                                                    <View style={{ padding: 15, height: '100%' }}>
+                                                        <View style={{ flexDirection: 'row' }}>
+                                                            <Text style={{ flex: 1, fontSize: 14, fontFamily: 'KHNPHDotfR', color: "#000" }}>{"채취일 : "}</Text>
+                                                            <Text style={{ fontSize: 14, fontFamily: 'KHNPHDotfR', color: "#000" }}>{item.opuDate}</Text>
+                                                        </View>
+
+                                                        <View style={{ flexDirection: 'row', marginTop: 8 }}>
+                                                            <Text style={{ flex: 1, fontSize: 14, fontFamily: 'KHNPHDotfR', color: "#000" }}>{"동결 난자 갯수 : "}</Text>
+                                                            <Text style={{ fontSize: 14, fontFamily: 'KHNPHDotfR', color: "#000" }}>{item.total}</Text>
+                                                        </View>
+
+                                                        <View style={{ flexDirection: 'row', marginTop: 8 }}>
+                                                            <Text style={{ flex: 1, fontSize: 14, fontFamily: 'KHNPHDotfR', color: "#000" }}>{"보존 난자 갯수 : "}</Text>
+                                                            <Text style={{ fontSize: 14, fontFamily: 'KHNPHDotfR', color: "#000" }}>{item.remaining}</Text>
+                                                        </View>
+
+                                                        <View style={{ flexDirection: 'row', marginTop: 8 }}>
+                                                            <Text style={{ flex: 1, fontSize: 14, fontFamily: 'KHNPHDotfR', color: "#000" }}>{"보존기간 만료일 : "}</Text>
+                                                            <Text style={{ fontSize: 14, fontFamily: 'KHNPHDotfR', color: "#000" }}>{item.expiredDate}</Text>
+                                                        </View>
+                                                    </View>
+                                                </View>
+                                            ))
+                                            )}
+                                        </Animated.ScrollView>
+                                        {this.state.oOcyteAllDatas.length > 1 && (<View style={{
+                                            left: 0,
+                                            right: 0,
+                                            bottom: 0,
+                                            zIndex: 100,
+                                            marginBottom: 0,
+                                            marginTop: 15,
+                                            flexDirection: 'row',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                        }}>
+                                            <TouchableWithoutFeedback onPress={() => this.scrSecond.scrollTo({ x: 0, animated: true })}><View style={{ marginRight: 12 }}><Image source={imgPrevious2} style={{ width: 12, height: 12, resizeMode: 'contain', tintColor: '#4a50ca' }}></Image></View></TouchableWithoutFeedback>
+                                            <RNAnimatedScrollIndicators
+                                                numberOfCards={this.state.oOcyteAllDatas.length}
+                                                scrollWidth={screenWidth - 80}
+                                                activeColor={'#4a50ca'}
+                                                inActiveColor={'#e7e7e7'}
+                                                scrollAnimatedValue={this.scrollX2}
+                                            />
+                                            <View style={{ marginLeft: 12, width: 15, height: 15 }}></View>
                                         </View>)}
                                     </View>
                                 )}

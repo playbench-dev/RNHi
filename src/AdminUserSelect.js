@@ -174,7 +174,7 @@ export default class AdminUserSelect extends React.Component {
                             </View>
 
                             <View style={{ flexDirection: 'row', }}>
-                                <TouchableWithoutFeedback onPress={() => this.props.navigation.navigate('AdminMedicineCalendar', { userNo: obj.item.userNo })}>
+                                <TouchableWithoutFeedback onPress={() => this.props.navigation.navigate('AdminMedicineCalendar', { userNo: obj.item.userNo, userName: obj.item.userName, patientNo: obj.item.userPatientNo })}>
                                     <View style={{ width: 70, alignItems: 'center', justifyContent: 'center', borderRadius: 8, backgroundColor: "#EDA5CA", height: 40 }}>
                                         <Text style={{
                                             fontSize: 14,
@@ -183,7 +183,7 @@ export default class AdminUserSelect extends React.Component {
                                         }}>주사</Text>
                                     </View>
                                 </TouchableWithoutFeedback>
-                                <TouchableWithoutFeedback onPress={() => this.props.navigation.navigate('AdminKakaoList', { userNo: obj.item.userNo })}>
+                                <TouchableWithoutFeedback onPress={() => this.props.navigation.navigate('AdminKakaoList', { userNo: obj.item.userNo, userName: obj.item.userName, patientNo: obj.item.userPatientNo })}>
                                     <View style={{ width: 70, alignItems: 'center', justifyContent: 'center', borderRadius: 8, backgroundColor: "#FAE101", marginLeft: 14, height: 40 }}>
                                         <Text style={{
                                             fontSize: 14,
@@ -193,7 +193,7 @@ export default class AdminUserSelect extends React.Component {
                                     </View>
                                 </TouchableWithoutFeedback>
 
-                                <TouchableWithoutFeedback onPress={() => this.props.navigation.navigate('AdminCellDevelop', { userNo: obj.item.userNo })}>
+                                <TouchableWithoutFeedback onPress={() => this.props.navigation.navigate('AdminCellDevelop', { userNo: obj.item.userNo, userName: obj.item.userName, patientNo: obj.item.userPatientNo })}>
                                     <View style={{ width: 70, alignItems: 'center', justifyContent: 'center', borderRadius: 8, backgroundColor: "#673AB7", marginLeft: 14, height: 40 }}>
                                         <Text style={{
                                             fontSize: 14,
@@ -203,7 +203,7 @@ export default class AdminUserSelect extends React.Component {
                                     </View>
                                 </TouchableWithoutFeedback>
 
-                                <TouchableWithoutFeedback onPress={() => this.props.navigation.navigate('AdminAlarmList', { userNo: obj.item.userNo })}>
+                                <TouchableWithoutFeedback onPress={() => this.props.navigation.navigate('AdminAlarmList', { userNo: obj.item.userNo, userName: obj.item.userName, patientNo: obj.item.userPatientNo })}>
                                     <View style={{ width: 70, alignItems: 'center', justifyContent: 'center', borderRadius: 8, backgroundColor: "#548235", marginLeft: 14, height: 40 }}>
                                         <Text style={{
                                             fontSize: 14,

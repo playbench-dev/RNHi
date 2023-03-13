@@ -127,7 +127,8 @@ export default class Inquire extends React.Component {
                             </View>
                         </View>
 
-                        <Text style={{ fontFamily: 'KHNPHDotfR', color: '#000', fontSize: 14, marginTop: 28, lineHeight: 24, marginBottom: 24 }}>{"앱 사용시 궁금한 점을 " + (this.state.type == 1 ? "문의" : "신고") + "하실 수 있습니다.\n(진료 및 예약에 관련한 문의는 전화 또는 카카오톡으로\n하실 수 있습니다.)"}</Text>
+                        <Text style={{ fontFamily: 'KHNPHDotfR', color: '#000', fontSize: 14, marginTop: 28, lineHeight: 24, marginBottom: 0 }}>{"앱 사용시 궁금한 점을 " + (this.state.type == 1 ? "문의" : "신고") + "하실 수 있습니다."}</Text>
+                        <Text style={{ fontFamily: 'KHNPHDotfB', color: '#3A137D', fontSize: 14, marginTop: 4, lineHeight: 16, marginBottom: 24 }}>{"*진료 및 예약에 관련한 문의는 전화 또는 카카오톡으로\n하실 수 있습니다."}</Text>
 
                     </ScrollView>
 

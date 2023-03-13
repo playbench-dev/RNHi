@@ -1,6 +1,5 @@
 import React from 'react';
-import { SafeAreaView, View, Text, Image, ScrollView, StatusBar, StyleSheet, TouchableWithoutFeedback, LogBox, Modal, BackHandler, ActivityIndicator } from 'react-native';
-import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { SafeAreaView, View, Text, Image, ScrollView, StatusBar, StyleSheet, TouchableWithoutFeedback, LogBox, Modal, BackHandler, ActivityIndicator, RefreshControl } from 'react-native';
 import Elevations from 'react-native-elevation';
 import SwitchToggle from 'react-native-switch-toggle';
 import FetchingIndicator from 'react-native-fetching-indicator'
@@ -12,11 +11,13 @@ import OneBtnDialog from './Common/OneBtnDialog'
 import TowBtnDialog from './Common/TwoBtnDialog'
 import DatePicker from 'react-native-date-picker'
 import GestureRecognizer from 'react-native-swipe-gestures';
+import Toast from 'react-native-toast-message';
 
 const TAG = "AdminMedicineCalendar";
 const imgBack = require('../assets/ic_calendar_back.png');
 const imgLeft = require('../assets/ic_calendar_left.png');
 const imgRight = require('../assets/ic_calendar_right.png');
+const imgRefresh = require('../assets/ic_refresh.png');
 
 const imgCircle = require('../assets/ic_main_circle.png');
 const imgArrow = require('../assets/ic_main_right_arrow.png');
@@ -30,6 +31,17 @@ const imgCirclePinkCheck = require('../assets/ic_pink_circle_check.png');
 const imgCircleGreenCheck = require('../assets/ic_green_circle_check.png');
 const imgCircleBlueCheck = require('../assets/ic_blue_circle_check.png');
 
+const imgStar = require('../assets/ic_calendar_star.png')   //  배란유도주사
+const imgOpuIUI = require('../assets/ic_calendar_opu_iui.png')//  난자채취, 인공수정
+const imgEt = require('../assets/ic_calendar_et.png')       //  배아이식
+const imgBhcg = require('../assets/ic_calendar_bhcg.png')   //  혈액확인
+const imgVisit = require('../assets/ic_calendar_visit.png') //  재방문
+
+const colorOpuIUI = "#AF6CC1" //  난자채취, 인공수정
+const colorEt = "#612093"     //  배아이식
+const colorBhcg = "#FDD835"   //  혈액확인
+const colorVisit = "#FDD835"  //  재방문
+
 const holidayKr = require('holiday-kr');
 
 const imgLogo = require('../assets/ic_main_logo.png');
@@ -41,6 +53,7 @@ LogBox.ignoreLogs([
 export default class AdminMedicineCalendar extends React.Component {
     constructor(props) {
         super(props)
+        this.backAction = this.backAction.bind(this);
     }
 
     state = {
@@ -51,7 +64,7 @@ export default class AdminMedicineCalendar extends React.Component {
         firstWeek: '',
         lastWeek: '',
         // dayTitleText: ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"],
-        dayTitleText: ["월", "화", "수", "목", "금", "토", "일"],
+        dayTitleText: ["일", "월", "화", "수", "목", "금", "토"],
         dayText: ["일요일", "월요일", "화요일", "수요일", "목요일", "금요일", "토요일"],
         dateList: [],
         selectedDay: Moment().format('YYYYMMDD'),
@@ -84,19 +97,38 @@ export default class AdminMedicineCalendar extends React.Component {
         cryoDate: '',
         bhcgDate: '',
         iuiDate: '',
+        visitDate: '',
+        opuDateList: [],
+        etDateList: [],
+        cryoDateList: [],
+        bhcgDateList: [],
+        iuiDateList: [],
+        visitDateList: [],
+        opuSubtractDate: '',
+        opuSubtractDateList: [],
         calendarHeight: 0,
-        calendarStatus: 0,
+        calendarStatus: 1,
         medicineNameDatas: [],
         medicineColorDatas: [],
+        toastText: {},
+        refreshing: false,
+        injectionTimes: [],
+        injectionTimeDatas: [],
     }
 
     componentDidMount() {
         this._MedicineAllInfo();
+        BackHandler.addEventListener("hardwareBackPress", this.backAction);
     }
 
     componentWillUnmount() {
-
+        BackHandler.removeEventListener('hardwareBackPress', this.backAction);
     }
+
+    backAction() {
+        this.props.navigation.goBack();
+        return true;
+    };
 
     _MedicineAllInfo() {
         var details = null;
@@ -180,7 +212,11 @@ export default class AdminMedicineCalendar extends React.Component {
             response => response.json()
         ).then(
             json => {
-                console.log(TAG, json);
+                if (this.state.requestType == 1) {
+                    if (this.props.route.params.userNo == "41") {
+                        this.state.toastText = json;
+                    }
+                }
                 if (json.Error_Cd == "0000") {
                     if (this.state.requestType == 1) {
                         this.state.datas = [];
@@ -189,62 +225,90 @@ export default class AdminMedicineCalendar extends React.Component {
                         this.state.namesList = [];
                         this.state.et_start_date = '';
                         this.state.et_end_date = '';
-                        console.log(json.Luteal)
+                        this.state.opuDateList = [];
+                        this.state.etDateList = [];
+                        this.state.cryoDateList = [];
+                        this.state.bhcgDateList = [];
+                        this.state.iuiDateList = [];
+                        this.state.visitDateList = [];
+                        this.state.opuSubtractDateList = [];
+                        this.state.injectionTimes = [];
+                        this.state.injectionTimeDatas = [];
+
+                        for (let i = 0; i < Object.keys(json.InjectionTime).length; i++) {
+                            this.state.injectionTimes.push(json.InjectionTime[i].time.substring(0, 10))
+                            const obj = ({
+                                before: json.InjectionTime[i].before || '',
+                                chartNo: json.InjectionTime[i].chart_no || '',
+                                time: json.InjectionTime[i].time || '',
+                            })
+                            this.state.injectionTimeDatas.push(obj)
+                        }
 
                         for (let i = 0; i < Object.keys(json.OpuDate).length; i++) {
-                            this.state.opuDate = json.OpuDate[0].cel_date;
+                            if (this.state.today.format('YYYYMM') == json.OpuDate[i].cel_date.replace("-", "").substring(0, 6)) {
+                                this.state.opuDate = json.OpuDate[i].cel_date;
+                                this.state.opuSubtractDate = Moment(this.state.opuDate, "YYYY-MM-DD").subtract(2, "day").format("YYYY-MM-DD");
+                                this.state.opuDateList.push(json.OpuDate[i].cel_date)
+                                this.state.opuSubtractDateList.push(Moment(this.state.opuDate, "YYYY-MM-DD").subtract(2, "day").format("YYYY-MM-DD"))
+                            }
+                        }
+                        for (let i = 0; i < Object.keys(json.EtDate).length; i++) {
+                            this.state.etDate = json.EtDate[i].cel_date;
+                            this.state.etDateList.push(json.EtDate[i].cel_date)
+                        }
+                        if (Array.isArray(json.ReTreatDate)) {
+                            for (let i = 0; i < Object.keys(json.ReTreatDate).length; i++) {
+                                this.state.visitDate = json.ReTreatDate[i].appointment_date.substring(0, 10);
+                                this.state.visitDateList.push(json.ReTreatDate[i].appointment_date.substring(0, 10))
+                            }
+                        } else {
+                            this.state.visitDate = json.ReTreatDate.substring(0, 10);
+                            this.state.visitDateList.push(json.ReTreatDate.substring(0, 10))
                         }
 
-                        for (let i = 0; i < Object.keys(json.EtDate).length; i++) {
-                            this.state.etDate = json.EtDate[0].cel_date;
-                        }
-                        // for (let i = 0; i < Object.keys(json.CryoDate).length; i++) {
-                        //     this.state.cryoDate = json.CryoDate[0].cel_date;
-                        // }
                         for (let i = 0; i < Object.keys(json.BhcgDate).length; i++) {
-                            this.state.bhcgDate = json.BhcgDate[0].cel_date;
+                            this.state.bhcgDate = json.BhcgDate[i].cel_date;
+                            this.state.bhcgDateList.push(json.BhcgDate[i].cel_date)
                         }
 
                         for (let i = 0; i < Object.keys(json.IUIDate).length; i++) {
-                            this.state.iuiDate = json.IUIDate[0].cel_date;
+                            this.state.iuiDate = json.IUIDate[i].cel_date;
+                            this.state.iuiDateList.push(json.IUIDate[i].cel_date)
                         }
 
-                        for (let i = 0; i < Object.keys(json.Resources).length; i++) {
+                        for (let i = 0; i < Object.keys(json.Medicine).length; i++) {
                             const obj = ({
-                                abbreviation: json.Resources[i].abbreviation || '',
-                                amount: json.Resources[i].amount || '',
-                                cel_date: json.Resources[i].cel_date || '',
-                                every_other_day: json.Resources[i].every_other_day || '',
-                                idx: json.Resources[i].idx || '',
-                                medicine_name: json.Resources[i].medicine_name || '',
-                                medicine_no: json.Resources[i].medicine_no || '',
-                                memo: json.Resources[i].taking || '',
-                                purpose: json.Resources[i].purpose || '',
-                                reg_date: json.Resources[i].reg_date || '',
-                                reg_id: json.Resources[i].reg_id || '',
-                                unit: json.Resources[i].unit || '',
-                                type: json.Resources[i].type || '',
-                                take_time: json.Resources[i].take_time || '',
-                                schedule_no: json.Resources[i].schedule_no || '',
+                                abbreviation: json.Medicine[i].abbreviation || '',
+                                amount: json.Medicine[i].amount || '',
+                                cel_date: json.Medicine[i].cel_date || '',
+                                every_other_day: json.Medicine[i].every_other_day || '',
+                                idx: json.Medicine[i].idx || '',
+                                medicine_name: json.Medicine[i].medicine_name || '',
+                                medicine_app_name: json.Medicine[i].medicine_app_name || '',
+                                medicine_no: json.Medicine[i].medicine_no || '',
+                                memo: json.Medicine[i].taking || '',
+                                purpose: json.Medicine[i].purpose || '',
+                                reg_date: json.Medicine[i].reg_date || '',
+                                reg_id: json.Medicine[i].reg_id || '',
+                                unit: json.Medicine[i].unit || '',
+                                type: json.Medicine[i].type || '',
+                                take_time: json.Medicine[i].take_time || '',
+                                schedule_no: json.Medicine[i].schedule_no || '',
 
                             })
-                            this.state.scheduleNo.push(json.Resources[i].schedule_no || '');
-                            this.state.namesList.push(json.Resources[i].medicine_name || '');
+                            this.state.scheduleNo.push(json.Medicine[i].schedule_no || '');
+                            this.state.namesList.push(json.Medicine[i].medicine_name || '');
                             this.state.datas.push(obj);
-                            this.state.dateList.push(json.Resources[i].cel_date || '');
+                            this.state.dateList.push(json.Medicine[i].cel_date || '');
                         }
 
                         for (let i = 0; i < Object.keys(json.Luteal).length; i++) {
                             for (let j = 0; j < Object.keys(json.Luteal[i].medicine_info).length; j++) {
-                                console.log(TAG, this.state.scheduleNo + " " + json.Luteal[i].schedule_no)
                                 if (this.state.scheduleNo.includes(json.Luteal[i].schedule_no) == true) {
-                                    console.log(TAG, 'includes ' + i);
                                     let test = false;
-                                    console.log(TAG, 'length ' + this.state.namesList.length);
                                     for (let x = 0; x < this.state.namesList.length; x++) {
-                                        console.log(TAG, this.state.scheduleNo[x] + " " + json.Luteal[i].schedule_no)
                                         if (this.state.scheduleNo[x] === json.Luteal[i].schedule_no && this.state.namesList[x] === json.Luteal[i].medicine_info[j].medicine_name) {
-                                            console.log(TAG, '?????')
                                             test = true;
                                             break;
                                         }
@@ -257,6 +321,7 @@ export default class AdminMedicineCalendar extends React.Component {
                                             every_other_day: json.Luteal[i].medicine_info[j].every_other_day || '',
                                             idx: '',
                                             medicine_name: json.Luteal[i].medicine_info[j].medicine_name || '',
+                                            medicine_app_name: json.Luteal[i].medicine_info[j].medicine_app_name || '',
                                             medicine_no: json.Luteal[i].medicine_info[j].medicine_no || '',
                                             memo: json.Luteal[i].medicine_info[j].memo || '',
                                             purpose: json.Luteal[i].medicine_info[j].purpose || '',
@@ -285,6 +350,7 @@ export default class AdminMedicineCalendar extends React.Component {
                                         every_other_day: json.Luteal[i].medicine_info[j].every_other_day || '',
                                         idx: '',
                                         medicine_name: json.Luteal[i].medicine_info[j].medicine_name || '',
+                                        medicine_app_name: json.Luteal[i].medicine_info[j].medicine_app_name || '',
                                         medicine_no: json.Luteal[i].medicine_info[j].medicine_no || '',
                                         memo: json.Luteal[i].medicine_info[j].memo || '',
                                         purpose: json.Luteal[i].medicine_info[j].purpose || '',
@@ -318,6 +384,7 @@ export default class AdminMedicineCalendar extends React.Component {
                         this.setState({
                             selectedDay: this.state.selectedDay,
                             isLoading: true,
+                            refreshing: false
                         })
                     } else if (this.state.requestType == 2) {
                         this.state.requestType = 1;
@@ -325,7 +392,10 @@ export default class AdminMedicineCalendar extends React.Component {
                         this._MedcineInfo();
                     }
                 } else {
-
+                    this.setState({
+                        isLoading: true,
+                        refreshing: false
+                    })
                 }
             }
         )
@@ -359,6 +429,7 @@ export default class AdminMedicineCalendar extends React.Component {
                         let blueCheck = 0;
 
                         let medicineName = [];
+                        let medicineAmount = [];
 
                         while (position != -1) {
                             if (this.state.datas[position].type == '주사') {
@@ -371,7 +442,11 @@ export default class AdminMedicineCalendar extends React.Component {
                                     pinkCheck = 2;
                                 }
                                 const obj = {
-                                    medicine_name: this.state.datas[position].medicine_name
+                                    medicine_name: this.state.datas[position].medicine_name,
+                                    medicine_app_name: this.state.datas[position].medicine_app_name,
+                                    medicine_unit: this.state.datas[position].unit,
+                                    medicine_amount: this.state.datas[position].amount,
+                                    medicine_abbreviation: this.state.datas[position].abbreviation
                                 }
                                 medicineName.push(obj)
                             } else if (this.state.datas[position].type == '약') {
@@ -384,7 +459,11 @@ export default class AdminMedicineCalendar extends React.Component {
                                     greenCheck = 2;
                                 }
                                 const obj = {
-                                    medicine_name: this.state.datas[position].medicine_name
+                                    medicine_name: this.state.datas[position].medicine_name,
+                                    medicine_app_name: this.state.datas[position].medicine_app_name,
+                                    medicine_unit: this.state.datas[position].unit,
+                                    medicine_amount: this.state.datas[position].amount,
+                                    medicine_abbreviation: this.state.datas[position].abbreviation
                                 }
                                 medicineName.push(obj)
                             } else if (this.state.datas[position].type == '질정') {
@@ -397,7 +476,11 @@ export default class AdminMedicineCalendar extends React.Component {
                                     blueCheck = 2;
                                 }
                                 const obj = {
-                                    medicine_name: this.state.datas[position].medicine_name
+                                    medicine_name: this.state.datas[position].medicine_name,
+                                    medicine_app_name: this.state.datas[position].medicine_app_name,
+                                    medicine_unit: this.state.datas[position].unit,
+                                    medicine_amount: this.state.datas[position].amount,
+                                    medicine_abbreviation: this.state.datas[position].abbreviation
                                 }
                                 medicineName.push(obj)
                             }
@@ -409,46 +492,103 @@ export default class AdminMedicineCalendar extends React.Component {
                                 <TouchableWithoutFeedback onPress={() => this._MakeListItem(days.format('YYYYMMDD'))}>
                                     <View key={index} style={{ flex: 1, alignItems: 'center', backgroundColor: (this.state.selectedDay == days.format('YYYYMMDD') ? '#F1F1F1' : '#fff'), marginLeft: (index == 0 ? 0 : 0.5) }}>
                                         <View style={{ width: '100%', marginTop: 4, paddingLeft: 5, paddingRight: 5, paddingTop: 3, paddingBottom: 3 }}>
-                                            <View style={{ backgroundColor: (this.state.bhcgDate == days.format('YYYY-MM-DD') && '#4A4FC3'), alignItems: 'center', justifyContent: 'center', }}>
-                                                <Text style={{ color: (this.state.bhcgDate == days.format('YYYY-MM-DD') ? '#fff' : (holidayKr.isSolarHoliday(new Date(Moment(days.format('YYYYMMDD')))) == true ? this.state.holidayColor : (this.state.selectedDay == days.format('YYYYMMDD') ? '#4A4FC3' : '#000'))), fontSize: 12, fontFamily: 'KHNPHDotfR', }}>{days.format('D')}</Text>
+                                            <View style={{ alignItems: 'center', justifyContent: 'center', }}>
+                                                <Text style={{ color: (holidayKr.isSolarHoliday(new Date(Moment(days.format('YYYYMMDD')))) == true ? this.state.holidayColor : (this.state.selectedDay == days.format('YYYYMMDD') ? '#4A4FC3' : ('20230124' == days.format('YYYYMMDD') ? this.state.holidayColor : '#000'))), fontSize: 12, fontFamily: 'KHNPHDotfR', }}>{days.format('D')}</Text>
                                             </View>
                                         </View>
                                         {this.state.calendarStatus == 1 ? (this.state.dateList.includes(days.format('YYYY-MM-DD')) ? <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', width: '100%', height: 30 }}>
                                             {pink && <Image source={pinkCheck == 1 ? imgCirclePinkCheck : imgCirclePink} style={{ width: 10, height: 10, resizeMode: 'contain', }}></Image>}
+                                            {green && console.log('green')}
                                             {green && <Image source={greenCheck == 1 ? imgCircleGreenCheck : imgCircleGreen} style={{ width: 10, height: 10, resizeMode: 'contain', marginLeft: 3 }}></Image>}
                                             {blue && <Image source={blueCheck == 1 ? imgCircleBlueCheck : imgCircleBlue} style={{ width: 10, height: 10, resizeMode: 'contain', marginLeft: 3 }}></Image>}
-                                            {(this.state.opuDate == days.format('YYYY-MM-DD') || this.state.etDate == days.format('YYYY-MM-DD') || this.state.cryoDate == days.format('YYYY-MM-DD')) && <Image source={imgCircleBlue} style={{ width: 10, height: 10, resizeMode: 'contain', marginLeft: 3, tintColor: '#AE91F8' }}></Image>}
+                                            {(this.state.opuDateList.includes(days.format('YYYY-MM-DD')) || this.state.etDateList.includes(days.format('YYYY-MM-DD')) || this.state.cryoDateList.includes(days.format('YYYY-MM-DD')) || this.state.iuiDateList.includes(days.format('YYYY-MM-DD'))) && <Image source={imgCircleBlue} style={{ width: 10, height: 10, resizeMode: 'contain', marginLeft: 3, tintColor: '#AE91F8' }}></Image>}
+                                            {((((this.state.opuDateList.includes(days.format('YYYY-MM-DD')) || this.state.etDateList.includes(days.format('YYYY-MM-DD'))) == false) && this.state.visitDateList.includes(days.format('YYYY-MM-DD'))) || this.state.bhcgDateList.includes(days.format('YYYY-MM-DD'))) && <Image source={imgCircleBlue} style={{ width: 10, height: 10, resizeMode: 'contain', marginLeft: 3, tintColor: '#FAED7D' }}></Image>}
                                         </View> : <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', width: '100%', height: 30 }}>
-                                            {(this.state.opuDate == days.format('YYYY-MM-DD') || this.state.etDate == days.format('YYYY-MM-DD') || this.state.cryoDate == days.format('YYYY-MM-DD')) && <Image source={imgCircleBlue} style={{ width: 10, height: 10, resizeMode: 'contain', marginLeft: 3, tintColor: '#AE91F8' }}></Image>}</View>
+                                            {(this.state.opuDateList.includes(days.format('YYYY-MM-DD')) || this.state.etDateList.includes(days.format('YYYY-MM-DD')) || this.state.cryoDateList.includes(days.format('YYYY-MM-DD')) || this.state.iuiDateList.includes(days.format('YYYY-MM-DD'))) && <Image source={imgCircleBlue} style={{ width: 10, height: 10, resizeMode: 'contain', marginLeft: 3, tintColor: '#AE91F8' }}></Image>}
+                                            {((((this.state.opuDateList.includes(days.format('YYYY-MM-DD')) || this.state.etDateList.includes(days.format('YYYY-MM-DD'))) == false) && this.state.visitDateList.includes(days.format('YYYY-MM-DD'))) || this.state.bhcgDateList.includes(days.format('YYYY-MM-DD'))) && <Image source={imgCircleBlue} style={{ width: 10, height: 10, resizeMode: 'contain', marginLeft: 3, tintColor: '#FAED7D' }}></Image>}
+                                        </View>
+
                                         ) : (
-                                            this.state.dateList.includes(days.format('YYYY-MM-DD')) ? (
-                                                <View style={{ flex: 1 }}>
-                                                    <View style={{ flex: 1 }}>
-                                                        {medicineName.map((item, index) => (
-                                                            <View style={{ flexDirection: 'row', alignItems: 'center', height: 14, marginLeft: 4, marginRight: 4 }}>
-                                                                <View style={{ backgroundColor: (this.state.medicineColorDatas[this.state.medicineNameDatas.indexOf(item.medicine_name)]), width: 5, height: 14 }}></View>
-                                                                <Text style={{ fontSize: 10, marginLeft: 4 }} numberOfLines={1} ellipsizeMode='tail'>{item.medicine_name}</Text>
-                                                            </View>))}
+                                            <View style={{ flex: 1, alignItems: 'center' }}>
+                                                {this.state.opuDateList.includes(days.format('YYYY-MM-DD')) ? (
+                                                    <View style={{ height: 14, paddingLeft: 5, paddingRight: 5, backgroundColor: colorOpuIUI, alignItems: 'center', justifyContent: 'center', width: '100%', borderRadius: 2 }}>
+                                                        <Text style={{ fontSize: 10, color: '#fff' }}>{"난자채취"}</Text>
                                                     </View>
-                                                    {this.state.bhcgDate == days.format('YYYY-MM-DD') && (
-                                                        <View style={{ alignItems: 'center', justifyContent: 'flex-end', }}>
-                                                            <View style={{ borderRadius: 24, borderWidth: 1, borderColor: '#707070', width: 30, height: 30, marginBottom: 5, alignItems: 'center', justifyContent: 'center' }}>
-                                                                <Image source={imgLogo} style={{ width: 20, height: 20, resizeMode: 'contain' }}></Image>
+                                                ) : (
+                                                    this.state.etDateList.includes(days.format('YYYY-MM-DD')) ? (
+                                                        <View style={{ height: 14, paddingLeft: 5, paddingRight: 5, backgroundColor: colorEt, alignItems: 'center', justifyContent: 'center', width: '100%', borderRadius: 2 }}>
+                                                            <Text style={{ fontSize: 10, color: '#fff' }}>{"배아이식"}</Text>
+                                                        </View>
+                                                    ) : (
+                                                        this.state.iuiDateList.includes(days.format('YYYY-MM-DD')) ? (
+                                                            <View style={{ height: 14, paddingLeft: 5, paddingRight: 5, backgroundColor: colorOpuIUI, alignItems: 'center', justifyContent: 'center', width: '100%', borderRadius: 2 }}>
+                                                                <Text style={{ fontSize: 10, color: '#fff' }}>{"인공수정"}</Text>
                                                             </View>
-                                                        </View>)}
-                                                </View>
-                                            ) : (
-                                                <View style={{ alignItems: 'center', justifyContent: 'center', flex: 1 }}>
-                                                    {(this.state.opuDate == days.format('YYYY-MM-DD') || this.state.etDate == days.format('YYYY-MM-DD') || this.state.cryoDate == days.format('YYYY-MM-DD')) && <Image source={imgCircleBlue} style={{ width: 10, height: 10, resizeMode: 'contain', tintColor: '#AE91F8' }}></Image>}
+                                                        ) : (
+                                                            this.state.bhcgDateList.includes(days.format('YYYY-MM-DD')) ? (
+                                                                <View style={{ height: 14, paddingLeft: 5, paddingRight: 5, backgroundColor: colorBhcg, alignItems: 'center', justifyContent: 'center', width: '100%', borderRadius: 2 }}>
+                                                                    <Text style={{ fontSize: 10, color: '#fff' }}>{"임신확인"}</Text>
+                                                                </View>
+                                                            ) : (
+                                                                this.state.visitDateList.includes(days.format('YYYY-MM-DD')) ? (
+                                                                    <View style={{ height: 14, paddingLeft: 5, paddingRight: 5, backgroundColor: colorVisit, alignItems: 'center', justifyContent: 'center', width: '100%', borderRadius: 2 }}>
+                                                                        <Text style={{ fontSize: 10, color: '#fff' }}>{"내원일"}</Text>
+                                                                    </View>) : null
+                                                            )
+                                                        )
+                                                    )
+                                                )}
+
+                                                {this.state.dateList.includes(days.format('YYYY-MM-DD')) ? (
+                                                    <View style={{ flex: 1 }}>
+                                                        <View style={{ flex: 1 }}>
+                                                            {medicineName.map((item, index) => (
+                                                                <View style={{ flexDirection: 'row', alignItems: 'center', height: 14, marginLeft: 4, marginRight: 4 }}>
+                                                                    <View style={{ backgroundColor: (this.state.medicineColorDatas[this.state.medicineNameDatas.indexOf(item.medicine_name)]), width: 5, height: 14 }}></View>
+                                                                    <Text style={{ fontSize: 10, marginLeft: 4, width: '110%' }} numberOfLines={1} >{item.medicine_abbreviation + " " + item.medicine_amount + item.medicine_unit}</Text>
+                                                                </View>))}
+                                                        </View>
+                                                    </View>
+                                                ) : (
                                                     <View style={{ flex: 1 }}></View>
-                                                    {this.state.bhcgDate == days.format('YYYY-MM-DD') && (
+                                                )}
+
+                                                {this.state.opuSubtractDateList.includes(days.format('YYYY-MM-DD')) && (
+                                                    <View style={{ alignItems: 'center', justifyContent: 'flex-end', }}>
+                                                        <Image source={imgStar} style={{ width: 30, height: 30, resizeMode: 'contain' }}></Image>
+                                                    </View>
+                                                )}
+
+                                                {this.state.opuDateList.includes(days.format('YYYY-MM-DD')) ? (
+                                                    <View style={{ alignItems: 'center', justifyContent: 'flex-end', }}>
+                                                        <Image source={imgOpuIUI} style={{ width: 30, height: 30, resizeMode: 'contain' }}></Image>
+                                                    </View>
+                                                ) : (
+                                                    this.state.etDateList.includes(days.format('YYYY-MM-DD')) ? (
                                                         <View style={{ alignItems: 'center', justifyContent: 'flex-end', }}>
-                                                            <View style={{ borderRadius: 24, borderWidth: 1, borderColor: '#707070', width: 30, height: 30, marginBottom: 5, alignItems: 'center', justifyContent: 'center' }}>
-                                                                <Image source={imgLogo} style={{ width: 20, height: 20, resizeMode: 'contain' }}></Image>
+                                                            <Image source={imgEt} style={{ width: 30, height: 30, resizeMode: 'contain' }}></Image>
+                                                        </View>
+                                                    ) : (
+                                                        this.state.iuiDateList.includes(days.format('YYYY-MM-DD')) ? (
+                                                            <View style={{ alignItems: 'center', justifyContent: 'flex-end', }}>
+                                                                <Image source={imgOpuIUI} style={{ width: 30, height: 30, resizeMode: 'contain' }}></Image>
                                                             </View>
-                                                        </View>)}
-                                                </View>
-                                            )
+                                                        ) : (
+                                                            this.state.bhcgDateList.includes(days.format('YYYY-MM-DD')) ? (
+                                                                <View style={{ alignItems: 'center', justifyContent: 'flex-end', }}>
+                                                                    <Image source={imgBhcg} style={{ width: 30, height: 30, resizeMode: 'contain' }}></Image>
+                                                                </View>
+                                                            ) : (
+                                                                (this.state.visitDateList.includes(days.format('YYYY-MM-DD')) && this.state.opuSubtractDateList.includes(days.format('YYYY-MM-DD')) == false) ? (
+                                                                    <View style={{ alignItems: 'center', justifyContent: 'flex-end', }}>
+                                                                        <Image source={imgVisit} style={{ width: 30, height: 30, resizeMode: 'contain' }}></Image>
+                                                                    </View>) : null
+                                                            )
+                                                        )
+                                                    )
+                                                )}
+                                            </View>
+
                                         )}
                                     </View>
                                 </TouchableWithoutFeedback>)
@@ -465,48 +605,103 @@ export default class AdminMedicineCalendar extends React.Component {
                                 <TouchableWithoutFeedback onPress={() => this._MakeListItem(days.format('YYYYMMDD'))}>
                                     <View key={index} style={{ flex: 1, alignItems: 'center', backgroundColor: (this.state.selectedDay == days.format('YYYYMMDD') ? '#F1F1F1' : '#fff'), marginLeft: (index == 0 ? 0 : 0.5) }}>
                                         <View style={{ width: '100%', marginTop: 4, paddingLeft: 5, paddingRight: 5, paddingTop: 3, paddingBottom: 3 }}>
-                                            <View style={{ backgroundColor: (this.state.bhcgDate == days.format('YYYY-MM-DD') && '#4A4FC3'), alignItems: 'center', justifyContent: 'center', }}>
-                                                <Text style={{ color: (this.state.bhcgDate == days.format('YYYY-MM-DD') ? '#fff' : (holidayKr.isSolarHoliday(new Date(Moment(days.format('YYYYMMDD')))) == true ? this.state.holidayColor : (this.state.selectedDay == days.format('YYYYMMDD') ? '#4A4FC3' : '#000'))), fontSize: 12, fontFamily: 'KHNPHDotfR', }}>{days.format('D')}</Text>
+                                            <View style={{ alignItems: 'center', justifyContent: 'center', }}>
+                                                <Text style={{ color: (holidayKr.isSolarHoliday(new Date(Moment(days.format('YYYYMMDD')))) == true ? this.state.holidayColor : (this.state.selectedDay == days.format('YYYYMMDD') ? '#4A4FC3' : ('20230124' == days.format('YYYYMMDD') ? this.state.holidayColor : '#000'))), fontSize: 12, fontFamily: 'KHNPHDotfR', }}>{days.format('D')}</Text>
                                             </View>
                                         </View>
 
                                         {this.state.calendarStatus == 1 ? (this.state.dateList.includes(days.format('YYYY-MM-DD')) ? <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', width: '100%', height: 30 }}>
                                             {pink && <Image source={pinkCheck == 1 ? imgCirclePinkCheck : imgCirclePink} style={{ width: 10, height: 10, resizeMode: 'contain', }}></Image>}
+                                            {green && console.log('green')}
                                             {green && <Image source={greenCheck == 1 ? imgCircleGreenCheck : imgCircleGreen} style={{ width: 10, height: 10, resizeMode: 'contain', marginLeft: 3 }}></Image>}
                                             {blue && <Image source={blueCheck == 1 ? imgCircleBlueCheck : imgCircleBlue} style={{ width: 10, height: 10, resizeMode: 'contain', marginLeft: 3 }}></Image>}
-                                            {(this.state.opuDate == days.format('YYYY-MM-DD') || this.state.etDate == days.format('YYYY-MM-DD') || this.state.cryoDate == days.format('YYYY-MM-DD')) && <Image source={imgCircleBlue} style={{ width: 10, height: 10, resizeMode: 'contain', marginLeft: 3, tintColor: '#AE91F8' }}></Image>}
+                                            {(this.state.opuDateList.includes(days.format('YYYY-MM-DD')) || this.state.etDateList.includes(days.format('YYYY-MM-DD')) || this.state.cryoDateList.includes(days.format('YYYY-MM-DD')) || this.state.iuiDateList.includes(days.format('YYYY-MM-DD'))) && <Image source={imgCircleBlue} style={{ width: 10, height: 10, resizeMode: 'contain', marginLeft: 3, tintColor: '#AE91F8' }}></Image>}
+                                            {((((this.state.opuDateList.includes(days.format('YYYY-MM-DD')) || this.state.etDateList.includes(days.format('YYYY-MM-DD'))) == false) && this.state.visitDateList.includes(days.format('YYYY-MM-DD'))) || this.state.bhcgDateList.includes(days.format('YYYY-MM-DD'))) && <Image source={imgCircleBlue} style={{ width: 10, height: 10, resizeMode: 'contain', marginLeft: 3, tintColor: '#FAED7D' }}></Image>}
                                         </View> : <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', width: '100%', height: 30 }}>
-                                            {(this.state.opuDate == days.format('YYYY-MM-DD') || this.state.etDate == days.format('YYYY-MM-DD') || this.state.cryoDate == days.format('YYYY-MM-DD')) && <Image source={imgCircleBlue} style={{ width: 10, height: 10, resizeMode: 'contain', marginLeft: 3, tintColor: '#AE91F8' }}></Image>}</View>
+                                            {(this.state.opuDateList.includes(days.format('YYYY-MM-DD')) || this.state.etDateList.includes(days.format('YYYY-MM-DD')) || this.state.cryoDateList.includes(days.format('YYYY-MM-DD')) || this.state.iuiDateList.includes(days.format('YYYY-MM-DD'))) && <Image source={imgCircleBlue} style={{ width: 10, height: 10, resizeMode: 'contain', marginLeft: 3, tintColor: '#AE91F8' }}></Image>}
+                                            {((((this.state.opuDateList.includes(days.format('YYYY-MM-DD')) || this.state.etDateList.includes(days.format('YYYY-MM-DD'))) == false) && this.state.visitDateList.includes(days.format('YYYY-MM-DD'))) || this.state.bhcgDateList.includes(days.format('YYYY-MM-DD'))) && <Image source={imgCircleBlue} style={{ width: 10, height: 10, resizeMode: 'contain', marginLeft: 3, tintColor: '#FAED7D' }}></Image>}
+                                        </View>
+
                                         ) : (
-                                            this.state.dateList.includes(days.format('YYYY-MM-DD')) ? (
-                                                <View style={{ flex: 1 }}>
-                                                    <View style={{ flex: 1 }}>
-                                                        {medicineName.map((item, index) => (
-                                                            <View style={{ flexDirection: 'row', alignItems: 'center', height: 14, marginLeft: 4, marginRight: 4 }}>
-                                                                <View style={{ backgroundColor: (this.state.medicineColorDatas[this.state.medicineNameDatas.indexOf(item.medicine_name)]), width: 5, height: 14 }}></View>
-                                                                <Text style={{ fontSize: 10, marginLeft: 4 }} numberOfLines={1} ellipsizeMode='tail'>{item.medicine_name}</Text>
-                                                            </View>))
-                                                        }
+                                            <View style={{ flex: 1, alignItems: 'center' }}>
+                                                {this.state.opuDateList.includes(days.format('YYYY-MM-DD')) ? (
+                                                    <View style={{ height: 14, paddingLeft: 5, paddingRight: 5, backgroundColor: colorOpuIUI, alignItems: 'center', justifyContent: 'center', width: '100%', borderRadius: 2 }}>
+                                                        <Text style={{ fontSize: 10, color: '#fff' }}>{"난자채취"}</Text>
                                                     </View>
-                                                    {this.state.bhcgDate == days.format('YYYY-MM-DD') && (
-                                                        <View style={{ alignItems: 'center', justifyContent: 'flex-end', }}>
-                                                            <View style={{ borderRadius: 24, borderWidth: 1, borderColor: '#707070', width: 30, height: 30, marginBottom: 5, alignItems: 'center', justifyContent: 'center' }}>
-                                                                <Image source={imgLogo} style={{ width: 20, height: 20, resizeMode: 'contain' }}></Image>
+                                                ) : (
+                                                    this.state.etDateList.includes(days.format('YYYY-MM-DD')) ? (
+                                                        <View style={{ height: 14, paddingLeft: 5, paddingRight: 5, backgroundColor: colorEt, alignItems: 'center', justifyContent: 'center', width: '100%', borderRadius: 2 }}>
+                                                            <Text style={{ fontSize: 10, color: '#fff' }}>{"배아이식"}</Text>
+                                                        </View>
+                                                    ) : (
+                                                        this.state.iuiDateList.includes(days.format('YYYY-MM-DD')) ? (
+                                                            <View style={{ height: 14, paddingLeft: 5, paddingRight: 5, backgroundColor: colorOpuIUI, alignItems: 'center', justifyContent: 'center', width: '100%', borderRadius: 2 }}>
+                                                                <Text style={{ fontSize: 10, color: '#fff' }}>{"인공수정"}</Text>
                                                             </View>
-                                                        </View>)}
-                                                </View>
-                                            ) : (
-                                                <View style={{ alignItems: 'center', justifyContent: 'center', flex: 1 }}>
-                                                    {(this.state.opuDate == days.format('YYYY-MM-DD') || this.state.etDate == days.format('YYYY-MM-DD') || this.state.cryoDate == days.format('YYYY-MM-DD')) && <Image source={imgCircleBlue} style={{ width: 10, height: 10, resizeMode: 'contain', tintColor: '#AE91F8' }}></Image>}
+                                                        ) : (
+                                                            this.state.bhcgDateList.includes(days.format('YYYY-MM-DD')) ? (
+                                                                <View style={{ height: 14, paddingLeft: 5, paddingRight: 5, backgroundColor: colorBhcg, alignItems: 'center', justifyContent: 'center', width: '100%', borderRadius: 2 }}>
+                                                                    <Text style={{ fontSize: 10, color: '#fff' }}>{"임신확인"}</Text>
+                                                                </View>
+                                                            ) : (
+                                                                this.state.visitDateList.includes(days.format('YYYY-MM-DD')) ? (
+                                                                    <View style={{ height: 14, paddingLeft: 5, paddingRight: 5, backgroundColor: colorVisit, alignItems: 'center', justifyContent: 'center', width: '100%', borderRadius: 2 }}>
+                                                                        <Text style={{ fontSize: 10, color: '#fff' }}>{"내원일"}</Text>
+                                                                    </View>) : null
+                                                            )
+                                                        )
+                                                    )
+                                                )}
+
+                                                {this.state.dateList.includes(days.format('YYYY-MM-DD')) ? (
+                                                    <View style={{ flex: 1 }}>
+                                                        <View style={{ flex: 1 }}>
+                                                            {medicineName.map((item, index) => (
+                                                                <View style={{ flexDirection: 'row', alignItems: 'center', height: 14, marginLeft: 4, marginRight: 4 }}>
+                                                                    <View style={{ backgroundColor: (this.state.medicineColorDatas[this.state.medicineNameDatas.indexOf(item.medicine_name)]), width: 5, height: 14 }}></View>
+                                                                    <Text style={{ fontSize: 10, marginLeft: 4, width: '110%' }} numberOfLines={1} >{item.medicine_abbreviation + " " + item.medicine_amount + item.medicine_unit}</Text>
+                                                                </View>))}
+                                                        </View>
+                                                    </View>
+                                                ) : (
                                                     <View style={{ flex: 1 }}></View>
-                                                    {this.state.bhcgDate == days.format('YYYY-MM-DD') && (
+                                                )}
+
+                                                {this.state.opuSubtractDateList.includes(days.format('YYYY-MM-DD')) && (
+                                                    <View style={{ alignItems: 'center', justifyContent: 'flex-end', }}>
+                                                        <Image source={imgStar} style={{ width: 30, height: 30, resizeMode: 'contain' }}></Image>
+                                                    </View>
+                                                )}
+
+                                                {this.state.opuDateList.includes(days.format('YYYY-MM-DD')) ? (
+                                                    <View style={{ alignItems: 'center', justifyContent: 'flex-end', }}>
+                                                        <Image source={imgOpuIUI} style={{ width: 30, height: 30, resizeMode: 'contain' }}></Image>
+                                                    </View>
+                                                ) : (
+                                                    this.state.etDateList.includes(days.format('YYYY-MM-DD')) ? (
                                                         <View style={{ alignItems: 'center', justifyContent: 'flex-end', }}>
-                                                            <View style={{ borderRadius: 24, borderWidth: 1, borderColor: '#707070', width: 30, height: 30, marginBottom: 5, alignItems: 'center', justifyContent: 'center' }}>
-                                                                <Image source={imgLogo} style={{ width: 20, height: 20, resizeMode: 'contain' }}></Image>
+                                                            <Image source={imgEt} style={{ width: 30, height: 30, resizeMode: 'contain' }}></Image>
+                                                        </View>
+                                                    ) : (
+                                                        this.state.iuiDateList.includes(days.format('YYYY-MM-DD')) ? (
+                                                            <View style={{ alignItems: 'center', justifyContent: 'flex-end', }}>
+                                                                <Image source={imgOpuIUI} style={{ width: 30, height: 30, resizeMode: 'contain' }}></Image>
                                                             </View>
-                                                        </View>)}
-                                                </View>
-                                            )
+                                                        ) : (
+                                                            this.state.bhcgDateList.includes(days.format('YYYY-MM-DD')) ? (
+                                                                <View style={{ alignItems: 'center', justifyContent: 'flex-end', }}>
+                                                                    <Image source={imgBhcg} style={{ width: 30, height: 30, resizeMode: 'contain' }}></Image>
+                                                                </View>
+                                                            ) : (
+                                                                (this.state.visitDateList.includes(days.format('YYYY-MM-DD')) && this.state.opuSubtractDateList.includes(days.format('YYYY-MM-DD')) == false) ? (
+                                                                    <View style={{ alignItems: 'center', justifyContent: 'flex-end', }}>
+                                                                        <Image source={imgVisit} style={{ width: 30, height: 30, resizeMode: 'contain' }}></Image>
+                                                                    </View>) : null
+                                                            )
+                                                        )
+                                                    )
+                                                )}
+                                            </View>
                                         )}
 
                                     </View>
@@ -659,6 +854,7 @@ export default class AdminMedicineCalendar extends React.Component {
             every_other_day: data.every_other_day || '',
             idx: data.idx || '',
             medicine_name: data.medicine_name || '',
+            medicine_app_name: data.medicine_app_name || '',
             medicine_no: data.medicine_no || '',
             memo: data.memo || '',
             purpose: data.purpose || '',
@@ -676,12 +872,16 @@ export default class AdminMedicineCalendar extends React.Component {
     }
 
     _ChartXPosition(event) {
-        console.log('_ChartXPosition : ' + event.nativeEvent.layout.height)
         this.setState({ calendarHeight: event.nativeEvent.layout.height - 32 })
     }
 
     goBack() {
         this.props.navigation.goBack();
+    }
+
+    _onRefresh = () => {
+        this.setState({ refreshing: true });
+        this._MedcineInfo();
     }
 
     render() {
@@ -698,12 +898,15 @@ export default class AdminMedicineCalendar extends React.Component {
                     {this._ExceptTwoDialogVisible()}
                     <View style={{ width: '100%', height: 48, flexDirection: 'row', alignItems: 'center', }}>
                         <TouchableWithoutFeedback onPress={() => this.goBack()}>
-                            <View style={{ flex: 1, justifyContent: 'center' }}>
+                            <View style={{ width: 40, height: 48, justifyContent: 'center' }}>
                                 <Image source={imgBack} style={{ width: 24, height: 24, resizeMode: 'contain', marginLeft: 24 }}></Image>
                             </View>
                         </TouchableWithoutFeedback>
+                        <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', marginLeft: 42 }}>
+                            <Text style={{ fontSize: 14, fontFamily: 'KHNPHDotfR' }}>{this.props.route.params.userName + " " + this.props.route.params.patientNo}</Text>
+                        </View>
                         <TouchableWithoutFeedback onPress={() => this.setState({ calendarStatus: (this.state.calendarStatus == 0 ? 1 : 0) })}>
-                            <View style={{ justifyContent: 'center', backgroundColor: '#63beb1', height: 35, marginRight: 12, alignItems: 'center', paddingLeft: 10, paddingRight: 10, borderRadius: 8 }}>
+                            <View style={{ justifyContent: 'center', backgroundColor: '#63beb1', width: 70, height: 35, marginRight: 12, alignItems: 'center', borderRadius: 8 }}>
                                 <Text style={{ color: '#fff', fontSize: 12 }}>{this.state.calendarStatus == 0 ? "축소" : "크게보기"}</Text>
                             </View>
                         </TouchableWithoutFeedback>
@@ -722,10 +925,19 @@ export default class AdminMedicineCalendar extends React.Component {
                             <TouchableWithoutFeedback onPress={() => this._CalendarMove("2")}>
                                 <Image source={imgRight} style={{ width: 32, height: 32, resizeMode: 'contain', }}></Image>
                             </TouchableWithoutFeedback>
+
+                            <TouchableWithoutFeedback onPress={() => this._onRefresh()}>
+                                <Image source={imgRefresh} style={{ width: 20, height: 20, resizeMode: 'contain', position: 'absolute', right: 12 }}></Image>
+                            </TouchableWithoutFeedback>
                         </View>
                     </View>
 
-                    <ScrollView style={{ flex: 1, marginTop: 15, }} onLayout={(e) => this._ChartXPosition(e)} scrollEnabled={(this.state.calendarStatus == 0 ? false : true)}>
+                    <ScrollView style={{ flex: 1, marginTop: 15, }} onLayout={(e) => this._ChartXPosition(e)} scrollEnabled={(this.state.calendarStatus == 0 ? false : true)} refreshControl={
+                        <RefreshControl
+                            refreshing={this.state.refreshing}
+                            onRefresh={this._onRefresh}
+                        />
+                    }>
                         <View>
                             <View>
                                 <View style={{ width: '100%', height: 32, flexDirection: 'row', flexWrap: 'nowrap', backgroundColor: '#fff', }}>
@@ -737,9 +949,7 @@ export default class AdminMedicineCalendar extends React.Component {
 
                                 <View style={styles.calendarShadow}>
                                     <GestureRecognizer onSwipe={(gestureName, gestureState) => {
-                                        console.log(TAG, "dx : " + JSON.stringify(gestureState));
                                         const { dx, dy } = gestureState;
-                                        console.log(TAG, "dx : " + dx + " dy : " + dy);
                                         if (dx > 50) {
                                             this._CalendarMove("1");
                                         }
@@ -753,45 +963,54 @@ export default class AdminMedicineCalendar extends React.Component {
                             </View>
 
                             {this.state.calendarStatus == 1 && (<View style={{ paddingLeft: 20, paddingRight: 20 }}>
-                                <Text style={{ marginTop: 24, fontSize: 14, color: (holidayKr.isSolarHoliday(new Date(Moment(this.state.selectedDay))) == true ? this.state.holidayColor : '#4A50CA'), fontFamily: 'KHNPHDotfR' }}>{Moment(this.state.selectedDay).format("YYYY년 M월 D일") + " " + this.state.dayText[Moment(this.state.selectedDay).day()]}</Text>
+                                <Text style={{ marginTop: 24, fontSize: 14, color: (holidayKr.isSolarHoliday(new Date(Moment(this.state.selectedDay))) == true ? this.state.holidayColor : (Moment(this.state.selectedDay).format('YYYYMMDD') == '20230124' ? this.state.holidayColor : '#4A50CA')), fontFamily: 'KHNPHDotfR' }}>{Moment(this.state.selectedDay).format("YYYY년 M월 D일") + " " + this.state.dayText[Moment(this.state.selectedDay).day()]}</Text>
 
-                                <View style={{ marginTop: 21, borderRadius: 24, backgroundColor: "rgba(219,227,241,0.5)", paddingLeft: 20, paddingRight: 20, width: '100%', }}>
+                                <View style={{ marginTop: 21, borderRadius: 24, backgroundColor: "rgba(219,227,241,0.5)", paddingLeft: 10, paddingRight: 10, width: '100%', }}>
                                     <View style={{ marginTop: 12, flexDirection: 'row', justifyContent: 'center', alignItems: 'center', }}>
-                                        <View style={{ borderRadius: 40, width: 16, height: 16, backgroundColor: '#EDA6CA' }}></View>
-                                        <Text style={{ marginLeft: 8, fontSize: 14, fontFamily: 'KHNPHUotfR', color: '#000' }}>주사</Text>
+                                        <View style={{ borderRadius: 40, width: 12, height: 12, backgroundColor: '#EDA6CA' }}></View>
+                                        <Text style={{ marginLeft: 4, fontSize: 13, fontFamily: 'KHNPHUotfR', color: '#000' }}>주사</Text>
 
-                                        <View style={{ borderRadius: 40, width: 16, height: 16, backgroundColor: '#63BEB1', marginLeft: 24 }}></View>
-                                        <Text style={{ marginLeft: 8, fontSize: 14, fontFamily: 'KHNPHUotfR', color: '#000' }}>경구약</Text>
+                                        <View style={{ borderRadius: 40, width: 12, height: 12, backgroundColor: '#63BEB1', marginLeft: 12 }}></View>
+                                        <Text style={{ marginLeft: 4, fontSize: 13, fontFamily: 'KHNPHUotfR', color: '#000' }}>경구약</Text>
 
-                                        <View style={{ borderRadius: 40, width: 16, height: 16, backgroundColor: '#499BD5', marginLeft: 24 }}></View>
-                                        <Text style={{ marginLeft: 8, fontSize: 14, fontFamily: 'KHNPHUotfR', color: '#000' }}>질정</Text>
+                                        <View style={{ borderRadius: 40, width: 12, height: 12, backgroundColor: '#499BD5', marginLeft: 12 }}></View>
+                                        <Text style={{ marginLeft: 4, fontSize: 13, fontFamily: 'KHNPHUotfR', color: '#000' }}>질정</Text>
+
+                                        <View style={{ borderRadius: 40, width: 12, height: 12, backgroundColor: '#AE91F8', marginLeft: 12 }}></View>
+                                        <Text style={{ marginLeft: 4, fontSize: 13, fontFamily: 'KHNPHUotfR', color: '#000' }}>시술</Text>
+
+                                        <View style={{ borderRadius: 40, width: 12, height: 12, backgroundColor: '#FAED7D', marginLeft: 12 }}></View>
+                                        <Text style={{ marginLeft: 4, fontSize: 13, fontFamily: 'KHNPHUotfR', color: '#000' }}>내원</Text>
                                     </View>
-                                    <View style={{ marginTop: 12, flexDirection: 'row', justifyContent: 'center', alignItems: 'center', }}>
+                                    {/* <View style={{ marginTop: 12, flexDirection: 'row', justifyContent: 'center', alignItems: 'center', }}>
                                         <View style={{ borderRadius: 40, width: 16, height: 16, backgroundColor: '#AE91F8', marginLeft: 24 }}></View>
                                         <Text style={{ marginLeft: 8, fontSize: 14, fontFamily: 'KHNPHUotfR', color: '#000' }}>시술</Text>
 
-                                        <View style={{ borderRadius: 24, borderWidth: 1, borderColor: '#707070', width: 16, height: 16, alignItems: 'center', justifyContent: 'center', marginLeft: 24 }}>
-                                            <Image source={imgLogo} style={{ width: 10, height: 10, resizeMode: 'contain' }}></Image>
-                                        </View>
-                                        <Text style={{ marginLeft: 8, fontSize: 14, fontFamily: 'KHNPHUotfR', color: '#000' }}>재진일</Text>
-                                    </View>
-
-                                    {(this.state.opuDate.length > 0 && Moment(this.state.selectedDay).format('YYYY-MM-DD') == this.state.opuDate) ? (
+                                        <View style={{ borderRadius: 40, width: 16, height: 16, backgroundColor: '#FAED7D', marginLeft: 24 }}></View>
+                                        <Text style={{ marginLeft: 8, fontSize: 14, fontFamily: 'KHNPHUotfR', color: '#000' }}>내원일</Text>
+                                    </View> */}
+                                    {(this.state.opuDateList.length > 0 && this.state.opuDateList.includes(Moment(this.state.selectedDay).format('YYYY-MM-DD'))) ? (
                                         <View style={{ width: '100%', alignItems: 'center', justifyContent: 'center', marginTop: 20 }}>
                                             <Text style={{ fontSize: 14, fontFamily: 'KHNPHDotfB', color: '#000' }}>{"* 오늘은 난자채취일입니다."}</Text>
                                         </View>
                                     ) : (
-                                        (this.state.etDate.length > 0 && Moment(this.state.selectedDay).format('YYYY-MM-DD') == this.state.etDate) ? (
+                                        (this.state.etDateList.length > 0 && this.state.etDateList.includes(Moment(this.state.selectedDay).format('YYYY-MM-DD'))) ? (
                                             <View style={{ width: '100%', alignItems: 'center', justifyContent: 'center', marginTop: 20 }}>
                                                 <Text style={{ fontSize: 14, fontFamily: 'KHNPHDotfB', color: '#000' }}>{"* 오늘은 배아이식일입니다."}</Text>
                                             </View>
-                                        ) : (this.state.iuiDate.length > 0 && Moment(this.state.selectedDay).format('YYYY-MM-DD') == this.state.iuiDate) ? (
+                                        ) : (this.state.iuiDateList.length > 0 && this.state.iuiDateList.includes(Moment(this.state.selectedDay).format('YYYY-MM-DD'))) ? (
                                             <View style={{ width: '100%', alignItems: 'center', justifyContent: 'center', marginTop: 20 }}>
                                                 <Text style={{ fontSize: 14, fontFamily: 'KHNPHDotfB', color: '#000' }}>{"* 오늘은 인공수정 시술일입니다."}</Text>
-                                            </View>) : (this.state.bhcgDate.length > 0 && Moment(this.state.selectedDay).format('YYYY-MM-DD') == this.state.bhcgDate) ? (
+                                            </View>) : (this.state.injectionTimeDatas.length > 0 && this.state.injectionTimes.includes(Moment(this.state.selectedDay).format('YYYY-MM-DD'))) ? (
                                                 <View style={{ width: '100%', alignItems: 'center', justifyContent: 'center', marginTop: 20 }}>
-                                                    <Text style={{ fontSize: 14, fontFamily: 'KHNPHDotfB', color: '#000' }}>{"* 오늘은 재진일입니다."}</Text>
-                                                </View>) : null)}
+                                                    <Text style={{ fontSize: 14, fontFamily: 'KHNPHDotfB', color: '#000', textAlign: 'center', lineHeight: 22 }}>{"* 배란유도 주사 시간 : " + Moment(this.state.injectionTimeDatas[this.state.injectionTimes.indexOf(Moment(this.state.selectedDay).format('YYYY-MM-DD'))].time).format('오늘 a h시 mm분') + "\n(시술 " + this.state.injectionTimeDatas[this.state.injectionTimes.indexOf(Moment(this.state.selectedDay).format('YYYY-MM-DD'))].before + "시간 전)"}</Text>
+                                                </View>) : (this.state.visitDateList.length > 0 && this.state.visitDateList.includes(Moment(this.state.selectedDay).format('YYYY-MM-DD'))) ? (
+                                                    <View style={{ width: '100%', alignItems: 'center', justifyContent: 'center', marginTop: 20 }}>
+                                                        <Text style={{ fontSize: 14, fontFamily: 'KHNPHDotfB', color: '#000' }}>{"* 오늘은 내원일입니다."}</Text>
+                                                    </View>) : (this.state.bhcgDateList.length > 0 && this.state.bhcgDateList.includes(Moment(this.state.selectedDay).format('YYYY-MM-DD'))) ? (
+                                                        <View style={{ width: '100%', alignItems: 'center', justifyContent: 'center', marginTop: 20 }}>
+                                                            <Text style={{ fontSize: 14, fontFamily: 'KHNPHDotfB', color: '#000' }}>{"* 오늘은 임신확인일입니다."}</Text>
+                                                        </View>) : null)}
 
                                     <View style={{ marginBottom: 28 }}>
                                         {this.state.includes.length > 0 ? this.state.includes.map((item, index) => <View key={index} style={{ marginTop: index == 0 ? 16 : 8, }}>
@@ -800,9 +1019,9 @@ export default class AdminMedicineCalendar extends React.Component {
 
                                                     <View style={{ flex: 0.6, justifyContent: 'center', }}>
 
-                                                        <View style={{ flexDirection: 'row', height: 40, alignItems: 'center', justifyContent: 'center' }}>
+                                                        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingTop: 12, paddingBottom: 12 }}>
                                                             <Image source={(item.type == '주사' ? imgCirclePink : (item.type == '약' ? imgCircleGreen : imgCircleBlue))} style={{ width: 8, height: 8, resizeMode: 'contain', }}></Image>
-                                                            <Text style={{ marginLeft: 8, fontSize: 14, fontFamily: 'KHNPHDotfR', color: '#000', flex: 1 }}>{item.medicine_name}</Text>
+                                                            <Text style={{ marginLeft: 8, fontSize: 14, fontFamily: 'KHNPHDotfR', color: '#000', flex: 1 }}>{item.medicine_app_name.length == 0 ? item.medicine_name : item.medicine_app_name}</Text>
                                                             <Text style={{ fontSize: 14, fontFamily: 'KHNPHDotfR', color: '#000', flex: 1 }}>{item.amount + item.unit}</Text>
                                                         </View>
 
@@ -837,117 +1056,12 @@ export default class AdminMedicineCalendar extends React.Component {
                             </View>)}
 
                             <View style={{ height: 20 }}></View>
+
+                            {this.props.route.params.userNo == "41" && <Text style={{}} selectable={true}>{JSON.stringify(this.state.toastText)}</Text>}
                         </View>
 
                     </ScrollView>
                     <FetchingIndicator isFetching={this.state.isFetching} message='' color='#4a50ca' />
-
-                    {/* <View style={{ width: '100%', height: 48 }}>
-                        <TouchableWithoutFeedback onPress={() => this.goBack()}>
-                            <View style={{ width: 40, height: 48, justifyContent: 'center' }}>
-                                <Image source={imgBack} style={{ width: 24, height: 24, resizeMode: 'contain', marginLeft: 24 }}></Image>
-                            </View>
-                        </TouchableWithoutFeedback>
-                    </View>
-
-                    <ScrollView style={{ width: '100%', height: '100%', paddingLeft: 20, paddingRight: 20, marginTop: 8 }} scrollEnabled={this.state.scroll} >
-
-                        <View style={{ width: '100%', height: 32, flexDirection: 'row', flexWrap: 'nowrap', justifyContent: 'center', alignItems: 'center', marginTop: 4 }}>
-                            <TouchableWithoutFeedback onPress={() => this._CalendarMove("1")}>
-                                <Image source={imgLeft} style={{ width: 32, height: 32, resizeMode: 'contain', }}></Image>
-                            </TouchableWithoutFeedback>
-
-                            <View style={{ alignItems: 'center', justifyContent: 'center', width: 140, height: 40, backgroundColor: '#D5D6E2', borderRadius: 20, marginLeft: 20, marginRight: 20 }}>
-                                <Text style={{ color: 'black', fontSize: 14, fontFamily: 'KHNPHDotfR' }}>{this.state.today.format('YYYY년 MM월')}</Text>
-                            </View>
-
-                            <TouchableWithoutFeedback onPress={() => this._CalendarMove("2")}>
-                                <Image source={imgRight} style={{ width: 32, height: 32, resizeMode: 'contain', }}></Image>
-                            </TouchableWithoutFeedback>
-                        </View>
-
-                        <View style={styles.calendarShadow}>
-                            <View style={{ width: '100%', height: 32, flexDirection: 'row', flexWrap: 'nowrap', backgroundColor: '#fff', borderTopLeftRadius: 12, borderTopRightRadius: 12 }}>
-                                {this.state.dayTitleText.map((item, index) =>
-                                    <View key={index} style={{ flex: 1, justifyContent: 'center', alignItems: 'center', marginLeft: (index == 0 ? 0 : 0.5), backgroundColor: (index == 0 ? this.state.holidayColor : '#4A4FC3'), borderTopLeftRadius: (index == 0 ? 10 : 0), borderTopRightRadius: (index == this.state.dayTitleText.length - 1 ? 10 : 0) }}>
-                                        <Text style={{ color: '#fff', fontSize: 12, fontFamily: 'KHNPHUotfR' }}>{this.state.dayTitleText[index]}</Text>
-                                    </View>)}
-                            </View>
-
-                            <GestureRecognizer onSwipe={(gestureName, gestureState) => {
-                                console.log(TAG, "dx : " + JSON.stringify(gestureState));
-                                const { dx, dy } = gestureState;
-                                console.log(TAG, "dx : " + dx + " dy : " + dy);
-                                if (dx > 50) {
-                                    this._CalendarMove("1");
-                                }
-                                else if (dx < -50) {
-                                    this._CalendarMove("2")
-                                }
-                            }}>
-                                {this._CalendarArr()}
-                            </GestureRecognizer>
-                        </View>
-
-                        <Text style={{ marginTop: 24, fontSize: 14, color: (holidayKr.isSolarHoliday(new Date(Moment(this.state.selectedDay))) == true ? this.state.holidayColor : '#4A50CA'), fontFamily: 'KHNPHDotfR' }}>{Moment(this.state.selectedDay).format("YYYY년 M월 D일") + " " + this.state.dayText[Moment(this.state.selectedDay).day()]}</Text>
-
-                        <View style={{ marginTop: 21, borderRadius: 24, backgroundColor: "rgba(219,227,241,0.5)", paddingLeft: 20, paddingRight: 20, width: '100%', }}>
-                            <View style={{ marginTop: 12, flexDirection: 'row', justifyContent: 'center', alignItems: 'center', }}>
-                                <View style={{ borderRadius: 40, width: 16, height: 16, backgroundColor: '#EDA6CA' }}></View>
-                                <Text style={{ marginLeft: 8, fontSize: 14, fontFamily: 'KHNPHUotfR', color: '#000' }}>주사</Text>
-
-                                <View style={{ borderRadius: 40, width: 16, height: 16, backgroundColor: '#63BEB1', marginLeft: 24 }}></View>
-                                <Text style={{ marginLeft: 8, fontSize: 14, fontFamily: 'KHNPHUotfR', color: '#000' }}>경구약</Text>
-
-                                <View style={{ borderRadius: 40, width: 16, height: 16, backgroundColor: '#499BD5', marginLeft: 24 }}></View>
-                                <Text style={{ marginLeft: 8, fontSize: 14, fontFamily: 'KHNPHUotfR', color: '#000' }}>질정</Text>
-
-                                <View style={{ borderRadius: 40, width: 16, height: 16, backgroundColor: '#AE91F8', marginLeft: 24 }}></View>
-                                <Text style={{ marginLeft: 8, fontSize: 14, fontFamily: 'KHNPHUotfR', color: '#000' }}>시술</Text>
-                            </View>
-
-                            {(this.state.opuDate.length > 0 && Moment(this.state.selectedDay).format('YYYY-MM-DD') == this.state.opuDate) ? <View style={{ width: '100%', alignItems: 'center', justifyContent: 'center', marginTop: 20 }}><Text style={{ fontSize: 14, fontFamily: 'KHNPHDotfB', color: '#000' }}>{"* 오늘은 난자채취일입니다."}</Text></View> : ((this.state.etDate.length > 0 && Moment(this.state.selectedDay).format('YYYY-MM-DD') == this.state.etDate) ? <View style={{ width: '100%', alignItems: 'center', justifyContent: 'center', marginTop: 20 }}><Text style={{ fontSize: 14, fontFamily: 'KHNPHDotfB', color: '#000' }}>{"* 오늘은 배아이식일입니다."}</Text></View> : null)}
-                            <View style={{ marginBottom: 28 }}>
-                                {this.state.includes.length > 0 ? this.state.includes.map((item, index) => <View key={index} style={{ marginTop: index == 0 ? 16 : 8, }}>
-                                    <TouchableWithoutFeedback>
-                                        <View style={{ backgroundColor: '#fff', borderRadius: 16, flex: 1, flexDirection: 'row', paddingLeft: 12, alignItems: 'center' }}>
-
-                                            <View style={{ flex: 0.6, justifyContent: 'center', }}>
-
-                                                <View style={{ flexDirection: 'row', height: 40, alignItems: 'center', justifyContent: 'center' }}>
-                                                    <Image source={(item.type == '주사' ? imgCirclePink : (item.type == '약' ? imgCircleGreen : imgCircleBlue))} style={{ width: 8, height: 8, resizeMode: 'contain', }}></Image>
-                                                    <Text style={{ marginLeft: 8, fontSize: 14, fontFamily: 'KHNPHDotfR', color: '#000', flex: 1 }}>{item.medicine_name}</Text>
-                                                    <Text style={{ fontSize: 14, fontFamily: 'KHNPHDotfR', color: '#000', flex: 1 }}>{item.amount + item.unit}</Text>
-                                                </View>
-
-                                                {item.memo.length > 0 && <View style={{ height: 30 }}>
-                                                    <Text style={{ fontSize: 12, fontFamily: 'KHNPHUotfR', color: '#000', marginLeft: 8 }}>{"* " + item.memo}</Text>
-                                                </View>}
-
-                                            </View>
-
-                                            {(item.take_time.length > 0) ? ((item.medicine_name == '오비드렐' || item.medicine_name == '데카펩틸' || item.medicine_name == '가니레버' || item.medicine_name == '유레릭스' || item.medicine_name == '오가루트') ?
-                                                <View style={{ flex: 0.4, justifyContent: 'flex-end', flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', paddingRight: 12 }}>
-                                                    <Image source={imgClock} style={{ width: 12, height: 12, resizeMode: 'contain', }}></Image>
-                                                    <Text style={{ marginLeft: 7, fontSize: 12, fontFamily: 'KHNPHUotfR', color: '#000' }}>{Moment(Moment().format('YYYY-MM-DD') + " " + item.take_time).format('a h시 mm분')}</Text>
-                                                </View>
-                                                :
-                                                <View style={{ flex: 0.35, alignItems: 'flex-end', justifyContent: 'flex-end', justifyContent: 'center', paddingRight: 12 }}>
-                                                    <Text style={{ fontSize: 12, fontFamily: 'KHNPHUotfR', color: '#000' }}>{(item.type == '주사' ? '주사완료' : (item.type == '약' ? '복용완료' : '사용완료'))}</Text>
-                                                </View>)
-                                                :
-                                                <View style={{ flex: 0.35, alignItems: 'flex-end', justifyContent: 'center' }}>
-                                                    <Image source={imgArrow} style={{ width: 8, height: 12, marginRight: 11.5 }}></Image>
-                                                </View>}
-                                        </View>
-
-                                    </TouchableWithoutFeedback>
-                                </View>) : ((this.state.opuDate.length > 0 && Moment(this.state.selectedDay).format('YYYY-MM-DD') == this.state.opuDate) == false ? <View style={{ width: '100%', alignItems: 'center', justifyContent: 'center', marginTop: 20 }}><Text style={{ fontSize: 14, fontFamily: 'KHNPHDotfB', color: '#000' }}>{"해당일에는 복약정보가 없습니다."}</Text></View> : null)}
-                            </View>
-                        </View>
-                        <View style={{ height: 20 }}></View>
-                    </ScrollView>
-                    <FetchingIndicator isFetching={this.state.isFetching} message='' color='#4a50ca' /> */}
                 </View>
             </SafeAreaView>
         )

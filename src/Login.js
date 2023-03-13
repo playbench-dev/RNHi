@@ -1,9 +1,9 @@
 import React from 'react';
-import { SafeAreaView, View, Text, Image, TextInput, ScrollView, TouchableWithoutFeedback } from 'react-native';
+import { SafeAreaView, View, Text, Image, TextInput, ScrollView, TouchableWithoutFeedback, Platform } from 'react-native';
 import Elevations from 'react-native-elevation';
 import AsyncStorage from '@react-native-community/async-storage';
 import OneBtnDialog from './Common/OneBtnDialog'
-
+import VersionInfo from 'react-native-version-info';
 import Users from './Common/User'
 import ServerUrl from './Common/ServerUrl'
 
@@ -31,6 +31,8 @@ export default class Login extends React.Component {
             'patient_no': this.state.number.trim(),
             'user_name': this.state.name.trim(),
             'token': Users.token,
+            'os_type': (Platform.OS === 'android' ? 'android' : 'ios'),
+            'app_version': (Platform.OS === 'android' ? VersionInfo.buildVersion : VersionInfo.appVersion)
         };
 
         var formBody = [];
@@ -165,6 +167,14 @@ export default class Login extends React.Component {
                                 </View>
                             </TouchableWithoutFeedback>
                         </View>
+
+                        {/* <View style={{ width: '100%', height: 64, paddingLeft: 32, paddingRight: 32, marginTop: 16 }}>
+                            <TouchableWithoutFeedback onPress={() => this.props.navigation.navigate('AboutWebview', { tag: 'loginStatusChart' })}>
+                                <View style={{ width: '100%', height: 64, alignItems: 'center', justifyContent: 'center', borderRadius: 32, borderWidth: 1, borderColor: '#AF8BB7' }}>
+                                    <Text style={{ fontSize: 16, color: '#AF8BB7', fontFamily: 'KHNPHDotfR' }}>초진문진표 작성하기(첫 방문)</Text>
+                                </View>
+                            </TouchableWithoutFeedback>
+                        </View> */}
                     </ScrollView>
                 </View>
             </SafeAreaView>

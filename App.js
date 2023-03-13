@@ -8,7 +8,6 @@
 
 import React from 'react';
 import { StatusBar, Platform, Alert } from 'react-native';
-import { SafeAreaView, SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { NavigationContainer } from '@react-navigation/native';
 import Stack from './src/Common/Stack';
 import Users from './src/Common/User';

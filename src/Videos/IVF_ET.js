@@ -80,19 +80,19 @@ export default class IVF_ET extends React.Component {
 
                     <Text style={{ marginLeft: 20, fontFamily: 'KHNPHDotfR', color: '#000', fontSize: 20, marginTop: 12 }}>{"시험관 시술"}</Text>
 
-                    <ScrollView style={{ marginTop: 20, paddingLeft: 20, paddingRight: 20 }}>
-                        {this.state.videoUrl.length > 0 && <View style={{ backgroundColor: 'transparent', }}>
-                            <Webview style={{ width: '100%', height: ((screenWidth - 40) * 0.5625) }}
-                                mediaPlaybackRequiresUserAction={true}
-                                allowsInlineMediaPlayback={true}
-                                javaScriptEnabled={true}
-                                allowsFullscreenVideo={true}
-                                domStorageEnabled={true}
-                                source={{
-                                    uri: `https://player.vimeo.com/video/${this.state.videoUrl}&amp;badge=1&amp;autopause=1&amp;player_id=0&amp;app_id=58479" frameborder="0" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen style="position:absolute;top:0;left:0;width:100%;height:100%;"`,
-                                }} />
-                        </View>}
+                    {this.state.videoUrl.length > 0 && <View style={{ marginTop: 20, width: '100%', height: ((screenWidth - 40) * 0.5625), paddingLeft: 20, paddingRight: 20 }}>
+                        <Webview style={{ width: '100%', height: ((screenWidth - 40) * 0.5625) }}
+                            mediaPlaybackRequiresUserAction={true}
+                            allowsInlineMediaPlayback={true}
+                            javaScriptEnabled={true}
+                            allowsFullscreenVideo={true}
+                            domStorageEnabled={true}
+                            source={{
+                                uri: `https://player.vimeo.com/video/${this.state.videoUrl}&amp;badge=1&amp;autopause=1&amp;player_id=0&amp;app_id=58479" frameborder="0" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen style="position:absolute;top:0;left:0;width:100%;height:100%;"`,
+                            }} />
+                    </View>}
 
+                    <ScrollView style={{ marginTop: 10, paddingLeft: 20, paddingRight: 20 }}>
                         <View style={{ marginTop: 20 }}>
                             <Text style={{ fontSize: 14, fontFamily: 'KHNPHDotfB', color: '#000' }}>{this.state.title}</Text>
                         </View>

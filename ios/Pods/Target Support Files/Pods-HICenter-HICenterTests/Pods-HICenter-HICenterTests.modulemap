@@ -1,6 +1,0 @@
-module Pods_HICenter_HICenterTests {
-  umbrella header "Pods-HICenter-HICenterTests-umbrella.h"
-
-  export *
-  module * { export * }
-}

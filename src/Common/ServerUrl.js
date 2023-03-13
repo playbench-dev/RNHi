@@ -1,8 +1,8 @@
 import React from 'react';
 
 export default class ServerUrl {
-    static Server = "https://hi-admin.co.kr";
-    static Server1 = "http://192.168.0.17:3010";    //명성
+    static Server = "https://hi-admin.co.kr"; //hi-admin.co.kr
+    static Server1 = "http://192.168.0.26:8080";    //ㅈㅣ훈이형
     static Server2 = "http://220.87.39.187:3010";   //용범
     static loginUrl = ServerUrl.Server + "/userApi/user-login";                                           //로그인                  // refresh_token null
     static spouseUpdateUrl = ServerUrl.Server + '/userApi/insert-spouse-info';                            //배우자 정보 수정          // refresh_token null (마이페이지에서는 넣어야됨)
@@ -12,6 +12,7 @@ export default class ServerUrl {
     static oneLineNoticeUrl = ServerUrl.Server + "/userApi/app-message-info";                             //한 줄 공지사항
     static RandomMessageInfo = ServerUrl.Server + "/userApi/app-random-message-info"                      //랜덤메시지  
     static hopeMessagesUrl = "https://www.hifertility.co.kr/api/pregnancy?page=1&pageSize=4";             //희망메세지
+    static BannerInfo = ServerUrl.Server + "/userApi/select-banner-info"
 
     //medicine
     static medicineInfoList = ServerUrl.Server + "/userApi/select-shedule-medicine-info";                 //투약 리스트
@@ -64,4 +65,5 @@ export default class ServerUrl {
     //admin 
     static UserList = ServerUrl.Server + "/userApi/select-admin-patient-list"                             //환자 리스트
     static AdminMedicineList = ServerUrl.Server + "/userApi/select-admin-schedule-medicine-info"         //환자 캘린더
+
 }

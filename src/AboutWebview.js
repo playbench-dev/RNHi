@@ -1,7 +1,7 @@
 import React from 'react';
 import { SafeAreaView, View, Text, Image, StyleSheet, ScrollView, TouchableWithoutFeedback } from 'react-native';
 import Webview from 'react-native-webview';
-
+import Users from './Common/User'
 const TAG = "AboutWebview";
 const imgBack = require('../assets/ic_back.png');
 
@@ -37,7 +37,14 @@ export default class AboutWebview extends React.Component {
             url = 'https://www.hifertility.co.kr/guide/support.do';
         } else if (this.props.route.params.tag == 'pregnancy') {
             url = 'https://www.hifertility.co.kr/news/pregnancy.do';
+        } else if (this.props.route.params.tag == 'banner') {
+            url = this.props.route.params.url;
+        } else if (this.props.route.params.tag == 'loginStatusChart') {
+            url = 'https://hi-admin.co.kr/ValidateUserIndex';
+        } else if (this.props.route.params.tag == 'home') {
+            url = Users.geust == true ? 'https://hi-admin.co.kr/ValidateUserIndex' : 'https://hi-admin.co.kr/MedicalExamIndex?patient_no=' + Users.paitentNo
         }
+        console.log(url)
         // loop={false} autoPlay={false} controls={true} speed={false} style={{ width: 1296, height: 540 }}
         // url = 'https://player.vimeo.com/video/677021084?h=4afc69070d&loop=false&autoPlay=false&controls=true&speed=false';
         // url = 'https://www.hifertility.co.kr/index.do';
@@ -52,7 +59,7 @@ export default class AboutWebview extends React.Component {
                         </TouchableWithoutFeedback>
                     </View>
                     <View style={{ backgroundColor: 'transparent', flex: 1 }}>
-                        <Webview style={{ backgroundColor: 'white', height: this.state.webheight, width: '100%', height: '100%' }} source={{ uri: url }} />
+                        <Webview originWhitelist={['*']} style={{ backgroundColor: 'white', height: this.state.webheight, width: '100%', height: '100%' }} source={{ uri: url }} />
                     </View>
                 </View>
             </SafeAreaView>

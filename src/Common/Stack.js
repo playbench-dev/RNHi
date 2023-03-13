@@ -1,7 +1,6 @@
 import React from 'react';
-import { View, StatusBar } from 'react-native';
+import { View, StatusBar, SafeAreaView } from 'react-native';
 import { createStackNavigator } from '@react-navigation/stack';
-import { SafeAreaView, SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import Splash from '../Splash'
 import Login from '../Login'
@@ -42,18 +41,6 @@ import AdminKakaoList from '../AdminKakaoList'
 
 const Stack = createStackNavigator();
 
-const CustomStatusBare = ({
-  backgroundColor,
-  barStyle = "dark-content",
-}) => {
-  const insets = useSafeAreaInsets();
-
-  return (
-    <View style={{ height: insets.top, backgroundColor }}>
-      <StatusBar animated={true} backgroundColor={backgroundColor} barStyle={barStyle}></StatusBar>
-    </View>
-  )
-}
 
 export default function () {
   return (

@@ -1,5 +1,5 @@
 import React from 'react';
-import { SafeAreaView, View, Text, Image, TouchableWithoutFeedback, FlatList } from 'react-native';
+import { SafeAreaView, View, Text, Image, TouchableWithoutFeedback, FlatList, BackHandler } from 'react-native';
 import Moment from 'moment'
 import ServerUrl from './Common/ServerUrl'
 import Users from './Common/User'
@@ -10,6 +10,7 @@ const imgBack = require('../assets/ic_calendar_back.png');
 export default class AdminKakaoList extends React.Component {
     constructor(props) {
         super(props);
+        this.backAction = this.backAction.bind(this);
     }
 
     state = {
@@ -26,7 +27,17 @@ export default class AdminKakaoList extends React.Component {
             console.log(TAG, 'isLoading : ' + this.state.isLoading);
             this._PushInfo();
         }
+        BackHandler.addEventListener("hardwareBackPress", this.backAction);
     }
+
+    componentWillUnmount() {
+        BackHandler.removeEventListener('hardwareBackPress', this.backAction);
+    }
+
+    backAction() {
+        this.props.navigation.goBack();
+        return true;
+    };
 
     _PushInfo() {
         var details = null;
@@ -98,12 +109,15 @@ export default class AdminKakaoList extends React.Component {
         return (
             <SafeAreaView>
                 <View style={{ width: '100%', height: '100%', backgroundColor: '#F6F7F9' }}>
-                    <View style={{ width: '100%', height: 48, flexDirection: 'row' }}>
+                    <View style={{ width: '100%', height: 48, flexDirection: 'row', alignItems: 'center', }}>
                         <TouchableWithoutFeedback onPress={() => this.props.navigation.goBack()}>
-                            <View style={{ width: 40, height: 48, justifyContent: 'center' }}>
+                            <View style={{ width: 40, height: 48, justifyContent: 'center', }}>
                                 <Image source={imgBack} style={{ width: 24, height: 24, resizeMode: 'contain', marginLeft: 24 }}></Image>
                             </View>
                         </TouchableWithoutFeedback>
+                        <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', marginRight: 40 }}>
+                            <Text style={{ fontSize: 14, fontFamily: 'KHNPHDotfR' }}>{this.props.route.params.userName + " " + this.props.route.params.patientNo}</Text>
+                        </View>
                     </View>
 
                     <View style={{ marginTop: 12, paddingLeft: 20 }}>

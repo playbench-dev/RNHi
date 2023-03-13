@@ -86,8 +86,9 @@ const styles = StyleSheet.create({
     },
     contentsBg: {
         marginTop: 10,
+        marginBottom: 44,
         maxHeight: '80%',
-        minHeight: 150,
+        minHeight: 50,
         width: '100%',
     },
     contentsSt: {

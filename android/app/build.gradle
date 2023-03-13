@@ -129,13 +129,26 @@ android {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
+configurations.all {
+        resolutionStrategy {
+            force 'androidx.browser:browser:1.2.0'
+        }
+    }
 
+     packagingOptions {
+        pickFirst '**/libjsc.so'
+        pickFirst '**/libc++_shared.so'
+        pickFirst '**/libfbjni.so'
+        pickFirst '**/llibturbomodulejsijni.so'
+        pickFirst '**/libturbomodulejsijni.so'
+        // Add more according to your error here
+    }
     defaultConfig {
         applicationId "com.hicenter"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 15
-        versionName "0.0.15"
+        versionCode 19
+        versionName "0.0.19"
         resConfigs "kr"
     }
     splits {

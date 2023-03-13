@@ -30,6 +30,14 @@ const imgOperation07 = require('../assets/img_operation_07.jpg');
 const imgOperation08 = require('../assets/img_operation_08.jpg');
 const imgOperation09 = require('../assets/img_operation_09.jpg');
 
+const imgDegree01 = require('../assets/img_degree01.jpg');
+const imgDegree02 = require('../assets/img_degree02.jpg');
+const imgDegree03 = require('../assets/img_degree03.jpg');
+const imgDegree05 = require('../assets/img_degree05.jpg');
+const imgDegree06 = require('../assets/img_degree06.jpg');
+const imgDegree07 = require('../assets/img_degree07.jpg');
+const imgDegree08 = require('../assets/img_degree08.jpg');
+
 export default class Caution extends React.Component {
     constructor(props) {
         super(props);
@@ -40,6 +48,7 @@ export default class Caution extends React.Component {
         ovumDatas: [imgOvum01, imgOvum02, imgOvum03, imgOvum04],
         embryosDatas: [imgEmbryos01, imgEmbryos02, imgEmbryos03],
         operationDatas: [imgOperation01, imgOperation02, imgOperation03, imgOperation04, imgOperation05, imgOperation06, imgOperation07, imgOperation08, imgOperation09],
+        degreeDatas: [imgDegree01, imgDegree02, imgDegree03, imgDegree05, imgDegree06, imgDegree07, imgDegree08],
         type: 1,
         clickItemPosition: 0,
         imgMagnify: false,
@@ -51,12 +60,12 @@ export default class Caution extends React.Component {
                 <View style={{ height: '100%', width: '100%', justifyContent: "center", alignItems: 'center', backgroundColor: 'rgb(0,0,0)', }}>
                     <View style={{ width: '100%', height: '10%', alignItems: 'flex-end', justifyContent: 'center' }}>
                         <TouchableWithoutFeedback onPress={() => this.setState({ imgMagnify: false })}>
-                            <Image source={imgClose} style={{ tintColor: 'white', width: 40, height: 40, resizeMode: 'contain', marginRight: 12 }} ></Image>
+                            <Image source={imgClose} style={{ tintColor: 'white', width: 50, height: 50, resizeMode: 'contain', marginRight: 12 }} ></Image>
                         </TouchableWithoutFeedback>
 
                     </View>
                     <View style={{ width: '100%', height: '80%' }}>
-                        <PageList style={{ width: '100%', height: '100%', showsHorizontalScrollIndicator: false, }} initialPage={this.state.clickItemPosition} data={(this.state.type == 1 ? this.state.spermDatas : (this.state.type == 2 ? this.state.ovumDatas : (this.state.type == 3 ? this.state.embryosDatas : this.state.operationDatas)))} renderItem={({ item, index }) => {
+                        <PageList style={{ width: '100%', height: '100%', showsHorizontalScrollIndicator: false, }} initialPage={this.state.clickItemPosition} data={(this.state.type == 1 ? this.state.spermDatas : (this.state.type == 2 ? this.state.ovumDatas : (this.state.type == 3 ? this.state.embryosDatas : (this.state.type == 4 ? this.state.operationDatas : this.state.degreeDatas))))} renderItem={({ item, index }) => {
                             return (
                                 <View key={index} style={{ flex: 1 }}>
                                     <Image style={{ width: '100%', height: '100%', resizeMode: 'contain' }} source={item} />
@@ -102,22 +111,27 @@ export default class Caution extends React.Component {
                     <ScrollView style={{ marginTop: 20, paddingLeft: 20, paddingRight: 20, marginBottom: 20 }} showsVerticalScrollIndicator={false} showsHorizontalScrollIndicator={false}>
                         <Text style={{ fontFamily: 'KHNPHDotfB', color: '#000', fontSize: 20, marginTop: 12 }}>{"난자채취"}</Text>
                         <ScrollView horizontal={true} style={{ marginTop: 20 }} showsVerticalScrollIndicator={false} showsHorizontalScrollIndicator={false}>
-                            {this.state.spermDatas.map((item, index) => (<TouchableWithoutFeedback onPress={() => this._SnapTo(1, index)}><View><Image source={item} style={{ resizeMode: 'contain', width: 272, height: 272, marginLeft: (index == 0 ? 0 : 20), borderRadius: 24, }}></Image></View></TouchableWithoutFeedback>))}
+                            {this.state.spermDatas.map((item, index) => (<TouchableWithoutFeedback onPress={() => this._SnapTo(1, index)}><View><Image resizeMethod='resize' source={item} style={{ resizeMode: 'contain', width: 272, height: 272, marginLeft: (index == 0 ? 0 : 20), borderRadius: 24, }}></Image></View></TouchableWithoutFeedback>))}
                         </ScrollView>
 
                         <Text style={{ fontFamily: 'KHNPHDotfB', color: '#000', fontSize: 20, marginTop: 32 }}>{"정액채취"}</Text>
                         <ScrollView horizontal={true} style={{ marginTop: 20 }} showsVerticalScrollIndicator={false} showsHorizontalScrollIndicator={false}>
-                            {this.state.ovumDatas.map((item, index) => (<TouchableWithoutFeedback onPress={() => this._SnapTo(2, index)}><View><Image source={item} style={{ resizeMode: 'contain', width: 272, height: 272, marginLeft: (index == 0 ? 0 : 20), borderRadius: 24, }}></Image></View></TouchableWithoutFeedback>))}
+                            {this.state.ovumDatas.map((item, index) => (<TouchableWithoutFeedback onPress={() => this._SnapTo(2, index)}><View><Image resizeMethod='resize' source={item} style={{ resizeMode: 'contain', width: 272, height: 272, marginLeft: (index == 0 ? 0 : 20), borderRadius: 24, }}></Image></View></TouchableWithoutFeedback>))}
                         </ScrollView>
 
                         <Text style={{ fontFamily: 'KHNPHDotfB', color: '#000', fontSize: 20, marginTop: 32 }}>{"배아이식"}</Text>
                         <ScrollView horizontal={true} style={{ marginTop: 20 }} showsVerticalScrollIndicator={false} showsHorizontalScrollIndicator={false}>
-                            {this.state.embryosDatas.map((item, index) => (<TouchableWithoutFeedback onPress={() => this._SnapTo(3, index)}><View><Image source={item} style={{ resizeMode: 'contain', width: 272, height: 272, marginLeft: (index == 0 ? 0 : 20), borderRadius: 24, }}></Image></View></TouchableWithoutFeedback>))}
+                            {this.state.embryosDatas.map((item, index) => (<TouchableWithoutFeedback onPress={() => this._SnapTo(3, index)}><View><Image resizeMethod='resize' source={item} style={{ resizeMode: 'contain', width: 272, height: 272, marginLeft: (index == 0 ? 0 : 20), borderRadius: 24, }}></Image></View></TouchableWithoutFeedback>))}
                         </ScrollView>
 
                         <Text style={{ fontFamily: 'KHNPHDotfB', color: '#000', fontSize: 20, marginTop: 32 }}>{"수술 후"}</Text>
                         <ScrollView horizontal={true} style={{ marginTop: 20 }} showsVerticalScrollIndicator={false} showsHorizontalScrollIndicator={false}>
-                            {this.state.operationDatas.map((item, index) => (<TouchableWithoutFeedback onPress={() => this._SnapTo(4, index)}><View><Image source={item} style={{ resizeMode: 'contain', width: 272, height: 272, marginLeft: (index == 0 ? 0 : 20), borderRadius: 24, }}></Image></View></TouchableWithoutFeedback>))}
+                            {this.state.operationDatas.map((item, index) => (<TouchableWithoutFeedback onPress={() => this._SnapTo(4, index)}><View><Image resizeMethod='resize' source={item} style={{ resizeMode: 'contain', width: 272, height: 272, marginLeft: (index == 0 ? 0 : 20), borderRadius: 24, }}></Image></View></TouchableWithoutFeedback>))}
+                        </ScrollView>
+
+                        <Text style={{ fontFamily: 'KHNPHDotfB', color: '#000', fontSize: 20, marginTop: 32 }}>{"시술동의 설명서"}</Text>
+                        <ScrollView horizontal={true} style={{ marginTop: 20 }} showsVerticalScrollIndicator={false} showsHorizontalScrollIndicator={false}>
+                            {this.state.degreeDatas.map((item, index) => (<TouchableWithoutFeedback onPress={() => this._SnapTo(5, index)}><View><Image resizeMethod='resize' source={item} style={{ resizeMode: 'contain', width: 190, height: 272, marginLeft: (index == 0 ? 0 : 20), borderRadius: 24, }}></Image></View></TouchableWithoutFeedback>))}
                         </ScrollView>
                     </ScrollView>
                 </View>

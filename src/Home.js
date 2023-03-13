@@ -1,5 +1,21 @@
 import React from 'react';
-import { SafeAreaView, View, Text, Image, StyleSheet, ScrollView, TouchableWithoutFeedback, Modal, ImageBackground, Dimensions, LogBox, AppState, FlatList, Linking } from 'react-native';
+import {
+  SafeAreaView,
+  View,
+  Text,
+  Image,
+  StyleSheet,
+  ScrollView,
+  TouchableWithoutFeedback,
+  Modal,
+  ImageBackground,
+  Dimensions,
+  LogBox,
+  AppState,
+  FlatList,
+  Linking,
+  Animated
+} from 'react-native';
 import Elevations from 'react-native-elevation';
 import Users from './Common/User'
 import TextTicker from 'react-native-text-ticker'
@@ -13,6 +29,9 @@ import Toast from 'react-native-toast-message';
 // import Marquee from "react-native-awesome-marquee";
 import Webview from 'react-native-webview';
 import ServerUrl from './Common/ServerUrl'
+import PageList from 'react-native-page-list'
+import RNAnimatedScrollIndicators from 'react-native-animated-scroll-indicators';
+import FastImage from 'react-native-fast-image'
 
 const TAG = "Home";
 const { width: screenWidth } = Dimensions.get('window')
@@ -71,6 +90,7 @@ export default class Home extends React.Component {
     // this.toastRef = React.createRef();
     // this._webView = React.createRef();
     this._webView = {};
+    this.scrollX = new Animated.Value(0);
   }
 
   state = {
@@ -92,6 +112,7 @@ export default class Home extends React.Component {
     selectTime: '',
     selectPosition: 0,
     twoDialogVisible: false,
+    twoDialogCancelVisible: false,
     exceptTwoDialogVisible: false,
     selectMedicineName: '',
     requestType: 1,
@@ -107,12 +128,22 @@ export default class Home extends React.Component {
     etDate: '',
     cryoDate: '',
     bhcgDate: '',
+    visitDate: '',
     iuiDate: '',
+    opuDateList: [],
+    etDateList: [],
+    cryoDateList: [],
+    bhcgDateList: [],
+    iuiDateList: [],
+    visitDateList: [],
     videoDatas: [],
     playing: false,
     playerId: '',
     popupSelectType: '',
     randomNum: 1,
+    bannerDatas: [],
+    injectionTimes: [],
+    injectionTimeDatas: [],
   }
 
   componentWillUnmount() {
@@ -161,6 +192,7 @@ export default class Home extends React.Component {
     //     this._NoticeMessage();
     //   }
     // });
+    console.log(TAG, 'test')
     this.setState({ isFetching: true, randomNum: Math.floor(Math.random() * 4) + 1 })
     this._NoticeMessage();
   }
@@ -278,6 +310,7 @@ export default class Home extends React.Component {
           this.state.noticeMessageExistence = false;
         }
         this._HopeMessages();
+        this._RandomMessages();
       }
     )
   }
@@ -359,7 +392,6 @@ export default class Home extends React.Component {
           }
           this.state.messageLengthOver = false;
         }
-        this._RandomMessages();
       }
     )
   }
@@ -414,6 +446,7 @@ export default class Home extends React.Component {
     console.log(TAG, 'here')
     if (this.state.requestType == 1) {
       url = ServerUrl.medicineInfoList;
+      console.log("user_no : " + Users.userNo)
       details = {
         'access_token': Users.AccessToken,
         'refresh_token': Users.RefreshToken,
@@ -453,51 +486,84 @@ export default class Home extends React.Component {
       response => response.json()
     ).then(
       json => {
-        console.log(TAG, JSON.stringify(json) + ' 1111');
+
         if (json.Error_Cd == "0000") {
           if (this.state.requestType == 1) {
+            console.log(TAG, JSON.stringify(json) + ' 1111');
             this.state.datas = [];
             this.state.scheduleNo = [];
             this.state.namesList = [];
+            this.state.opuDateList = [];
+            this.state.etDateList = [];
+            this.state.cryoDateList = [];
+            this.state.bhcgDateList = [];
+            this.state.iuiDateList = [];
+            this.state.visitDateList = [];
+            this.state.injectionTimes = [];
+            this.state.injectionTimeDatas = [];
+
+            for (let i = 0; i < Object.keys(json.InjectionTime).length; i++) {
+              this.state.injectionTimes.push(json.InjectionTime[i].time.substring(0, 10))
+              const obj = ({
+                before: json.InjectionTime[i].before || '',
+                chartNo: json.InjectionTime[i].chart_no || '',
+                time: json.InjectionTime[i].time || '',
+              })
+              this.state.injectionTimeDatas.push(obj)
+            }
 
             for (let i = 0; i < Object.keys(json.OpuDate).length; i++) {
-              this.state.opuDate = json.OpuDate[0].cel_date;
-              console.log(TAG, 'celDate : ' + json.OpuDate[0].cel_date);
+              if (Moment().format('YYYYMM') == json.OpuDate[i].cel_date.replace("-", "").substring(0, 6)) {
+                this.state.opuDate = json.OpuDate[i].cel_date;
+                this.state.opuDateList.push(json.OpuDate[i].cel_date)
+              }
             }
             for (let i = 0; i < Object.keys(json.EtDate).length; i++) {
-              this.state.etDate = json.EtDate[0].cel_date;
+              this.state.etDate = json.EtDate[i].cel_date;
+              this.state.etDateList.push(json.EtDate[i].cel_date)
             }
-            // for (let i = 0; i < Object.keys(json.CryoDate).length; i++) {
-            //   this.state.cryoDate = json.CryoDate[0].cel_date;
-            // }
+
+            if (Array.isArray(json.ReTreatDate)) {
+              for (let i = 0; i < Object.keys(json.ReTreatDate).length; i++) {
+                this.state.visitDate = json.ReTreatDate[i].appointment_date.substring(0, 10);
+                this.state.visitDateList.push(json.ReTreatDate[i].appointment_date.substring(0, 10))
+              }
+            } else {
+              this.state.visitDate = json.ReTreatDate.substring(0, 10);
+              this.state.visitDateList.push(json.ReTreatDate.substring(0, 10))
+            }
+
             for (let i = 0; i < Object.keys(json.BhcgDate).length; i++) {
-              this.state.bhcgDate = json.BhcgDate[0].cel_date;
+              this.state.bhcgDate = json.BhcgDate[i].cel_date;
+              this.state.bhcgDateList.push(json.BhcgDate[i].cel_date)
             }
 
             for (let i = 0; i < Object.keys(json.IUIDate).length; i++) {
-              this.state.iuiDate = json.IUIDate[0].cel_date;
+              this.state.iuiDate = json.IUIDate[i].cel_date;
+              this.state.iuiDateList.push(json.IUIDate[i].cel_date)
             }
 
-            for (let i = 0; i < Object.keys(json.Resources).length; i++) {
+            for (let i = 0; i < Object.keys(json.Medicine).length; i++) {
               const obj = ({
-                abbreviation: json.Resources[i].abbreviation || '',
-                amount: json.Resources[i].amount || '',
-                cel_date: json.Resources[i].cel_date || '',
-                every_other_day: json.Resources[i].every_other_day || '',
-                idx: json.Resources[i].idx || '',
-                medicine_name: json.Resources[i].medicine_name || '',
-                medicine_no: json.Resources[i].medicine_no || '',
-                memo: json.Resources[i].taking || '',
-                purpose: json.Resources[i].purpose || '',
-                reg_date: json.Resources[i].reg_date || '',
-                reg_id: json.Resources[i].reg_id || '',
-                unit: json.Resources[i].unit || '',
-                type: json.Resources[i].type || '',
-                take_time: json.Resources[i].take_time || '',
-                schedule_no: json.Resources[i].schedule_no || '',
+                abbreviation: json.Medicine[i].abbreviation || '',
+                amount: json.Medicine[i].amount || '',
+                cel_date: json.Medicine[i].cel_date || '',
+                every_other_day: json.Medicine[i].every_other_day || '',
+                idx: json.Medicine[i].idx || '',
+                medicine_name: json.Medicine[i].medicine_name || '',
+                medicine_app_name: json.Medicine[i].medicine_app_name || '',
+                medicine_no: json.Medicine[i].medicine_no || '',
+                memo: json.Medicine[i].taking || '',
+                purpose: json.Medicine[i].purpose || '',
+                reg_date: json.Medicine[i].reg_date || '',
+                reg_id: json.Medicine[i].reg_id || '',
+                unit: json.Medicine[i].unit || '',
+                type: json.Medicine[i].type || '',
+                take_time: json.Medicine[i].take_time || '',
+                schedule_no: json.Medicine[i].schedule_no || '',
               })
-              this.state.scheduleNo.push(json.Resources[i].schedule_no || '');
-              this.state.namesList.push(json.Resources[i].medicine_name || '');
+              this.state.scheduleNo.push(json.Medicine[i].schedule_no || '');
+              this.state.namesList.push(json.Medicine[i].medicine_name || '');
               this.state.datas.push(obj);
             }
 
@@ -521,6 +587,7 @@ export default class Home extends React.Component {
                         every_other_day: json.Luteal[i].medicine_info[j].every_other_day || '',
                         idx: '',
                         medicine_name: json.Luteal[i].medicine_info[j].medicine_name || '',
+                        medicine_app_name: json.Luteal[i].medicine_info[j].medicine_app_name || '',
                         medicine_no: json.Luteal[i].medicine_info[j].medicine_no || '',
                         memo: json.Luteal[i].medicine_info[j].memo || '',
                         purpose: json.Luteal[i].medicine_info[j].purpose || '',
@@ -547,6 +614,7 @@ export default class Home extends React.Component {
                       every_other_day: json.Luteal[i].medicine_info[j].every_other_day || '',
                       idx: '',
                       medicine_name: json.Luteal[i].medicine_info[j].medicine_name || '',
+                      medicine_app_name: json.Luteal[i].medicine_info[j].medicine_app_name || '',
                       medicine_no: json.Luteal[i].medicine_info[j].medicine_no || '',
                       memo: json.Luteal[i].medicine_info[j].memo || '',
                       purpose: json.Luteal[i].medicine_info[j].purpose || '',
@@ -581,6 +649,7 @@ export default class Home extends React.Component {
           console.log(TAG, '0005');
 
         }
+
       }
     )
   }
@@ -625,6 +694,45 @@ export default class Home extends React.Component {
             }
             this.state.videoDatas.push(obj);
           }
+        }
+        this._BannerInfo()
+      }
+    )
+  }
+
+  _BannerInfo() {
+    var formBody = [];
+
+    formBody = formBody.join("&");
+
+    fetch(ServerUrl.BannerInfo, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
+      },
+      mode: 'cors',
+      cache: 'default',
+      body: formBody,
+    }).then(
+      response => response.json()
+    ).then(
+      json => {
+        console.log(TAG, json);
+        if (json.Error_Cd == "0000") {
+          for (let i = 0; i < Object.keys(json.Resources).length; i++) {
+            if (json.Resources[i].alive_flag == 1) {
+              const obj = ({
+                banner_no: json.Resources[i].banner_no || '',
+                banner_url: json.Resources[i].banner_url || '',
+                category: json.Resources[i].category || '',
+                phone_num: json.Resources[i].phone || '',
+                priority: json.Resources[i].priority || '',
+                thumbnail: json.Resources[i].thumbnail || ''
+              })
+              this.state.bannerDatas.push(obj)
+            }
+          }
+          this.state.bannerDatas.sort((a, b) => { return a.priority - b.priority })
         }
         this.setState({
           isLoading: true,
@@ -680,7 +788,8 @@ export default class Home extends React.Component {
       this.props.navigation.navigate('Caution')
     } else if (name == 'Business') {
       this.props.navigation.navigate('Business')
-      // Linking.openURL(`tel:${'01032604765'}`)
+    } else if (name == 'ChartWebview') {
+      this.props.navigation.navigate('AboutWebview', { tag: 'home' })
     }
 
   };
@@ -765,6 +874,7 @@ export default class Home extends React.Component {
       every_other_day: data.every_other_day || '',
       idx: data.idx || '',
       medicine_name: data.medicine_name || '',
+      medicine_app_name: data.medicine_app_name || '',
       medicine_no: data.medicine_no || '',
       memo: data.memo || '',
       taking: data.memo || '',
@@ -782,6 +892,7 @@ export default class Home extends React.Component {
       every_other_day: data.every_other_day || '',
       idx: data.idx || '',
       medicine_name: data.medicine_name || '',
+      medicine_app_name: data.medicine_app_name || '',
       medicine_no: data.medicine_no || '',
       memo: data.memo || '',
       taking: data.memo || '',
@@ -795,7 +906,7 @@ export default class Home extends React.Component {
     })
     // console.log(TAG,this.state.datas);
     this.state.requestType = 2;
-    this.setState({ twoDialogVisible: false, })
+    this.setState({ twoDialogVisible: false, twoDialogCancelVisible: false })
     this._MedcineInfo();
   }
 
@@ -850,6 +961,7 @@ export default class Home extends React.Component {
     if (value != undefined) {
       this.setState({
         twoDialogVisible: value.visible,
+        twoDialogCancelVisible: value.visible
       })
       if (value.status == "done") {
         this._UpdateTakeTime("aa");
@@ -857,6 +969,8 @@ export default class Home extends React.Component {
     }
     if (this.state.twoDialogVisible) {
       return <TowBtnDialog title={"투약등록"} contents={this.state.eatingTime + " 투약시간\n등록 하시겠습니까?"} leftBtnText={"취소"} rightBtnText={"확인"} clcik={this._TwoDialogVisible}></TowBtnDialog>
+    } else if (this.state.twoDialogCancelVisible) {
+      return <TowBtnDialog title={"투약취소"} contents={"투약을 취소하시겠습니까?"} leftBtnText={"취소"} rightBtnText={"확인"} clcik={this._TwoDialogVisible}></TowBtnDialog>
     } else {
       return null;
     }
@@ -907,11 +1021,29 @@ export default class Home extends React.Component {
     })
   }
 
+  _BannerClick(category, source,) {
+    console.log(`category : ${category}`)
+    if (this.state.playing == true) {
+      this._webView[this.state.playerId].injectJavaScript(`
+      window.player.pause(); true;`);
+    } else {
+      console.log(TAG, 'playPause : pause');
+    }
+    if (category == '1') {
+      this.props.navigation.navigate('AboutWebview', { tag: "banner", url: source })
+    } else if (category == '2') {
+      Linking.openURL(`${source}`)
+    } else {
+      Linking.openURL(`tel:${source}`)
+    }
+  }
+
   render() {
     //게스트 로그인 확인
     const guest = Users.guest;
     // console.log(TAG,'guest : ' + guest);
     // console.log(TAG,"time : " + Moment(Moment().format('YYYY-MM-DD') + " " + "18:24").format("a HH:mm"));
+    console.log("datas : " + JSON.stringify(this.state.datas))
     return (
       <SafeAreaView>
         <View style={{ width: '100%', height: '100%', backgroundColor: '#fff' }}>
@@ -983,55 +1115,44 @@ export default class Home extends React.Component {
                     </View>
 
                     {/* <View style={{ height: 0.5, width: '100%', backgroundColor: '#AFAFAF', marginTop: 16, }}></View> */}
-                    {(this.state.opuDate.length > 0 && Moment(this.state.selectedDay).format('YYYY-MM-DD') == this.state.opuDate) ? (
+                    {(this.state.opuDateList.length > 0 && this.state.opuDateList.includes(Moment(this.state.selectedDay).format('YYYY-MM-DD'))) ? (
                       <View style={{ width: '100%', alignItems: 'center', justifyContent: 'center', marginTop: 20 }}>
                         <Text style={{ fontSize: 14, fontFamily: 'KHNPHDotfB', color: '#000' }}>{"* 오늘은 난자채취일입니다."}</Text>
                       </View>
                     ) : (
-                      (this.state.etDate.length > 0 && Moment(this.state.selectedDay).format('YYYY-MM-DD') == this.state.etDate) ? (
+                      (this.state.etDateList.length > 0 && this.state.etDateList.includes(Moment(this.state.selectedDay).format('YYYY-MM-DD'))) ? (
                         <View style={{ width: '100%', alignItems: 'center', justifyContent: 'center', marginTop: 20 }}>
                           <Text style={{ fontSize: 14, fontFamily: 'KHNPHDotfB', color: '#000' }}>{"* 오늘은 배아이식일입니다."}</Text>
                         </View>
-                      ) : (this.state.iuiDate.length > 0 && Moment(this.state.selectedDay).format('YYYY-MM-DD') == this.state.iuiDate) ? (
+                      ) : (this.state.iuiDateList.length > 0 && this.state.iuiDateList.includes(Moment(this.state.selectedDay).format('YYYY-MM-DD'))) ? (
                         <View style={{ width: '100%', alignItems: 'center', justifyContent: 'center', marginTop: 20 }}>
                           <Text style={{ fontSize: 14, fontFamily: 'KHNPHDotfB', color: '#000' }}>{"* 오늘은 인공수정 시술일입니다."}</Text>
-                        </View>) : (this.state.bhcgDate.length > 0 && Moment(this.state.selectedDay).format('YYYY-MM-DD') == this.state.bhcgDate) ? (
+                        </View>) : (this.state.injectionTimeDatas.length > 0 && this.state.injectionTimes.includes(Moment(this.state.selectedDay).format('YYYY-MM-DD'))) ? (
                           <View style={{ width: '100%', alignItems: 'center', justifyContent: 'center', marginTop: 20 }}>
-                            <Text style={{ fontSize: 14, fontFamily: 'KHNPHDotfB', color: '#000' }}>{"* 오늘은 재진일입니다."}</Text>
-                          </View>) : (this.state.datas.length > 0 ? (
-                            <View style={{ width: '100%', alignItems: 'center', justifyContent: 'center', marginTop: 25 }}>
-                              <Text style={{ fontSize: 14, fontFamily: 'KHNPHDotfB', color: '#000' }}>{"처방된 약과 주사를 잊지 말고 챙겨주세요."}
-                              </Text>
-                            </View>
-                          ) : <View style={{ width: '100%', alignItems: 'center', justifyContent: 'center', marginTop: 25 }}><Text style={{ fontSize: 14, fontFamily: 'KHNPHDotfB', color: '#000' }}>{"해당일에는 복약정보가 없습니다."}</Text></View>))}
-
-                    {/* {this.state.datas.length > 0 ? (
-                      <View style={{ width: '100%', alignItems: 'center', justifyContent: 'center', marginTop: 25 }}>
-                        <Text style={{ fontSize: 14, fontFamily: 'KHNPHDotfB', color: '#000' }}>{"처방된 약과 주사를 잊지 말고 챙겨주세요."}
-                        </Text>
-                      </View>
-                    ) : (
-                      (
-                        (
-                          (this.state.opuDate.length > 0 && Moment(this.state.selectedDay).format('YYYY-MM-DD') == this.state.opuDate) || (this.state.etDate.length > 0 && Moment(this.state.selectedDay).format('YYYY-MM-DD') == this.state.etDate) || (this.state.cryoDate.length > 0 && Moment(this.state.selectedDay).format('YYYY-MM-DD') == this.state.cryoDate) || (this.state.bhcgDate.length > 0 && Moment(this.state.selectedDay).format('YYYY-MM-DD') == this.state.bhcgDate)
-                        )
-                      ) == true ?
-                      <View style={{ width: '100%', alignItems: 'center', justifyContent: 'center', marginTop: 25 }}>
-                        <Text style={{ fontSize: 14, fontFamily: 'KHNPHDotfB', color: '#000' }}>{"* 오늘은 시술일입니다."}
-                        </Text>
-                      </View> : <View style={{ width: '100%', alignItems: 'center', justifyContent: 'center', marginTop: 25 }}><Text style={{ fontSize: 14, fontFamily: 'KHNPHDotfB', color: '#000' }}>{"해당일에는 복약정보가 없습니다."}</Text></View>
-                      )
-                    } */}
+                            <Text style={{ fontSize: 14, fontFamily: 'KHNPHDotfB', color: '#000', textAlign: 'center', lineHeight: 22 }}>{"* 배란유도 주사 시간 : " + Moment(this.state.injectionTimeDatas[this.state.injectionTimes.indexOf(Moment(this.state.selectedDay).format('YYYY-MM-DD'))].time).format('M월 D일 a h시 mm분') + "\n(" + this.state.injectionTimeDatas[this.state.injectionTimes.indexOf(Moment(this.state.selectedDay).format('YYYY-MM-DD'))].before + "시간 전)"}</Text>
+                          </View>) : (this.state.visitDateList.length > 0 && this.state.visitDateList.includes(Moment(this.state.selectedDay).format('YYYY-MM-DD'))) ? (
+                            <View style={{ width: '100%', alignItems: 'center', justifyContent: 'center', marginTop: 20 }}>
+                              <Text style={{ fontSize: 14, fontFamily: 'KHNPHDotfB', color: '#000' }}>{"* 오늘은 내원일입니다."}</Text>
+                            </View>) : (this.state.bhcgDateList.length > 0 && this.state.bhcgDateList.includes(Moment(this.state.selectedDay).format('YYYY-MM-DD'))) ? (
+                              <View style={{ width: '100%', alignItems: 'center', justifyContent: 'center', marginTop: 20 }}>
+                                <Text style={{ fontSize: 14, fontFamily: 'KHNPHDotfB', color: '#000' }}>{"* 오늘은 임신확인일입니다."}</Text>
+                              </View>
+                            ) : (this.state.datas.length > 0 ? (
+                              <View style={{ width: '100%', alignItems: 'center', justifyContent: 'center', marginTop: 25 }}>
+                                <Text style={{ fontSize: 14, fontFamily: 'KHNPHDotfB', color: '#000' }}>{"처방된 약과 주사를 잊지 말고 챙겨주세요."}
+                                </Text>
+                              </View>
+                            ) : <View style={{ width: '100%', alignItems: 'center', justifyContent: 'center', marginTop: 25 }}><Text style={{ fontSize: 14, fontFamily: 'KHNPHDotfB', color: '#000' }}>{"해당일에는 복약정보가 없습니다."}</Text></View>))}
 
                     <View style={{ marginTop: 28, marginBottom: 20 }}>
                       {this.state.datas.map((item, index) =>
-                        <TouchableWithoutFeedback onPress={() => ((item.medicine_name == '오비드렐' || item.medicine_name == '데카펩틸' || item.medicine_name == '가니레버' || item.medicine_name == '유레릭스' || item.medicine_name == '오가루트') ? this.setState({ calendarVisible: true, selectPosition: index, selectMedicineName: item.medicine_name, eatingTime: Moment().format("a HH:mm"), selectTime: Moment().format("HH:mm"), popupSelectType: item.type }) : item.take_time.length == 0 && this.setState({ exceptTwoDialogVisible: true, selectPosition: index, selectMedicineName: item.medicine_name, eatingTime: Moment().format("a HH:mm"), selectTime: Moment().format("HH:mm"), popupSelectType: item.type }))}>
+                        <TouchableWithoutFeedback onPress={() => ((item.medicine_name == '오비드렐' || item.medicine_name == '데카펩틸' || item.medicine_name == '가니레버' || item.medicine_name == '유레릭스' || item.medicine_name == '오가루트') ? this.setState({ calendarVisible: true, selectPosition: index, selectMedicineName: item.medicine_name, eatingTime: Moment().format("a HH:mm"), selectTime: Moment().format("HH:mm"), popupSelectType: item.type }) : item.take_time.length == 0 ? this.setState({ exceptTwoDialogVisible: true, selectPosition: index, selectMedicineName: item.medicine_name, eatingTime: Moment().format("a HH:mm"), selectTime: Moment().format("HH:mm"), popupSelectType: item.type }) : this.setState({ twoDialogCancelVisible: true, selectPosition: index, selectMedicineName: item.medicine_name, eatingTime: Moment().format("a HH:mm"), selectTime: "", popupSelectType: item.type }))}>
 
                           <View key={index} style={{ backgroundColor: '#fff', borderRadius: 16, flex: 1, flexDirection: 'row', paddingLeft: 12, alignItems: 'center', marginTop: index == 0 ? 0 : 8 }}>
                             <View style={{ flex: 0.6, justifyContent: 'center', }}>
-                              <View style={{ flexDirection: 'row', height: 40, alignItems: 'center', justifyContent: 'center' }}>
+                              <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingTop: 12, paddingBottom: 12 }}>
                                 <Image source={(item.type == '주사' ? imgCirclePink : (item.type == '약' ? imgCircleGreen : imgCircleBlue))} style={{ width: 8, height: 8, resizeMode: 'contain', }}></Image>
-                                <Text style={{ marginLeft: 8, fontSize: 14, fontFamily: 'KHNPHDotfR', color: '#000', flex: 1 }}>{item.medicine_name}</Text>
+                                <Text style={{ marginLeft: 8, fontSize: 14, fontFamily: 'KHNPHDotfR', color: '#000', flex: 1 }}>{item.medicine_app_name.length == 0 ? item.medicine_name : item.medicine_app_name}</Text>
                                 <Text style={{ fontSize: 14, fontFamily: 'KHNPHDotfR', color: '#000', flex: 1 }}>{item.amount + item.unit}</Text>
                               </View>
 
@@ -1077,6 +1198,15 @@ export default class Home extends React.Component {
                     <Image source={imgArrow} style={{ width: 8, height: 12, resizeMode: 'contain', }}></Image>
                   </View>
                 </TouchableWithoutFeedback>
+
+                {/* <Text style={{ marginTop: 32, fontSize: 16, color: '#AFAFAF', fontFamily: 'KHNPHDotfR' }}>{Users.guest == true ? '처음 오셨나요?' : '나의 초진 차트'}</Text>
+                <TouchableWithoutFeedback onPress={() => this.playPause('ChartWebview', '')}>
+                  <View style={{ marginTop: 10, borderRadius: 12, backgroundColor: "rgba(219,227,241,0.5)", paddingLeft: 16, paddingRight: 31.5, flexDirection: 'row', width: '100%', height: 56, alignItems: 'center' }}>
+                    <Text style={{ marginLeft: 0, fontSize: 18, fontFamily: 'KHNPHDotfR', color: '#000', flex: 1, }}>{Users.guest == true ? "나의 초진문진표 작성하기" : "나의 초진 예진표 작성하기"}</Text>
+                    <Image source={imgArrow} style={{ width: 8, height: 12, resizeMode: 'contain', }}></Image>
+                  </View>
+                </TouchableWithoutFeedback> */}
+
 
                 <Text style={{ marginTop: 32, fontSize: 16, color: '#AFAFAF', fontFamily: 'KHNPHDotfR' }}>HI의료진이 알려주는</Text>
 
@@ -1214,11 +1344,52 @@ export default class Home extends React.Component {
                 </View>
               </View>
 
+              {this.state.bannerDatas.length > 0 && (
+                <View style={{ paddingRight: 20, marginTop: 20 }}>
+                  <Animated.ScrollView
+                    horizontal
+                    pagingEnabled
+                    scrollEnabled={true}
+                    showsHorizontalScrollIndicator={false}
+                    contentContainerStyle={{ flexGrow: 1 }}
+                    onScroll={Animated.event(
+                      [{ nativeEvent: { contentOffset: { x: this.scrollX } } }],
+                      { useNativeDriver: true })}
+                  >
+                    {this.state.bannerDatas.map((item, index) =>
+                    (
+                      <TouchableWithoutFeedback onPress={() => this._BannerClick(item.category, ((item.category == '1' || item.category == '2') ? item.banner_url : item.phone_num))}>
+                        <View style={{ width: (screenWidth - 40), height: (screenWidth - 40) * 0.62693 }}>
+                          <FastImage style={{ width: '100%', height: '100%', resizeMode: 'contain', }} source={{ uri: ServerUrl.Server + "/" + item.thumbnail, headers: { Authorization: 'someAuthToken' }, priority: FastImage.priority.normal }} resizeMode={FastImage.resizeMode.contain}></FastImage>
+                        </View>
+                      </TouchableWithoutFeedback>
+                    )
+                    )}
+                  </Animated.ScrollView>
+                  {this.state.bannerDatas.length > 0 && (<View style={{
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    zIndex: 100,
+                    marginBottom: 0,
+                    marginTop: 15,
+                  }}>
+                    <RNAnimatedScrollIndicators
+                      numberOfCards={this.state.bannerDatas.length}
+                      scrollWidth={screenWidth - 40}
+                      activeColor={'#4a50ca'}
+                      inActiveColor={'#e7e7e7'}
+                      scrollAnimatedValue={this.scrollX}
+                    />
+                  </View>)}
+                </View>
+              )}
+
               <View style={{ marginBottom: 72 }}></View>
             </View>
 
           </ScrollView>
-          <FetchingIndicator isFetching={this.state.isFetching} message='' color='#4a50ca' />
+          {/* <FetchingIndicator isFetching={this.state.isFetching} message='' color='#4a50ca' /> */}
 
         </View>
       </SafeAreaView>

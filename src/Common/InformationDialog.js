@@ -25,12 +25,12 @@ class InformationDialog extends Component {
                             <View style={{ marginTop: 26, width: '100%', backgroundColor: '#f2f3f4', borderRadius: 8, alignItems: 'center', justifyContent: 'center', paddingTop: 16, paddingBottom: 19 }}>
                                 <Text style={{ fontSize: 16, color: '#000', fontFamily: 'KHNPHDotfR' }}>{"Step.01 수정결과"}</Text>
                                 <Text style={{ fontSize: 14, color: '#000', fontFamily: 'KHNPHDotfR', marginTop: 12, textAlign: 'center', lineHeight: 22 }}>{"채취된 난자와 수정된 결과를 알려드립니다."}</Text>
-                                <Text style={{ fontSize: 11, color: '#000', fontFamily: 'KHNPHDotfR', marginTop: 4, textAlign: 'center', lineHeight: 22 }}>{"*채취 다음날 등록되며, 공휴일과 추가 수정은 그 다음날 등록됩니다."}</Text>
+                                <Text style={{ fontSize: 11, color: '#000', fontFamily: 'KHNPHDotfR', marginTop: 4, textAlign: 'center', lineHeight: 15 }}>{"*채취 다음날 등록되며, 공휴일과 추가 수정은 그 다음날 등록됩니다.\n*수정된 배아의 수는 등록시점 이후 배양과정에서 변경될 수 있습니다."}</Text>
                             </View>
 
                             <View style={{ marginTop: 14, width: '100%', backgroundColor: '#f2f3f4', borderRadius: 8, alignItems: 'center', justifyContent: 'center', paddingTop: 16, paddingBottom: 19 }}>
                                 <Text style={{ fontSize: 16, color: '#000', fontFamily: 'KHNPHDotfR' }}>{"Step.02 배아등급"}</Text>
-                                <Text style={{ fontSize: 14, color: '#000', fontFamily: 'KHNPHDotfR', marginTop: 12, textAlign: 'center', lineHeight: 22 }}>{"수정된 배아는 1~5등급 배반포로 나누어집니다."}</Text>
+                                <Text style={{ fontSize: 14, color: '#000', fontFamily: 'KHNPHDotfR', marginTop: 12, textAlign: 'center', lineHeight: 22 }}>{"수정된 배아는 1~5등급, 배반포로 나누어집니다."}</Text>
                                 <Text style={{ fontSize: 11, color: '#000', fontFamily: 'KHNPHDotfR', marginTop: 4, textAlign: 'center', lineHeight: 22 }}>{"*채취 2일 후부터 안내해 드리며, 이식 당일은 등록되지 않습니다."}</Text>
                             </View>
 
@@ -47,8 +47,8 @@ class InformationDialog extends Component {
                             </View>
 
                             <View style={{ marginTop: 14, width: '100%', backgroundColor: '#f2f3f4', borderRadius: 8, alignItems: 'center', justifyContent: 'center', paddingTop: 16, paddingBottom: 19 }}>
-                                <Text style={{ fontSize: 16, color: '#000', fontFamily: 'KHNPHDotfR' }}>{"Step.05 잔여배아"}</Text>
-                                <Text style={{ fontSize: 14, color: '#000', fontFamily: 'KHNPHDotfR', marginTop: 12, textAlign: 'center', lineHeight: 22 }}>{"22년 4월 이후 시술에서 생성된 잔여배아의 보존기간 만료일을 확인하실 수 있습니다."}</Text>
+                                <Text style={{ fontSize: 16, color: '#000', fontFamily: 'KHNPHDotfR' }}>{"Step.05 보존배아"}</Text>
+                                <Text style={{ fontSize: 14, color: '#000', fontFamily: 'KHNPHDotfR', marginTop: 12, textAlign: 'center', lineHeight: 22 }}>{"22년 4월 이후 시술에서 생성된 보존배아의 보존기간 만료일을 확인하실 수 있습니다."}</Text>
                                 <Text style={{ fontSize: 11, color: '#000', fontFamily: 'KHNPHDotfR', marginTop: 4, textAlign: 'center', lineHeight: 22 }}>{"*배아가 사용되었을 경우 정보가 사라집니다."}</Text>
                             </View>
                         </View>

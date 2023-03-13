@@ -6,6 +6,8 @@ import LogoutDialog from './Common/LogoutDialog'
 import Users from './Common/User'
 import VersionInfo from 'react-native-version-info';
 import ServerUrl from './Common/ServerUrl'
+import Toast from 'react-native-toast-message';
+import Moment from 'moment'
 
 const TAG = "MyPage";
 const imgBack = require('../assets/ic_calendar_back.png');
@@ -26,6 +28,7 @@ export default class MyPage extends React.Component {
     state = {
         twoDialogVisible: false,
         refresh: false,
+        updatetedDay: '2022.09.07 10:57',
     }
 
     _TwoDialogVisible = value => {
@@ -99,7 +102,6 @@ export default class MyPage extends React.Component {
     }
 
     render() {
-
         return (
             <SafeAreaView>
                 <View style={{ width: '100%', height: '100%', backgroundColor: '#F6F7F9' }}>
@@ -188,10 +190,12 @@ export default class MyPage extends React.Component {
                                 </View>
                             </TouchableWithoutFeedback>
 
-                            <View style={{ width: '100%', height: 52, borderRadius: 24, backgroundColor: '#fff', flexDirection: 'row', marginTop: 20, paddingLeft: 20, paddingRight: 20, alignItems: 'center' }}>
-                                <Text style={{ flex: 1, fontSize: 16, fontFamily: 'KHNPHDotfB', color: '#000' }}>앱 버전 정보</Text>
-                                <Text style={{ fontSize: 14, fontFamily: 'KHNPHUotfR', color: '#000' }}>{VersionInfo.appVersion}</Text>
-                            </View>
+                            <TouchableWithoutFeedback onPress={() => Toast.show({ type: 'success', text1: 'CodePush', text2: this.state.updatetedDay })}>
+                                <View style={{ width: '100%', height: 52, borderRadius: 24, backgroundColor: '#fff', flexDirection: 'row', marginTop: 20, paddingLeft: 20, paddingRight: 20, alignItems: 'center' }}>
+                                    <Text style={{ flex: 1, fontSize: 16, fontFamily: 'KHNPHDotfB', color: '#000' }}>앱 버전 정보</Text>
+                                    <Text style={{ fontSize: 14, fontFamily: 'KHNPHUotfR', color: '#000' }}>{VersionInfo.appVersion}</Text>
+                                </View>
+                            </TouchableWithoutFeedback>
 
                             <View style={{ width: '100%', alignItems: 'center', justifyContent: 'center', marginTop: 32, marginBottom: 23 }}>
                                 <Text style={{ fontSize: 16, fontFamily: 'KHNPHDotfB', color: '#000', textDecorationLine: 'underline' }} onPress={() => this.setState({ twoDialogVisible: true })}>로그아웃</Text>

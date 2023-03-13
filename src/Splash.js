@@ -1,8 +1,7 @@
 import React from 'react';
-import { SafeAreaView, View, Text, Image, Animated, Linking } from 'react-native';
+import { SafeAreaView, View, Text, Image, Animated, Linking, Platform } from 'react-native';
 import { StatusBar } from 'react-native';
 import AsyncStorage from '@react-native-community/async-storage';
-import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
 import Users from '../src/Common/User'
 import ServerUrl from './Common/ServerUrl'
 import OneBtnDialog from './Common/OneBtnDialog'
@@ -27,20 +26,6 @@ const APPLE_APP_STORE_LINK =
 const APPLE_APP_STORE_WEB_LINK =
   'https://apps.apple.com/us/app/antodo-%EC%8B%AC%ED%94%8C%ED%95%9C-%EC%86%90%EA%B8%80%EC%94%A8-%ED%95%A0%EC%9D%BC-%EA%B3%84%ED%9A%8D-%EB%A9%94%EB%AA%A8/id1585606989';
 
-const CustomStatusBare = ({
-  backgroundColor,
-  barStyle = "dark-content",
-}) => {
-  const insets = useSafeAreaInsets();
-
-  return (
-    <View style={{ height: insets.top, backgroundColor }}>
-      <StatusBar animated={true} backgroundColor={backgroundColor} barStyle={barStyle}></StatusBar>
-    </View>
-  )
-}
-
-
 export default class Splash extends React.Component {
   constructor(props) {
     super(props)
@@ -61,6 +46,8 @@ export default class Splash extends React.Component {
       'patient_no': this.state.patientNo,
       'user_name': this.state.name,
       'token': Users.token,
+      'os_type': (Platform.OS === 'android' ? 'android' : 'ios'),
+      'app_version': (Platform.OS === 'android' ? VersionInfo.buildVersion : VersionInfo.appVersion)
     };
 
     var formBody = [];
@@ -85,6 +72,7 @@ export default class Splash extends React.Component {
       response => response.json()
     ).then(
       json => {
+        console.log(json)
         if (json.Error_Cd == "0000") {
           AsyncStorage.setItem('userInfo', JSON.stringify({
             'user_no': json.Resources[0].user_no || '',
@@ -182,29 +170,8 @@ export default class Splash extends React.Component {
       }
     ).start((o) => {
       if (o.finished) {
-
-        // AsyncStorage.getItem('userInfo', (err, result) => {
-        //   if (result != null) {
-        //     const UserInfo = JSON.parse(result);
-        //     console.log(TAG, UserInfo.user_name + " " + UserInfo.patient_no);
-        //     this.state.name = UserInfo.user_name;
-        //     this.state.patientNo = UserInfo.patient_no;
-        //     if ((this.state.name == 'ad' || this.state.name == 'Ad') && this.state.patientNo == '1') {
-        //       this.props.navigation.navigate('AdminUserSelect');
-        //       return;
-        //     } else {
-        //       this._Login();
-        //     }
-        //     // this.props.navigation.reset({index:0, routes:[{name: 'AgreeDetail',mode : '2'}]})
-        //   } else {
-        //     this.props.navigation.reset({ index: 0, routes: [{ name: 'Login' }] })
-        //   }
-        // });
-
         remoteConfig().setDefaults({ version: '1', check: false })
-          .then(() => remoteConfig().setConfigSettings({
-            minimumFetchIntervalMillis: 60,
-          }))
+          .then(() => remoteConfig().fetchAndActivate())
           .then((fetchedRemotely) => {
             if (Platform.OS === 'android') {
               console.log(TAG, remoteConfig().getValue('version'));
