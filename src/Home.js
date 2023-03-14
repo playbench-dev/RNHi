@@ -1202,7 +1202,7 @@ export default class Home extends React.Component {
                 {/* <Text style={{ marginTop: 32, fontSize: 16, color: '#AFAFAF', fontFamily: 'KHNPHDotfR' }}>{Users.guest == true ? '처음 오셨나요?' : '나의 초진 차트'}</Text>
                 <TouchableWithoutFeedback onPress={() => this.playPause('ChartWebview', '')}>
                   <View style={{ marginTop: 10, borderRadius: 12, backgroundColor: "rgba(219,227,241,0.5)", paddingLeft: 16, paddingRight: 31.5, flexDirection: 'row', width: '100%', height: 56, alignItems: 'center' }}>
-                    <Text style={{ marginLeft: 0, fontSize: 18, fontFamily: 'KHNPHDotfR', color: '#000', flex: 1, }}>{Users.guest == true ? "나의 초진문진표 작성하기" : "나의 초진 예진표 작성하기"}</Text>
+                    <Text style={{ marginLeft: 0, fontSize: 18, fontFamily: 'KHNPHDotfR', color: '#000', flex: 1, }}>{Users.guest == true ? "나의 초진문진표" : "나의 초진문진표"}</Text>
                     <Image source={imgArrow} style={{ width: 8, height: 12, resizeMode: 'contain', }}></Image>
                   </View>
                 </TouchableWithoutFeedback> */}
