@@ -83,7 +83,7 @@ let gifImg3 = require('../assets/hi003.gif')
 let gifImg4 = require('../assets/hi004.gif')
 
 const holidayKr = require('holiday-kr');
-
+// test
 LogBox.ignoreLogs([
   'Each child in a list should have a unique "key" prop.', 'onAnimatedValueUpdate', 'Warning'
 ]);
