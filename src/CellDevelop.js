@@ -2,7 +2,6 @@ import React from 'react';
 import { SafeAreaView, View, Text, Image, ScrollView, StatusBar, StyleSheet, TouchableWithoutFeedback, Dimensions, Modal, BackHandler, Animated, Easing, ImageBackground, Platform, FlatList, RefreshControl } from 'react-native';
 import AsyncStorage from '@react-native-community/async-storage';
 import Elevations from 'react-native-elevation';
-import Carousel, { ParallaxImage } from 'react-native-snap-carousel';
 import Moment from 'moment'
 import ServerUrl from './Common/ServerUrl'
 import Users from './Common/User'
@@ -922,7 +921,11 @@ export default class CellDevelop extends React.Component {
     }
 
     _onRefresh = () => {
-        this.setState({ refreshing: true });
+        this.setState({
+            refreshing: true,
+            embryoAllDatas: [],
+            oOcyteAllDatas: [],
+        });
         this._IVFInfo();
     }
 

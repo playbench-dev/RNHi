@@ -16,15 +16,15 @@ export default class AgreeDetail extends React.Component {
     _html() {
         if (Platform.OS === 'ios' && this.props.route.params.mode == '1') {
             return (
-                <Webview style={{ backgroundColor: 'white', flex: 1 }} source={require('../assets/policy.html')} javaScriptEnabled={true} domStorageEnabled={true}></Webview>
+                <Webview style={{ backgroundColor: 'white', flex: 1 }} originWhitelist={['*']} source={require('../assets/policy.html')} javaScriptEnabled={true} domStorageEnabled={true}></Webview>
             )
         } else if (Platform.OS === 'ios' && this.props.route.params.mode == '2') {
             return (
-                <Webview style={{ backgroundColor: 'white', flex: 1 }} source={require('../assets/policy_service.html')} javaScriptEnabled={true} domStorageEnabled={true}></Webview>
+                <Webview style={{ backgroundColor: 'white', flex: 1 }} originWhitelist={['*']} source={require('../assets/policy_service.html')} javaScriptEnabled={true} domStorageEnabled={true}></Webview>
             )
         } else if (Platform.OS === 'ios' && this.props.route.params.mode == '3') {
             return (
-                <Webview style={{ backgroundColor: 'white', flex: 1 }} source={require('../assets/service.html')} javaScriptEnabled={true} domStorageEnabled={true}></Webview>
+                <Webview style={{ backgroundColor: 'white', flex: 1 }} originWhitelist={['*']} source={require('../assets/service.html')} javaScriptEnabled={true} domStorageEnabled={true}></Webview>
             )
         } else if (Platform.OS === 'android' && this.props.route.params.mode == '1') {
             return (

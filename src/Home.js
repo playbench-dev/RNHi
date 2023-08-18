@@ -14,7 +14,9 @@ import {
   AppState,
   FlatList,
   Linking,
-  Animated
+  Animated,
+  TouchableOpacity,
+  Platform
 } from 'react-native';
 import Elevations from 'react-native-elevation';
 import Users from './Common/User'
@@ -24,6 +26,8 @@ import AsyncStorage from '@react-native-community/async-storage';
 import DatePicker from 'react-native-date-picker'
 import TowBtnDialog from './Common/TwoBtnDialog'
 import MedicineUpdateDialog from './Common/MedicineUpdateDialog'
+import PregnancyDialog from './Common/PregnancyDialog'
+import PregnancyCautionDialog from './Common/PregnancyCautionDialog'
 import FetchingIndicator from 'react-native-fetching-indicator'
 import Toast from 'react-native-toast-message';
 // import Marquee from "react-native-awesome-marquee";
@@ -144,6 +148,8 @@ export default class Home extends React.Component {
     bannerDatas: [],
     injectionTimes: [],
     injectionTimeDatas: [],
+    pregnancyDialogVisible: false,
+    pregnancyCautionDialogVisible: false,
   }
 
   componentWillUnmount() {
@@ -345,8 +351,9 @@ export default class Home extends React.Component {
     ).then(
       json => {
         this.state.messageDates = [];
-        if (Object.keys(json.data).length > 3) {
-          for (let i = 0; i < 4; i++) {
+        console.log(Object.keys(json.data).length)
+        if (Object.keys(json.data).length > 10) {
+          for (let i = 0; i < 10; i++) {
             const obj = ({
               kind: json.data[i].kind || '',
               cont1: json.data[i].cont1 || '',
@@ -369,7 +376,7 @@ export default class Home extends React.Component {
           }
           this.state.messageLengthOver = true;
         } else {
-          for (i == 0; i < Object.keys(json.data).length; i++) {
+          for (let i = 0; i < Object.keys(json.data).length; i++) {
             const obj = ({
               kind: json.data[i].kind || '',
               cont1: json.data[i].cont1 || '',
@@ -789,9 +796,8 @@ export default class Home extends React.Component {
     } else if (name == 'Business') {
       this.props.navigation.navigate('Business')
     } else if (name == 'ChartWebview') {
-      this.props.navigation.navigate('AboutWebview', { tag: 'home' })
+      Users.guest == false ? this._ChartCheck() : this.props.navigation.navigate('AboutWebview', { tag: 'loginStatusChart' })
     }
-
   };
 
   onMessage = (event) => {
@@ -926,7 +932,7 @@ export default class Home extends React.Component {
             <Text style={{ fontSize: 16, fontFamily: 'KHNPHDotfR', color: '#000' }}>{this.state.selectMedicineName}</Text>
           </View>
 
-          <DatePicker androidVariant="iosClone" date={new Date()} onDateChange={(value) => str = value} mode={"time"} locale="ko" style={{ flex: 1 }} />
+          <DatePicker androidVariant="iosClone" date={new Date()} textColor={"#000000"} style={{ flex: 1 }} onDateChange={(value) => str = value} mode={"time"} locale="ko" onConfirm={(date) => console.log(date)} onCancel={() => console.log('cancel')} />
           <View style={{ flexDirection: 'row', flexWrap: 'nowrap', height: 50, marginBottom: 20, paddingLeft: 20, paddingRight: 20 }}>
             <TouchableWithoutFeedback onPress={() => this.setState({ calendarVisible: false, })}>
               <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: '#9699D6', borderRadius: 24 }}>
@@ -973,6 +979,28 @@ export default class Home extends React.Component {
       return <TowBtnDialog title={"투약취소"} contents={"투약을 취소하시겠습니까?"} leftBtnText={"취소"} rightBtnText={"확인"} clcik={this._TwoDialogVisible}></TowBtnDialog>
     } else {
       return null;
+    }
+  }
+
+  _PregnancyDialogVisible = value => {
+    if (value != undefined) {
+      this.setState({
+        pregnancyDialogVisible: value.visible,
+      })
+    }
+    if (this.state.pregnancyDialogVisible) {
+      return <PregnancyDialog clcik={this._PregnancyDialogVisible}></PregnancyDialog>
+    }
+  }
+
+  _PregnancyCautionDialogVisible = value => {
+    if (value != undefined) {
+      this.setState({
+        pregnancyCautionDialogVisible: value.visible,
+      })
+    }
+    if (this.state.pregnancyCautionDialogVisible) {
+      return <PregnancyCautionDialog clcik={this._PregnancyCautionDialogVisible}></PregnancyCautionDialog>
     }
   }
 
@@ -1043,13 +1071,15 @@ export default class Home extends React.Component {
     const guest = Users.guest;
     // console.log(TAG,'guest : ' + guest);
     // console.log(TAG,"time : " + Moment(Moment().format('YYYY-MM-DD') + " " + "18:24").format("a HH:mm"));
-    console.log("datas : " + JSON.stringify(this.state.datas))
+    // console.log("datas : " + JSON.stringify(this.state.datas))
     return (
       <SafeAreaView>
         <View style={{ width: '100%', height: '100%', backgroundColor: '#fff' }}>
           {this._Calendar()}
           {this._TwoDialogVisible()}
           {this._ExceptTwoDialogVisible()}
+          {this._PregnancyDialogVisible()}
+          {this._PregnancyCautionDialogVisible()}
           <View style={{ width: '100%', height: 50, flexWrap: 'nowrap', flexDirection: 'row', alignItems: 'center', }}>
 
             <Image source={imgLogo} style={{ width: 24, height: 27, resizeMode: 'contain', marginLeft: 20 }}></Image>
@@ -1093,8 +1123,8 @@ export default class Home extends React.Component {
 
             <Image style={{ marginTop: (Platform.OS === 'android' ? 19 : 10), height: 106, width: '100%', resizeMode: 'contain', opacity: 0 }}></Image>
 
-            <View style={{ width: '100%', backgroundColor: '#F6F7F9', paddingLeft: 20, paddingTop: 20, marginTop: 16, borderTopLeftRadius: 32, ...Elevations[20] }}>
-              <View style={{ paddingRight: 20, }}>
+            <View style={{ width: '100%', backgroundColor: '#F6F7F9', paddingTop: 20, marginTop: 16, borderTopLeftRadius: 32, ...Elevations[20] }}>
+              <View style={{ paddingRight: 20, paddingLeft: 20, }}>
                 {this.state.noticeMessageExistence && <View style={{ width: '100%', flexDirection: 'row' }}>
                   <Text style={{ fontSize: 13, fontFamily: 'KHNPHDotfB' }}>{"공지사항 | "}</Text>
                   <TextTicker style={{ fontSize: 13, fontFamily: 'KHNPHDotfB', color: '#3A137D' }} shouldAnimateTreshold={40} bounce={false} loop={true} duration={20000} marqueeDelay={0} repeatSpacer={20}>{this.state.noticeMessages}</TextTicker>
@@ -1199,13 +1229,13 @@ export default class Home extends React.Component {
                   </View>
                 </TouchableWithoutFeedback>
 
-                {/* <Text style={{ marginTop: 32, fontSize: 16, color: '#AFAFAF', fontFamily: 'KHNPHDotfR' }}>{Users.guest == true ? '처음 오셨나요?' : '나의 초진 차트'}</Text>
+                <Text style={{ marginTop: 32, fontSize: 16, color: '#AFAFAF', fontFamily: 'KHNPHDotfR' }}>{Users.guest == true ? '처음 오셨나요?' : '나의 초진 차트'}</Text>
                 <TouchableWithoutFeedback onPress={() => this.playPause('ChartWebview', '')}>
                   <View style={{ marginTop: 10, borderRadius: 12, backgroundColor: "rgba(219,227,241,0.5)", paddingLeft: 16, paddingRight: 31.5, flexDirection: 'row', width: '100%', height: 56, alignItems: 'center' }}>
                     <Text style={{ marginLeft: 0, fontSize: 18, fontFamily: 'KHNPHDotfR', color: '#000', flex: 1, }}>{Users.guest == true ? "나의 초진문진표" : "나의 초진문진표"}</Text>
                     <Image source={imgArrow} style={{ width: 8, height: 12, resizeMode: 'contain', }}></Image>
                   </View>
-                </TouchableWithoutFeedback> */}
+                </TouchableWithoutFeedback>
 
 
                 <Text style={{ marginTop: 32, fontSize: 16, color: '#AFAFAF', fontFamily: 'KHNPHDotfR' }}>HI의료진이 알려주는</Text>
@@ -1263,23 +1293,23 @@ export default class Home extends React.Component {
 
               </View>
 
-              <FlatList style={{ marginTop: 20, }} horizontal={true} data={this.state.videoDatas} renderItem={this._RenderItem} keyExtractor={(item, index) => index.toString()}></FlatList>
+              <FlatList style={{ marginTop: 20, paddingLeft: 20, }} horizontal={true} data={this.state.videoDatas} renderItem={this._RenderItem} keyExtractor={(item, index) => index.toString()}></FlatList>
 
-              <Text style={{ marginTop: 32, fontSize: 16, color: '#AFAFAF', fontFamily: 'KHNPHDotfR' }}>{"HI에서 아이를 만난 부부가 전하는"}</Text>
-              <Text style={{ marginTop: 15, fontSize: 20, color: '#000', fontFamily: 'KHNPHDotfB' }}>희망의 메세지</Text>
+              <Text style={{ marginTop: 32, fontSize: 16, color: '#AFAFAF', fontFamily: 'KHNPHDotfR', paddingLeft: 20, }}>{"HI에서 아이를 만난 부부가 전하는"}</Text>
+              <Text style={{ marginTop: 15, fontSize: 20, color: '#000', fontFamily: 'KHNPHDotfB', paddingLeft: 20, }}>희망의 메세지</Text>
 
-              <ScrollView style={{ marginTop: 20 }} horizontal={true} showsVerticalScrollIndicator={false} showsHorizontalScrollIndicator={false}>
-                {this.state.messageDatas.map((item, index) => (index != 3 ? <View key={index} style={{ width: 292, height: 232, backgroundColor: "rgb(236,233,228)", borderRadius: 24, marginLeft: index == 0 ? 0 : 20, marginRight: index == this.state.messageDatas.length - 1 ? 20 : 0, paddingTop: 24, paddingLeft: 20, paddingRight: 18, paddingBottom: 15 }}>
+              <ScrollView style={{ marginTop: 20, paddingLeft: 20, }} horizontal={true} showsVerticalScrollIndicator={false} showsHorizontalScrollIndicator={false}>
+                {this.state.messageDatas.map((item, index) => (index != 9 ? <View key={index} style={{ width: 292, height: 232, backgroundColor: "rgb(236,233,228)", borderRadius: 24, marginLeft: index == 0 ? 0 : 20, marginRight: 0, paddingTop: 24, paddingLeft: 20, paddingRight: 18, paddingBottom: 15 }}>
                   <Text style={{ fontSize: 14, fontFamily: 'KHNPHDotfR', color: item.kind == 1 ? '#E39C42' : '#4A50CA' }}>{(item.kind == 1 ? "임신했어요" : "출산했어요")}</Text>
                   <Text style={{ fontSize: 18, fontFamily: 'KHNPHDotfB', color: '#000', marginTop: 13 }}>{(item.kind == 1 ? "아이를 기다리는 난임부부에게 전하고 싶은 말" : "주치의에게 전하고 싶은 말")}</Text>
-                  <Text style={{ flex: 1, fontSize: 14, color: '#000', marginTop: 20, fontFamily: 'KHNPHUotfR', lineHeight: 20 }} ellipsizeMode="tail" numberOfLines={3}>{(item.kind == 1 ? item.cont1 : item.cont2)}</Text>
+                  <Text style={{ flex: 1, fontSize: 14, color: '#000', marginTop: 20, fontFamily: 'KHNPHUotfR', lineHeight: 20 }} ellipsizeMode="tail" numberOfLines={3}>{(item.kind == 1 ? item.cont1.replace(/&quot;/gi, "\"").replace(/&ldquo;/gi, '\"').replace(/&rdquo;/gi, '\"').replace(/&iexcl;/gi, '¡') : item.cont2.replace(/&quot;/gi, "\"").replace(/&ldquo;/gi, '\"').replace(/&rdquo;/gi, '\"').replace(/&iexcl;/gi, '¡'))}</Text>
                   <TouchableWithoutFeedback onPress={() => this.playPause('HopeMessageDetail', this.state.messageDatas[index])}>
                     <View style={{ justifyContent: 'flex-end', width: '100%', flexDirection: 'row', alignItems: 'center', height: 30 }}>
                       <Text style={{ fontSize: 14, fontFamily: 'KHNPHDotfB', color: '#AFAFAF' }}>more</Text>
                       <Image source={imgArrow} style={{ width: 4, height: 8, resizeMode: 'contain', marginLeft: 10, marginTop: 2 }}></Image>
                     </View>
                   </TouchableWithoutFeedback>
-                </View> : <View key={index} style={{ width: 292, height: 232, backgroundColor: 'rgb(236,233,228)', borderRadius: 24, marginLeft: index == 0 ? 0 : 20, marginRight: index == this.state.messageDatas.length - 1 ? 20 : 0, paddingTop: 24, paddingLeft: 20, paddingRight: 18, paddingBottom: 15 }}>
+                </View> : <View key={index} style={{ width: 292, height: 232, backgroundColor: 'rgb(236,233,228)', borderRadius: 24, marginLeft: index == 0 ? 0 : 20, marginRight: 20, paddingTop: 24, paddingLeft: 20, paddingRight: 18, paddingBottom: 15 }}>
                   <TouchableWithoutFeedback onPress={() => this.playPause('AboutWebview', 'pregnancy')}>
                     <View style={{ flex: 1, paddingTop: 0 }}>
                       <Text style={{ flex: 1, fontSize: 18, fontFamily: 'KHNPHDotfB', color: '#000', lineHeight: 30 }}>{"HI홈페이지에서\n더 많은 메시지를\n확인해보세요."}</Text>
@@ -1293,7 +1323,31 @@ export default class Home extends React.Component {
                 )}
               </ScrollView>
 
-              <View style={{ paddingRight: 20 }}>
+              <View style={{ flexDirection: 'row', marginTop: 20, alignItems: 'center' }}>
+                <View style={{ width: 20, height: 5, backgroundColor: '#ffffff', justifyContent: 'flex-end' }}>
+                  <View style={{ width: 20, height: 1, backgroundColor: '#d0d0d0', }}></View>
+                </View>
+                <TouchableOpacity style={{ flex: 1 }} onPress={() => this.setState({ pregnancyDialogVisible: true })}>
+                  <View style={{ alignItems: 'center', justifyContent: 'center', backgroundColor: '#F2D15D', borderRadius: 50, paddingTop: 12, paddingBottom: 12 }}>
+                    <Text style={{ fontSize: 14, fontFamily: 'KHNPHDotfB', color: '#000' }}>{"임신 초기 주의사항"}</Text>
+                  </View>
+                </TouchableOpacity>
+
+                <View style={{ width: 20, height: 5, backgroundColor: '#ffffff', justifyContent: 'flex-end' }}>
+                  <View style={{ width: 20, height: 1, backgroundColor: '#d0d0d0', }}></View>
+                </View>
+                <TouchableOpacity style={{ flex: 1 }} onPress={() => this.setState({ pregnancyCautionDialogVisible: true })}>
+                  <View style={{ alignItems: 'center', justifyContent: 'center', backgroundColor: '#F2D15D', borderRadius: 50, paddingTop: 12, paddingBottom: 12 }}>
+                    <Text style={{ fontSize: 14, fontFamily: 'KHNPHDotfB', color: '#000', }}>{"임신 중 받아야 할 검사"}</Text>
+                  </View>
+                </TouchableOpacity>
+
+                <View style={{ width: 20, height: 5, backgroundColor: '#ffffff', justifyContent: 'flex-end' }}>
+                  <View style={{ width: 20, height: 1, backgroundColor: '#d0d0d0', }}></View>
+                </View>
+              </View>
+
+              <View style={{ paddingRight: 20, paddingLeft: 20, }}>
                 <Text style={{ marginTop: 32, fontSize: 20, color: '#000', fontFamily: 'KHNPHDotfB' }}>About HI</Text>
                 <View style={{ marginTop: 20, flexDirection: 'row', alignItems: 'center' }}>
                   <TouchableWithoutFeedback onPress={() => this.playPause('AboutWebview', 'staff')}>
@@ -1345,7 +1399,7 @@ export default class Home extends React.Component {
               </View>
 
               {this.state.bannerDatas.length > 0 && (
-                <View style={{ paddingRight: 20, marginTop: 20 }}>
+                <View style={{ paddingRight: 20, marginTop: 20, paddingLeft: 20, }}>
                   <Animated.ScrollView
                     horizontal
                     pagingEnabled
@@ -1394,5 +1448,50 @@ export default class Home extends React.Component {
         </View>
       </SafeAreaView>
     );
+  }
+  _ChartCheck() {
+    var details = {
+      'name': Users.userName,
+      'phone': Users.userPhoneNumber,
+      'birthDate': Users.userBirthday,
+    };
+
+    var formBody = [];
+
+    for (var property in details) {
+      var encodedKey = encodeURIComponent(property);
+      var encodedValue = encodeURIComponent(details[property]);
+      formBody.push(encodedKey + "=" + encodedValue);
+    }
+
+    formBody = formBody.join("&");
+
+    fetch(ServerUrl.Server + "/userApi/select-checkup-list", {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
+      },
+      mode: 'cors',
+      cache: 'default',
+      body: formBody,
+    }).then(
+      response => response.json()
+    ).then(
+      json => {
+        console.log(TAG, json);
+        if (json.Error_Cd == "0000") {
+          // console.log(Users.userName,)
+          if (Object.keys(json.Resources).length > 0) {
+            this.props.navigation.navigate('AboutWebview', { tag: 'home' })
+          } else {
+            this.props.navigation.navigate('AboutWebview', { tag: 'home_first_chart' })
+          }
+        } else {
+          this.setState({
+            isLoading: true,
+          })
+        }
+      }
+    )
   }
 }

@@ -28,7 +28,7 @@ export default class MyPage extends React.Component {
     state = {
         twoDialogVisible: false,
         refresh: false,
-        updatetedDay: '2022.09.07 10:57',
+        updatetedDay: '2023.07.20 15:20',
     }
 
     _TwoDialogVisible = value => {

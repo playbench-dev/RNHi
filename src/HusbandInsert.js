@@ -181,10 +181,10 @@ export default class HusbandInsert extends React.Component {
                         <View style={{ width: '100%', height: 216, justifyContent: "center", alignItems: 'center' }}>
                             <DatePicker
                                 locale={"ko"}
-                                modal
                                 mode="date"
                                 open={true}
                                 date={new Date()}
+                                textColor={"#000000"}
                                 onDateChange={(date) => {
                                     console.log('DatePicker', 'date : ' + date + ' moment : ' + Moment(date).format('yyyy-MM-DD'));
                                     this.state.birthDay = Moment(date).format('yyyy-MM-DD');

@@ -1,7 +1,7 @@
 /**
  * @format
  */
-import { AppRegistry, Platform } from 'react-native';
+import { AppRegistry, Platform, Text, TextInput } from 'react-native';
 import App from './App';
 import { name as appName } from './app.json';
 import PushNotification from 'react-native-push-notification';
@@ -10,6 +10,13 @@ import codePush from 'react-native-code-push';
 import messaging from '@react-native-firebase/messaging';
 
 const TAG = "index";
+
+Text.defaultProps = Text.defaultProps || {};
+Text.defaultProps.allowFontScaling = false;
+
+TextInput.defaultProps = TextInput.defaultProps || {};
+TextInput.defaultProps.autoCorrect = false;
+TextInput.defaultProps.allowFontScaling = false;
 
 const codePushOptions = {
   checkFrequency: codePush.CheckFrequency.ON_APP_START,

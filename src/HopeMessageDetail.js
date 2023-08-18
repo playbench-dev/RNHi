@@ -87,12 +87,12 @@ export default class HopeMessageDetail extends React.Component {
 
                             <Text style={{ fontFamily: 'KHNPHDotfR', color: '#000', fontSize: 16 }}>{this.state.datas.kind == 1 ? "아기를 기다리는 난임부부에게 전하고 싶은 말" : "출산하고 아기에게 처음 해준 말"}</Text>
 
-                            <Text style={{ fontFamily: 'KHNPHUotfR', color: '#000', fontSize: 14, marginTop: 21, lineHeight: 20 }}>{this.state.datas.cont1.replace(/&quot;/gi, "\"")}</Text>
+                            <Text style={{ fontFamily: 'KHNPHUotfR', color: '#000', fontSize: 14, marginTop: 21, lineHeight: 20 }}>{this.state.datas.cont1.replace(/&quot;/gi, "\"").replace(/&ldquo;/gi, '\"').replace(/&rdquo;/gi, '\"').replace(/&iexcl;/gi, '¡')}</Text>
 
                             {this.state.datas.kind == 1 ? null : <View>
                                 <View style={{ marginTop: 20, marginBottom: 20, width: '100%', height: 1, backgroundColor: '#00000029' }}></View>
                                 <Text style={{ fontFamily: 'KHNPHDotfR', color: '#000', fontSize: 16 }}>주치의에게 전하고 싶은 말</Text>
-                                <Text style={{ fontFamily: 'KHNPHUotfR', color: '#000', fontSize: 14, marginTop: 21, lineHeight: 20 }}>{this.state.datas.cont2.replace(/&quot;/gi, "\"")}</Text>
+                                <Text style={{ fontFamily: 'KHNPHUotfR', color: '#000', fontSize: 14, marginTop: 21, lineHeight: 20 }}>{this.state.datas.cont2.replace(/&quot;/gi, "\"").replace(/&ldquo;/gi, '\"').replace(/&rdquo;/gi, '\"').replace(/&iexcl;/gi, '¡')}</Text>
                             </View>}
                         </View>
 
@@ -102,7 +102,7 @@ export default class HopeMessageDetail extends React.Component {
                                 <Text style={{ fontFamily: 'KHNPHUotfR', color: '#AFAFAF', fontSize: 12 }}>{Moment(this.state.datas.answerDate).format("YYYY.MM.DD")}</Text>
                             </View>
                             <View style={{ marginTop: 21 }}>
-                                <Text style={{ fontFamily: 'KHNPHUotfR', color: '#000', fontSize: 14, marginTop: 21, lineHeight: 20 }}>{this.state.datas.answerCont.replace(/&quot;/gi, "\"")}</Text>
+                                <Text style={{ fontFamily: 'KHNPHUotfR', color: '#000', fontSize: 14, marginTop: 21, lineHeight: 20 }}>{this.state.datas.answerCont.replace(/&quot;/gi, "\"").replace(/&ldquo;/gi, '\"').replace(/&rdquo;/gi, '\"').replace(/&iexcl;/gi, '¡')}</Text>
                             </View>
                         </View> : null}
 

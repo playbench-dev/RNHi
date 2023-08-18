@@ -1,5 +1,5 @@
 import React from 'react';
-import { SafeAreaView, View, Text, Image, ScrollView, StatusBar, StyleSheet, TouchableWithoutFeedback, LogBox, Modal, BackHandler, ActivityIndicator, Animated, RefreshControl } from 'react-native';
+import { SafeAreaView, View, Text, Image, ScrollView, StatusBar, StyleSheet, TouchableWithoutFeedback, LogBox, Modal, BackHandler, ActivityIndicator, Animated, RefreshControl, TouchableOpacity } from 'react-native';
 import Elevations from 'react-native-elevation';
 import SwitchToggle from 'react-native-switch-toggle';
 import FetchingIndicator from 'react-native-fetching-indicator'
@@ -503,7 +503,7 @@ export default class MedicineCalendar extends React.Component {
                         <Text style={{ fontSize: 16, fontFamily: 'KHNPHDotfR', color: '#000' }}>{this.state.selectMedicineName}</Text>
                     </View>
 
-                    <DatePicker androidVariant="iosClone" date={new Date()} onDateChange={(value) => str = value} mode={"time"} locale="ko" style={{ flex: 1 }} />
+                    <DatePicker androidVariant="iosClone" textColor={"#000000"} date={new Date()} onDateChange={(value) => str = value} mode={"time"} locale="ko" style={{ flex: 1 }} />
                     <View style={{ flexDirection: 'row', flexWrap: 'nowrap', height: 50, marginBottom: 20, paddingLeft: 20, paddingRight: 20 }}>
                         <TouchableWithoutFeedback onPress={() => this.setState({ calendarVisible: false, })}>
                             <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: '#9699D6', borderRadius: 24 }}>
@@ -684,7 +684,7 @@ export default class MedicineCalendar extends React.Component {
     }
 
     _CalendarArr = (value) => {
-        console.log(`index : ${this.state.medicineNameDatas.indexOf('페마라')}`)
+
         let result = [];
         let week = this.state.firstWeek;
         let heightDivide = 0;
@@ -1021,14 +1021,18 @@ export default class MedicineCalendar extends React.Component {
                     {this._TwoDialogVisible()}
                     {this._ExceptTwoDialogVisible()}
                     <View style={{ width: '100%', height: 48, flexDirection: 'row', alignItems: 'center', }}>
-                        <TouchableWithoutFeedback onPress={() => this.goBack()}>
-                            <View style={{ flex: 1, justifyContent: 'center' }}>
-                                <Image source={imgBack} style={{ width: 24, height: 24, resizeMode: 'contain', marginLeft: 24 }}></Image>
-                            </View>
-                        </TouchableWithoutFeedback>
+
+                        <View style={{ justifyContent: 'center', height: '100%' }}>
+                            <TouchableOpacity style={{ width: 48, height: 48, paddingTop: 8, paddingBottom: 8, marginLeft: 12, }} onPress={() => this.goBack()}>
+                                <Image source={imgBack} style={{ width: 32, height: 32, resizeMode: 'contain', }}></Image>
+                            </TouchableOpacity>
+                        </View>
+
+                        <View style={{ flex: 1 }}></View>
+
                         <TouchableWithoutFeedback onPress={() => this.setState({ calendarStatus: (this.state.calendarStatus == 0 ? 1 : 0) })}>
                             <View style={{ justifyContent: 'center', backgroundColor: '#63beb1', height: 35, marginRight: 12, alignItems: 'center', paddingLeft: 10, paddingRight: 10, borderRadius: 8 }}>
-                                <Text style={{ color: '#fff', fontSize: 12 }}>{this.state.calendarStatus == 0 ? "축소" : "크게보기"}</Text>
+                                <Text style={{ color: '#fff', fontSize: 12, fontFamily: 'KHNPHDotfR' }}>{this.state.calendarStatus == 0 ? "축소" : "크게보기"}</Text>
                             </View>
                         </TouchableWithoutFeedback>
                     </View>

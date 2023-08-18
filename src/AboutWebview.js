@@ -42,14 +42,7 @@ export default class AboutWebview extends React.Component {
             this.state.url = this.props.route.params.url;
         } else if (this.props.route.params.tag == 'loginStatusChart') {
             this.state.url = 'https://hi-admin.co.kr/ValidateUserIndex';
-        } else if (this.props.route.params.tag == 'home') {
-            console.log(Users.guest)
-            Users.guest == true ? (this.state.url = ServerUrl.Server + '/ValidateUserIndex') : this._ChartCheck()
         }
-        // this.setState({
-        //     isLoading: true,
-        //     isFetching: false,
-        // })
     }
 
     _ChartCheck() {
@@ -101,6 +94,33 @@ export default class AboutWebview extends React.Component {
     }
 
     render() {
+        if (this.props.route.params.tag == 'staff') {
+            this.state.url = 'https://www.hifertility.co.kr/about/staff.do';
+        } else if (this.props.route.params.tag == 'reservation') {
+            this.state.url = 'https://www.hifertility.co.kr/contact/reservation.do';
+        } else if (this.props.route.params.tag == 'news') {
+            this.state.url = 'https://www.hifertility.co.kr/news/notice_view2?num=' + this.props.route.params.num;
+        } else if (this.props.route.params.tag == 'question') {
+            this.state.url = 'https://www.hifertility.co.kr/contact/shout.do';
+        } else if (this.props.route.params.tag == 'caution') {
+            this.state.url = 'https://www.hifertility.co.kr/contact/reservation.do';
+        } else if (this.props.route.params.tag == 'business') {
+            this.state.url = 'https://www.hifertility.co.kr/guide/support.do';
+        } else if (this.props.route.params.tag == 'pregnancy') {
+            this.state.url = 'https://www.hifertility.co.kr/news/pregnancy.do';
+        } else if (this.props.route.params.tag == 'banner') {
+            this.state.url = this.props.route.params.url;
+        } else if (this.props.route.params.tag == 'loginStatusChart') {
+            this.state.url = 'https://hi-admin.co.kr/ValidateUserIndex';
+        } else if (this.props.route.params.tag == 'home') {
+            console.log(ServerUrl.Server + '/MedicalExamIndex?patient_no=' + Users.paitentNo)
+            console.log(Users.paitentNo)
+            this.state.url = ServerUrl.Server + '/MedicalExamIndex?patient_no=' + Users.paitentNo
+        } else if (this.props.route.params.tag == 'home_first_chart') {
+            this.state.url = ServerUrl.Server + '/ValidateUserIndex'
+        } else if (this.props.route.params.tag == 'adminChart') {
+            this.state.url = this.props.route.params.url
+        }
         return (
             <SafeAreaView>
                 <View style={{ width: '100%', height: '100%', backgroundColor: '#F6F7F9' }}>
@@ -112,7 +132,7 @@ export default class AboutWebview extends React.Component {
                         </TouchableWithoutFeedback>
                     </View>
                     <View style={{ backgroundColor: 'transparent', flex: 1 }}>
-                        <Webview onLoad={() => this.setState({ isFetching: false })} originWhitelist={['*']} startInLoadingState={true} style={{ backgroundColor: 'white', height: this.state.webheight, width: '100%', height: '100%' }} source={{ uri: this.state.url }} />
+                        <Webview onLoad={() => this.setState({ isFetching: false })} mediaPlaybackRequiresUserAction={true} originWhitelist={['*']} style={{ backgroundColor: 'white', height: this.state.webheight, width: '100%', height: '100%' }} source={{ uri: this.state.url }} />
                     </View>
                     <FetchingIndicator isFetching={this.state.isFetching} message='' color='#4a50ca' />
                 </View>

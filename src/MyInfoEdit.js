@@ -194,9 +194,9 @@ export default class MyInfoEdit extends React.Component {
                         <View style={{ width: '100%', height: 216, justifyContent: "center", alignItems: 'center' }}>
                             <DatePicker
                                 locale={"ko"}
-                                modal
                                 mode="date"
                                 open={true}
+                                textColor={"#000000"}
                                 date={(Users.spouseBirthday.length == 0 ? new Date() : new Date(Users.spouseBirthday))}
                                 onDateChange={(date) => {
                                     console.log('DatePicker', 'date : ' + date + ' moment : ' + Moment(date).format('yyyy-MM-DD'));

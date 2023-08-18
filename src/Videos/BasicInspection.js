@@ -100,7 +100,7 @@ export default class BasicInspection extends React.Component {
                         </View>
 
                         <View style={{ marginTop: 20 }}>
-                            <Text style={{ fontSize: 14, fontFamily: 'KHNPHUotfR', color: '#000', lineHeight: 20 }} >{this.state.contents}</Text>
+                            <Text style={{ fontSize: 14, fontFamily: 'KHNPHUotfR', color: '#000', lineHeight: 20 }} >{this.state.contents.replace(/<p>/g, '').replace(/<\/p>/g, '\n').replace(/<br>/g, '\n\n')}</Text>
                         </View>
                     </ScrollView>
 

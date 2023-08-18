@@ -11,7 +11,7 @@ export default class ServerUrl {
     //Home
     static oneLineNoticeUrl = ServerUrl.Server + "/userApi/app-message-info";                             //한 줄 공지사항
     static RandomMessageInfo = ServerUrl.Server + "/userApi/app-random-message-info"                      //랜덤메시지  
-    static hopeMessagesUrl = "https://www.hifertility.co.kr/api/pregnancy?page=1&pageSize=4";             //희망메세지
+    static hopeMessagesUrl = "https://www.hifertility.co.kr/api/pregnancy?page=1&pageSize=10";             //희망메세지
     static BannerInfo = ServerUrl.Server + "/userApi/select-banner-info"
     static ChartCheck = ServerUrl.Server + "/userApi/select-checkup-list"
 

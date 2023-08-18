@@ -128,6 +128,52 @@ export default class AdminUserSelect extends React.Component {
         }
     }
 
+    _ChartCheck(name, phone, birth, patientNo) {
+        var details = {
+            'name': name,
+            'phone': phone,
+            'birthDate': birth,
+        };
+
+        var formBody = [];
+
+        for (var property in details) {
+            var encodedKey = encodeURIComponent(property);
+            var encodedValue = encodeURIComponent(details[property]);
+            formBody.push(encodedKey + "=" + encodedValue);
+        }
+
+        formBody = formBody.join("&");
+
+        fetch(ServerUrl.Server + "/userApi/select-checkup-list", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
+            },
+            mode: 'cors',
+            cache: 'default',
+            body: formBody,
+        }).then(
+            response => response.json()
+        ).then(
+            json => {
+                console.log(TAG, json);
+                if (json.Error_Cd == "0000") {
+                    // console.log(Users.userName,)
+                    if (Object.keys(json.Resources).length > 0) {
+                        this.props.navigation.navigate('AboutWebview', { tag: 'adminChart', url: ServerUrl.Server + '/MedicalExamIndex?patient_no=' + patientNo })
+                    } else {
+                        this.props.navigation.navigate('AboutWebview', { tag: 'adminChart', url: ServerUrl.Server + '/ValidateUserIndex' })
+                    }
+                } else {
+                    this.setState({
+                        isLoading: true,
+                    })
+                }
+            }
+        )
+    }
+
     render() {
         return (
             <SafeAreaView>
@@ -155,65 +201,77 @@ export default class AdminUserSelect extends React.Component {
                                 <Image style={{ width: 33, height: 33, resizeMode: 'contain', }} source={imgLogo}></Image>
                             </View>
 
-                            <View style={{ flex: 1, marginLeft: 12, justifyContent: 'center', alignItems: 'center', }}>
-                                <View style={{ flexDirection: 'row', alignItems: 'center', }}>
-                                    <View style={{ flex: 1 }}>
-                                        <Text>{"이름 : " + obj.item.userName}</Text>
+                            <ScrollView horizontal showsVerticalScrollIndicator={false} showsHorizontalScrollIndicator={false}>
+                                <View style={{ flex: 1, marginLeft: 12, justifyContent: 'center', alignItems: 'center', }}>
+                                    <View style={{ flexDirection: 'row', alignItems: 'center', }}>
+                                        <View style={{ flex: 1 }}>
+                                            <Text>{"이름 : " + obj.item.userName}</Text>
+                                        </View>
+                                    </View>
+                                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                                        <View style={{ flex: 1 }}>
+                                            <Text>{"환자번호 : " + obj.item.userPatientNo}</Text>
+                                        </View>
+                                    </View>
+                                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                                        <View style={{ flex: 1 }}>
+                                            <Text>{"전화번호 : " + obj.item.userPhone}</Text>
+                                        </View>
                                     </View>
                                 </View>
-                                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                                    <View style={{ flex: 1 }}>
-                                        <Text>{"환자번호 : " + obj.item.userPatientNo}</Text>
-                                    </View>
+
+                                <View style={{ flexDirection: 'row', marginLeft: 12, alignItems: 'center' }}>
+                                    <TouchableWithoutFeedback onPress={() => this._ChartCheck(obj.item.userName, obj.item.userPhone, obj.item.userBirth, obj.item.userPatientNo)}>
+                                        <View style={{ width: 70, alignItems: 'center', justifyContent: 'center', borderRadius: 8, backgroundColor: "#AF8BB7", height: 40 }}>
+                                            <Text style={{
+                                                fontSize: 14,
+                                                color: "#000",
+                                                fontFamily: 'KHNPHDotfR',
+                                            }}>문진표</Text>
+                                        </View>
+                                    </TouchableWithoutFeedback>
+                                    <TouchableWithoutFeedback onPress={() => this.props.navigation.navigate('AdminMedicineCalendar', { userNo: obj.item.userNo, userName: obj.item.userName, patientNo: obj.item.userPatientNo })}>
+                                        <View style={{ width: 70, alignItems: 'center', justifyContent: 'center', borderRadius: 8, backgroundColor: "#EDA5CA", height: 40, marginLeft: 14, }}>
+                                            <Text style={{
+                                                fontSize: 14,
+                                                color: "#000",
+                                                fontFamily: 'KHNPHDotfR',
+                                            }}>주사</Text>
+                                        </View>
+                                    </TouchableWithoutFeedback>
+                                    <TouchableWithoutFeedback onPress={() => this.props.navigation.navigate('AdminKakaoList', { userNo: obj.item.userNo, userName: obj.item.userName, patientNo: obj.item.userPatientNo })}>
+                                        <View style={{ width: 70, alignItems: 'center', justifyContent: 'center', borderRadius: 8, backgroundColor: "#FAE101", marginLeft: 14, height: 40 }}>
+                                            <Text style={{
+                                                fontSize: 14,
+                                                color: "#000",
+                                                fontFamily: 'KHNPHDotfR',
+                                            }}>알림톡</Text>
+                                        </View>
+                                    </TouchableWithoutFeedback>
+
+                                    <TouchableWithoutFeedback onPress={() => this.props.navigation.navigate('AdminCellDevelop', { userNo: obj.item.userNo, userName: obj.item.userName, patientNo: obj.item.userPatientNo })}>
+                                        <View style={{ width: 70, alignItems: 'center', justifyContent: 'center', borderRadius: 8, backgroundColor: "#673AB7", marginLeft: 14, height: 40 }}>
+                                            <Text style={{
+                                                fontSize: 14,
+                                                color: "#000",
+                                                fontFamily: 'KHNPHDotfR',
+                                            }}>배아</Text>
+                                        </View>
+                                    </TouchableWithoutFeedback>
+
+                                    <TouchableWithoutFeedback onPress={() => this.props.navigation.navigate('AdminAlarmList', { userNo: obj.item.userNo, userName: obj.item.userName, patientNo: obj.item.userPatientNo })}>
+                                        <View style={{ width: 70, alignItems: 'center', justifyContent: 'center', borderRadius: 8, backgroundColor: "#548235", marginLeft: 14, height: 40 }}>
+                                            <Text style={{
+                                                fontSize: 14,
+                                                color: "#000",
+                                                fontFamily: 'KHNPHDotfR',
+                                            }}>푸시</Text>
+                                        </View>
+                                    </TouchableWithoutFeedback>
+
                                 </View>
-                                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                                    <View style={{ flex: 1 }}>
-                                        <Text>{"전화번호 : " + obj.item.userPhone}</Text>
-                                    </View>
-                                </View>
-                            </View>
+                            </ScrollView>
 
-                            <View style={{ flexDirection: 'row', }}>
-                                <TouchableWithoutFeedback onPress={() => this.props.navigation.navigate('AdminMedicineCalendar', { userNo: obj.item.userNo, userName: obj.item.userName, patientNo: obj.item.userPatientNo })}>
-                                    <View style={{ width: 70, alignItems: 'center', justifyContent: 'center', borderRadius: 8, backgroundColor: "#EDA5CA", height: 40 }}>
-                                        <Text style={{
-                                            fontSize: 14,
-                                            color: "#000",
-                                            fontFamily: 'KHNPHDotfR',
-                                        }}>주사</Text>
-                                    </View>
-                                </TouchableWithoutFeedback>
-                                <TouchableWithoutFeedback onPress={() => this.props.navigation.navigate('AdminKakaoList', { userNo: obj.item.userNo, userName: obj.item.userName, patientNo: obj.item.userPatientNo })}>
-                                    <View style={{ width: 70, alignItems: 'center', justifyContent: 'center', borderRadius: 8, backgroundColor: "#FAE101", marginLeft: 14, height: 40 }}>
-                                        <Text style={{
-                                            fontSize: 14,
-                                            color: "#000",
-                                            fontFamily: 'KHNPHDotfR',
-                                        }}>알림톡</Text>
-                                    </View>
-                                </TouchableWithoutFeedback>
-
-                                <TouchableWithoutFeedback onPress={() => this.props.navigation.navigate('AdminCellDevelop', { userNo: obj.item.userNo, userName: obj.item.userName, patientNo: obj.item.userPatientNo })}>
-                                    <View style={{ width: 70, alignItems: 'center', justifyContent: 'center', borderRadius: 8, backgroundColor: "#673AB7", marginLeft: 14, height: 40 }}>
-                                        <Text style={{
-                                            fontSize: 14,
-                                            color: "#000",
-                                            fontFamily: 'KHNPHDotfR',
-                                        }}>배아</Text>
-                                    </View>
-                                </TouchableWithoutFeedback>
-
-                                <TouchableWithoutFeedback onPress={() => this.props.navigation.navigate('AdminAlarmList', { userNo: obj.item.userNo, userName: obj.item.userName, patientNo: obj.item.userPatientNo })}>
-                                    <View style={{ width: 70, alignItems: 'center', justifyContent: 'center', borderRadius: 8, backgroundColor: "#548235", marginLeft: 14, height: 40 }}>
-                                        <Text style={{
-                                            fontSize: 14,
-                                            color: "#000",
-                                            fontFamily: 'KHNPHDotfR',
-                                        }}>푸시</Text>
-                                    </View>
-                                </TouchableWithoutFeedback>
-
-                            </View>
                         </View>
                         // </TouchableOpacity>
 
