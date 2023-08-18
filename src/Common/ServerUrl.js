@@ -1,9 +1,16 @@
 import React from 'react';
 
+<<<<<<< HEAD
 export default class ServerUrl{
     static Server = "https://hi-admin.co.kr";    
     static Server1 = "http://192.168.0.17:3010";    //명성
     static Server2 = "http://192.168.0.102:3010";   //용범
+=======
+export default class ServerUrl {
+    static Server = "https://hi-admin.co.kr"; //hi-admin.co.kr
+    static Server1 = "http://192.168.0.26:8080";    //ㅈㅣ훈이형
+    static Server2 = "http://220.87.39.187:3010";   //용범
+>>>>>>> mw
     static loginUrl = ServerUrl.Server + "/userApi/user-login";                                           //로그인                  // refresh_token null
     static spouseUpdateUrl = ServerUrl.Server + '/userApi/insert-spouse-info';                            //배우자 정보 수정          // refresh_token null (마이페이지에서는 넣어야됨)
     static provisionAgree = ServerUrl.Server + '/userApi/update-provision-agree';                         //약관동의                // refresh_token null
@@ -11,11 +18,21 @@ export default class ServerUrl{
     //Home
     static oneLineNoticeUrl = ServerUrl.Server + "/userApi/app-message-info";                             //한 줄 공지사항
     static RandomMessageInfo = ServerUrl.Server + "/userApi/app-random-message-info"                      //랜덤메시지  
+<<<<<<< HEAD
     static hopeMessagesUrl = "https://www.hifertility.co.kr/api/pregnancy?page=1&pageSize=4";             //희망메세지
+=======
+    static hopeMessagesUrl = "https://www.hifertility.co.kr/api/pregnancy?page=1&pageSize=10";             //희망메세지
+    static BannerInfo = ServerUrl.Server + "/userApi/select-banner-info"
+    static ChartCheck = ServerUrl.Server + "/userApi/select-checkup-list"
+>>>>>>> mw
 
     //medicine
     static medicineInfoList = ServerUrl.Server + "/userApi/select-shedule-medicine-info";                 //투약 리스트
     static medicineUpdate = ServerUrl.Server + "/userApi/take-time-update";                               //투약 업데이트
+<<<<<<< HEAD
+=======
+    static MedicineInfo = ServerUrl.Server + "/userApi/select-all-medicine-info"                          //약 정보
+>>>>>>> mw
 
     //MyPage
     static myInfoEditUrl = ServerUrl.Server + "/userApi/update-user-info";                                //개인정보 수정
@@ -38,6 +55,10 @@ export default class ServerUrl{
     //IVF
     static IVFListUrl = ServerUrl.Server + "/userApi/select-app-chart-list"                               //IVF 리스트
     static IVFDetailUrl = ServerUrl.Server + "/userApi/select-app-opu-info"                               //IVF 상세
+<<<<<<< HEAD
+=======
+    static CryoUrl = ServerUrl.Server + "/userApi/select-cryo-all-info"                                   //Cryo 리스트
+>>>>>>> mw
 
     //동영상
     static VideoListDetail = ServerUrl.Server + "/userApi/video-app-management-list"                      //동영상 관리
@@ -56,10 +77,18 @@ export default class ServerUrl{
     // category = 4 THEN '배양기술력'
     // category = 5 THEN '주사방법'
     // category = 6 THEN '주사별영상'
+<<<<<<< HEAD
     
+=======
+
+>>>>>>> mw
     // category = 8 THEN '난임 지원사업관리'
 
     //admin 
     static UserList = ServerUrl.Server + "/userApi/select-admin-patient-list"                             //환자 리스트
     static AdminMedicineList = ServerUrl.Server + "/userApi/select-admin-schedule-medicine-info"         //환자 캘린더
+<<<<<<< HEAD
+=======
+
+>>>>>>> mw
 }

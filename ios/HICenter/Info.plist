@@ -24,6 +24,13 @@
 	<string>$(CURRENT_PROJECT_VERSION)</string>
 	<key>CodePushDeploymentKey</key>
 	<string>E9oewdAoktqaNJe63Fbmps0s9oFK_Fs1qsi8H</string>
+<<<<<<< HEAD
+=======
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>itms-apps</string>
+	</array>
+>>>>>>> mw
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSAppTransportSecurity</key>
@@ -42,6 +49,7 @@
 		<string>NotoSansCJKkr-Medium.otf</string>
 		<string>NotoSansCJKkr-Regular.otf</string>
 	</array>
+<<<<<<< HEAD
 	<key>LSApplicationQueriesSchemes</key>
 	<array>
 		<string>itms-apps</string> <!-- app store -->
@@ -49,6 +57,10 @@
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>fetch</string>
+=======
+	<key>UIBackgroundModes</key>
+	<array>
+>>>>>>> mw
 		<string>remote-notification</string>
 	</array>
 	<key>UILaunchStoryboardName</key>
@@ -67,6 +79,9 @@
 	<string>Light</string>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>
+<<<<<<< HEAD
 
+=======
+>>>>>>> mw
 </dict>
 </plist>

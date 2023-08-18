@@ -6,7 +6,11 @@
 //
 
 #import "NotificationService.h"
+<<<<<<< HEAD
 #import "FirebaseMessaging.h"
+=======
+//#import "FirebaseMessaging.h"
+>>>>>>> mw
 
 @interface NotificationService ()
 
@@ -22,10 +26,17 @@
     self.bestAttemptContent = [request.content mutableCopy];
     
     // Modify the notification content here...
+<<<<<<< HEAD
 //    self.bestAttemptContent.title = [NSString stringWithFormat:@"%@ [modified]", self.bestAttemptContent.title];
 //
 //    self.contentHandler(self.bestAttemptContent);
   [[FIRMessaging extensionHelper] populateNotificationContent:self.bestAttemptContent withContentHandler:contentHandler];
+=======
+    self.bestAttemptContent.title = [NSString stringWithFormat:@"%@ [modified]", self.bestAttemptContent.title];
+
+    self.contentHandler(self.bestAttemptContent);
+//  [[FIRMessaging extensionHelper] populateNotificationContent:self.bestAttemptContent withContentHandler:contentHandler];
+>>>>>>> mw
 
 }
 

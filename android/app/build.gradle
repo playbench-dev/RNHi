@@ -129,13 +129,35 @@ android {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
+<<<<<<< HEAD
 
+=======
+configurations.all {
+        resolutionStrategy {
+            force 'androidx.browser:browser:1.2.0'
+        }
+    }
+
+     packagingOptions {
+        pickFirst '**/libjsc.so'
+        pickFirst '**/libc++_shared.so'
+        pickFirst '**/libfbjni.so'
+        pickFirst '**/llibturbomodulejsijni.so'
+        pickFirst '**/libturbomodulejsijni.so'
+        // Add more according to your error here
+    }
+>>>>>>> mw
     defaultConfig {
         applicationId "com.hicenter"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
+<<<<<<< HEAD
         versionCode 3
         versionName "0.0.2"
+=======
+        versionCode 22
+        versionName "0.0.22"
+>>>>>>> mw
         resConfigs "kr"
     }
     splits {
@@ -199,6 +221,11 @@ dependencies {
     implementation platform('com.google.firebase:firebase-bom:28.2.0')
     implementation 'com.google.firebase:firebase-analytics'
     implementation "androidx.swiperefreshlayout:swiperefreshlayout:1.0.0"
+<<<<<<< HEAD
+=======
+    implementation 'com.facebook.fresco:fresco:2.5.0'
+    implementation 'com.facebook.fresco:animated-gif:2.5.0'  
+>>>>>>> mw
     implementation project(':react-native-version-info')
     debugImplementation("com.facebook.flipper:flipper:${FLIPPER_VERSION}") {
       exclude group:'com.facebook.fbjni'

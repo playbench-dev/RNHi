@@ -19,8 +19,14 @@
         android:label="@string/app_name"
         android:configChanges="keyboard|keyboardHidden|orientation|screenSize|uiMode"
         android:launchMode="singleTask"
+<<<<<<< HEAD
         android:screenOrientation="portrait"
         android:windowSoftInputMode="adjustResize">
+=======
+        android:exported="true"
+        android:screenOrientation="portrait"
+        android:windowSoftInputMode="adjustPan">
+>>>>>>> mw
         <intent-filter>
             <action android:name="android.intent.action.MAIN" />
             <category android:name="android.intent.category.LAUNCHER" />
