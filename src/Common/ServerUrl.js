@@ -2,7 +2,7 @@ import React from 'react';
 
 export default class ServerUrl {
     static Server = "https://hi-admin.co.kr"; //hi-admin.co.kr
-    static Server1 = "http://192.168.0.26:8080";    //ㅈㅣ훈이형
+    static Server1 = "http://192.168.0.96:8080";    //ㅈㅣ훈이형
     static Server2 = "http://220.87.39.187:3010";   //용범
     static loginUrl = ServerUrl.Server + "/userApi/user-login";                                           //로그인                  // refresh_token null
     static spouseUpdateUrl = ServerUrl.Server + '/userApi/insert-spouse-info';                            //배우자 정보 수정          // refresh_token null (마이페이지에서는 넣어야됨)
@@ -42,6 +42,7 @@ export default class ServerUrl {
     static IVFListUrl = ServerUrl.Server + "/userApi/select-app-chart-list"                               //IVF 리스트
     static IVFDetailUrl = ServerUrl.Server + "/userApi/select-app-opu-info"                               //IVF 상세
     static CryoUrl = ServerUrl.Server + "/userApi/select-cryo-all-info"                                   //Cryo 리스트
+    static emBryoNoticeFlagUrl = ServerUrl.Server + "/userApi/update-embryo-notice"                       //주의사항 팝업
 
     //동영상
     static VideoListDetail = ServerUrl.Server + "/userApi/video-app-management-list"                      //동영상 관리

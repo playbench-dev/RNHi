@@ -24,23 +24,35 @@ const codePushOptions = {
 }
 
 //background
-// messaging().setBackgroundMessageHandler(async (remoteMessage) => {
-//   console.log("App : ", 'remote : ' + JSON.stringify(remoteMessage));
-//   //  여기에 로직을 작성한다.
-//   //  remoteMessage.data로 메세지에 접근가능
-//   //  remoteMessage.from 으로 topic name 또는 message identifier
-//   //  remoteMessage.messageId 는 메시지 고유값 id
-//   //  remoteMessage.notification 메시지와 함께 보내진 추가 데이터
-//   //  remoteMessage.sentTime 보낸시간
-// });
+messaging().setBackgroundMessageHandler(async (remoteMessage) => {
+  console.log("Index : ", 'remote : ' + JSON.stringify(remoteMessage));
+  //  여기에 로직을 작성한다.
+  //  remoteMessage.data로 메세지에 접근가능
+  //  remoteMessage.from 으로 topic name 또는 message identifier
+  //  remoteMessage.messageId 는 메시지 고유값 id
+  //  remoteMessage.notification 메시지와 함께 보내진 추가 데이터
+  //  remoteMessage.sentTime 보낸시간
 
-// function HeadlessCheck({ isHeadless }) {
-//   if (isHeadless) {
-//     console.log('index', 'aaaa');
-//     return null;
-//   }
-//   return <App />;
-// }
+  // PushNotification.localNotification({
+  //   channelId: remoteMessage.data.android_channel_id,
+  //   vibrate: true,
+  //   vibration: 300,
+  //   priority: 'high',
+  //   visibility: 'public',
+  //   importance: 'hight',
+  //   title: remoteMessage.data.title,
+  //   message: remoteMessage.data.body, // (required)
+  //   playSound: false,
+  //   autoCancel: true,
+  //   smallIcon: 'ic_logo',
+  //   largeIcon: remoteMessage.data.image,
+  //   no: remoteMessage.data.no,
+  //   picture: remoteMessage.data.image,
+  //   largeIconUrl: remoteMessage.data.image
+  // });
+});
+
+
 
 if (Platform.OS == 'android') {
   PushNotification.createChannel(
@@ -140,6 +152,7 @@ if (Platform.OS == 'android') {
     (created) => console.log(`createChannel returned '${created}'`) // (optional) callback returns whether the channel was created, false means it already existed.
   );
 }
+
 AppRegistry.registerComponent(appName, () => codePush(codePushOptions)(App));
 // AppRegistry.registerComponent(appName, () => HeadlessCheck);
 

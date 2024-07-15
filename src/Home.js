@@ -150,6 +150,8 @@ export default class Home extends React.Component {
     injectionTimeDatas: [],
     pregnancyDialogVisible: false,
     pregnancyCautionDialogVisible: false,
+    selectedDay: Moment().format('YYYYMMDD'),
+    // selectedDay: '20240710',
   }
 
   componentWillUnmount() {
@@ -316,7 +318,6 @@ export default class Home extends React.Component {
           this.state.noticeMessageExistence = false;
         }
         this._HopeMessages();
-        this._RandomMessages();
       }
     )
   }
@@ -399,6 +400,7 @@ export default class Home extends React.Component {
           }
           this.state.messageLengthOver = false;
         }
+        this._RandomMessages();
       }
     )
   }
@@ -459,6 +461,7 @@ export default class Home extends React.Component {
         'refresh_token': Users.RefreshToken,
         'user_no': Users.userNo,
         'cel_date_pick': Moment().format('YYYYMMDD'),
+        // 'cel_date_pick': '20240710',
       };
     } else if (this.state.requestType == 2) {
       this.setState({ isFetching: true })
@@ -496,7 +499,6 @@ export default class Home extends React.Component {
 
         if (json.Error_Cd == "0000") {
           if (this.state.requestType == 1) {
-            console.log(TAG, JSON.stringify(json) + ' 1111');
             this.state.datas = [];
             this.state.scheduleNo = [];
             this.state.namesList = [];

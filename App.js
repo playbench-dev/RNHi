@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { StatusBar, Platform, Alert } from 'react-native';
+import { StatusBar, Platform, Alert, PermissionsAndroid } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import Stack from './src/Common/Stack';
 import Users from './src/Common/User';
@@ -30,6 +30,34 @@ export default class App extends React.Component {
   }
 
   async componentDidMount() {
+    // if (Platform.OS === "android") {
+    //   try {
+    //     console.log('1')
+    //     const OsVer = Platform.Version;
+    //     console.log('2')
+    //     if (+OsVer >= 33) {
+    //       console.log('3')
+    //       const res = await PermissionsAndroid.request(
+    //         PermissionsAndroid.PERMISSIONS.POST_NOTIFICATION,
+    //       );
+    //       console.log(res)
+    //       console.log('4')
+    //       if (res === "granted") {
+    //         console.log('5')
+    //         console.log(TAG, messaging().hasPermission());
+    //         this._Notification();
+    //       }
+    //     }
+    //     else {
+    //       console.log(TAG, messaging().hasPermission());
+    //       this._Notification();
+    //     }
+    //   } catch (err) {
+    //     console.log(TAG, err)
+    //   }
+    // } else {
+    //   this._Notification();
+    // }
     console.log(TAG, messaging().hasPermission());
     this._Notification();
   }
@@ -76,7 +104,8 @@ export default class App extends React.Component {
         largeIcon: remoteMessage.data.image,
         no: remoteMessage.data.no,
         picture: remoteMessage.data.image,
-        largeIconUrl: remoteMessage.data.image
+        largeIconUrl: remoteMessage.data.image,
+
       });
 
       console.log("App", remoteMessage.data.image)

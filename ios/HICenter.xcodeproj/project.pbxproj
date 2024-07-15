@@ -11,8 +11,9 @@
 		13B07FBC1A68108700A75B9A /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB01A68108700A75B9A /* AppDelegate.m */; };
 		13B07FBF1A68108700A75B9A /* Images in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images */; };
 		13B07FC11A68108700A75B9A /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB71A68108700A75B9A /* main.m */; };
+		25ED8C1EADC74EBB896A54DB /* KHNPHUotfR.otf in Resources */ = {isa = PBXBuildFile; fileRef = 0EFBBBC4AE5948B192E2E9AF /* KHNPHUotfR.otf */; };
+		2F920EBF395940CFBBCCFE80 /* KHNPHDotfB.otf in Resources */ = {isa = PBXBuildFile; fileRef = 28FFD72DADA84A21A228CFF9 /* KHNPHDotfB.otf */; };
 		81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */; };
-		D356E99729D13A1C00E9667B /* Pods-HICenter.debug.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = B9A77CC9EE08D21FBF06DE62 /* Pods-HICenter.debug.xcconfig */; };
 		D356E99929D13A2400E9667B /* (null) in Resources */ = {isa = PBXBuildFile; };
 		D398134F27320CF100E857A0 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D398134E27320CF100E857A0 /* Assets.xcassets */; };
 		D39813562735269F00E857A0 /* AppCenter-Config.plist in Resources */ = {isa = PBXBuildFile; fileRef = D39813552735269F00E857A0 /* AppCenter-Config.plist */; };
@@ -21,11 +22,9 @@
 		D398135C27352DD800E857A0 /* service.html in Resources */ = {isa = PBXBuildFile; fileRef = D398135927352DD800E857A0 /* service.html */; };
 		D3C04DCB270E95BE00A5A1F7 /* NotificationService.m in Sources */ = {isa = PBXBuildFile; fileRef = D3C04DCA270E95BE00A5A1F7 /* NotificationService.m */; };
 		D3C04DCF270E95BE00A5A1F7 /* HICenterEx.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = D3C04DC7270E95BE00A5A1F7 /* HICenterEx.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
-		D3C9288326D76B32005885DF /* KHNPHDotfB.otf in Resources */ = {isa = PBXBuildFile; fileRef = D3C9287D26D76B32005885DF /* KHNPHDotfB.otf */; };
-		D3C9288526D76B32005885DF /* KHNPHUotfR.otf in Resources */ = {isa = PBXBuildFile; fileRef = D3C9287F26D76B32005885DF /* KHNPHUotfR.otf */; };
-		D3C9288726D76B32005885DF /* KHNPHDotfR.otf in Resources */ = {isa = PBXBuildFile; fileRef = D3C9288126D76B32005885DF /* KHNPHDotfR.otf */; };
 		D3FFF19326F04466000B4C12 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = D3FFF19226F04466000B4C12 /* GoogleService-Info.plist */; };
 		DAFC5F848FC95807319ECA70 /* libPods-HICenter.a in Frameworks */ = {isa = PBXBuildFile; fileRef = EDB6A838781EE21D215BE729 /* libPods-HICenter.a */; };
+		DE43527601A942BBA680CF99 /* KHNPHDotfR.otf in Resources */ = {isa = PBXBuildFile; fileRef = C94C4A9855854BA7A6D8D8CD /* KHNPHDotfR.otf */; };
 		EABEDAFBD0EEA798357BA5D0 /* libPods-HICenter-HICenterTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3EC011AFB236A20C8D3AAD1F /* libPods-HICenter-HICenterTests.a */; };
 /* End PBXBuildFile section */
 
@@ -64,18 +63,34 @@
 		00E356EE1AD99517003FC87E /* HICenterTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = HICenterTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		00E356F11AD99517003FC87E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		00E356F21AD99517003FC87E /* HICenterTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = HICenterTests.m; sourceTree = "<group>"; };
-		0A505C7959D17618D2D7E4F2 /* Pods-HICenter-HICenterTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-HICenter-HICenterTests.release.xcconfig"; path = "Target Support Files/Pods-HICenter-HICenterTests/Pods-HICenter-HICenterTests.release.xcconfig"; sourceTree = "<group>"; };
+		0EFBBBC4AE5948B192E2E9AF /* KHNPHUotfR.otf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = KHNPHUotfR.otf; path = ../assets/fonts/KHNPHUotfR.otf; sourceTree = "<group>"; };
+		10294F4C5E19B1BE5C340DA2 /* Pods-HICenter-HICenterTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-HICenter-HICenterTests.release.xcconfig"; path = "Target Support Files/Pods-HICenter-HICenterTests/Pods-HICenter-HICenterTests.release.xcconfig"; sourceTree = "<group>"; };
 		13B07F961A680F5B00A75B9A /* HICenter.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = HICenter.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		13B07FAF1A68108700A75B9A /* AppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AppDelegate.h; path = HICenter/AppDelegate.h; sourceTree = "<group>"; };
 		13B07FB01A68108700A75B9A /* AppDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = AppDelegate.m; path = HICenter/AppDelegate.m; sourceTree = "<group>"; };
 		13B07FB51A68108700A75B9A /* Images */ = {isa = PBXFileReference; lastKnownFileType = folder; name = Images; path = HICenter/Images; sourceTree = "<group>"; };
 		13B07FB61A68108700A75B9A /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = HICenter/Info.plist; sourceTree = "<group>"; };
 		13B07FB71A68108700A75B9A /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = main.m; path = HICenter/main.m; sourceTree = "<group>"; };
+		1530D3F6CB6C7CAE03E1F265 /* Pods-HICenter.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-HICenter.debug.xcconfig"; path = "Target Support Files/Pods-HICenter/Pods-HICenter.debug.xcconfig"; sourceTree = "<group>"; };
+		18D34EA1F9E54DFB88968CC5 /* AntDesign.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = AntDesign.ttf; path = "../node_modules/react-native-vector-icons/Fonts/AntDesign.ttf"; sourceTree = "<group>"; };
+		1ECF3C99483546CAA3A99230 /* FontAwesome5_Solid.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = FontAwesome5_Solid.ttf; path = "../node_modules/react-native-vector-icons/Fonts/FontAwesome5_Solid.ttf"; sourceTree = "<group>"; };
+		28FFD72DADA84A21A228CFF9 /* KHNPHDotfB.otf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = KHNPHDotfB.otf; path = ../assets/fonts/KHNPHDotfB.otf; sourceTree = "<group>"; };
+		3CF7F40CF77D40EBBCACFCC0 /* Zocial.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = Zocial.ttf; path = "../node_modules/react-native-vector-icons/Fonts/Zocial.ttf"; sourceTree = "<group>"; };
 		3EC011AFB236A20C8D3AAD1F /* libPods-HICenter-HICenterTests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-HICenter-HICenterTests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		42E3DE4974094CDFA12EC81B /* Feather.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = Feather.ttf; path = "../node_modules/react-native-vector-icons/Fonts/Feather.ttf"; sourceTree = "<group>"; };
+		44CE93EFD33448D6BAC2E944 /* FontAwesome5_Brands.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = FontAwesome5_Brands.ttf; path = "../node_modules/react-native-vector-icons/Fonts/FontAwesome5_Brands.ttf"; sourceTree = "<group>"; };
+		45AE9B099B524496AD183D65 /* SimpleLineIcons.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = SimpleLineIcons.ttf; path = "../node_modules/react-native-vector-icons/Fonts/SimpleLineIcons.ttf"; sourceTree = "<group>"; };
+		51BD7331B6ADAAC75D55DF81 /* Pods-HICenter-HICenterTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-HICenter-HICenterTests.debug.xcconfig"; path = "Target Support Files/Pods-HICenter-HICenterTests/Pods-HICenter-HICenterTests.debug.xcconfig"; sourceTree = "<group>"; };
+		523B99D7CFCC42A8AB36676D /* FontAwesome.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = FontAwesome.ttf; path = "../node_modules/react-native-vector-icons/Fonts/FontAwesome.ttf"; sourceTree = "<group>"; };
+		66F679F38A004E06850A3D8B /* MaterialIcons.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = MaterialIcons.ttf; path = "../node_modules/react-native-vector-icons/Fonts/MaterialIcons.ttf"; sourceTree = "<group>"; };
+		74938E02972B43AC841F5EAB /* Octicons.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = Octicons.ttf; path = "../node_modules/react-native-vector-icons/Fonts/Octicons.ttf"; sourceTree = "<group>"; };
 		81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = LaunchScreen.storyboard; path = HICenter/LaunchScreen.storyboard; sourceTree = "<group>"; };
-		9400C8A8BA9F33604FFD0FAB /* Pods-HICenter.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-HICenter.release.xcconfig"; path = "Target Support Files/Pods-HICenter/Pods-HICenter.release.xcconfig"; sourceTree = "<group>"; };
-		A10475645F3E103CC7D92A2D /* Pods-HICenter-HICenterTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-HICenter-HICenterTests.debug.xcconfig"; path = "Target Support Files/Pods-HICenter-HICenterTests/Pods-HICenter-HICenterTests.debug.xcconfig"; sourceTree = "<group>"; };
-		B9A77CC9EE08D21FBF06DE62 /* Pods-HICenter.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-HICenter.debug.xcconfig"; path = "Target Support Files/Pods-HICenter/Pods-HICenter.debug.xcconfig"; sourceTree = "<group>"; };
+		894C1E12557B4241B1A42AFC /* FontAwesome5_Regular.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = FontAwesome5_Regular.ttf; path = "../node_modules/react-native-vector-icons/Fonts/FontAwesome5_Regular.ttf"; sourceTree = "<group>"; };
+		8DAC50171D234660B4C09044 /* Ionicons.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = Ionicons.ttf; path = "../node_modules/react-native-vector-icons/Fonts/Ionicons.ttf"; sourceTree = "<group>"; };
+		94C9DC09A29641938CBBDD2E /* Entypo.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = Entypo.ttf; path = "../node_modules/react-native-vector-icons/Fonts/Entypo.ttf"; sourceTree = "<group>"; };
+		B7D12C6F381E30AD7A960C13 /* Pods-HICenter.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-HICenter.release.xcconfig"; path = "Target Support Files/Pods-HICenter/Pods-HICenter.release.xcconfig"; sourceTree = "<group>"; };
+		C94C4A9855854BA7A6D8D8CD /* KHNPHDotfR.otf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = KHNPHDotfR.otf; path = ../assets/fonts/KHNPHDotfR.otf; sourceTree = "<group>"; };
+		CD5A89A8438043C3822A73F0 /* Fontisto.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = Fontisto.ttf; path = "../node_modules/react-native-vector-icons/Fonts/Fontisto.ttf"; sourceTree = "<group>"; };
 		D398134E27320CF100E857A0 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		D39813552735269F00E857A0 /* AppCenter-Config.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "AppCenter-Config.plist"; sourceTree = "<group>"; };
 		D398135727352DD800E857A0 /* policy.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = policy.html; sourceTree = "<group>"; };
@@ -87,13 +102,13 @@
 		D3C04DC9270E95BE00A5A1F7 /* NotificationService.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = NotificationService.h; sourceTree = "<group>"; };
 		D3C04DCA270E95BE00A5A1F7 /* NotificationService.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = NotificationService.m; sourceTree = "<group>"; };
 		D3C04DCC270E95BE00A5A1F7 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		D3C9287D26D76B32005885DF /* KHNPHDotfB.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = KHNPHDotfB.otf; sourceTree = "<group>"; };
-		D3C9287F26D76B32005885DF /* KHNPHUotfR.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = KHNPHUotfR.otf; sourceTree = "<group>"; };
-		D3C9288126D76B32005885DF /* KHNPHDotfR.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = KHNPHDotfR.otf; sourceTree = "<group>"; };
 		D3FBE78126EDC612008A0A5B /* HICenter.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; name = HICenter.entitlements; path = HICenter/HICenter.entitlements; sourceTree = "<group>"; };
 		D3FFF19226F04466000B4C12 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = "GoogleService-Info.plist"; path = "HICenter/GoogleService-Info.plist"; sourceTree = "<group>"; };
+		E521B284B416480D84169D9E /* EvilIcons.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = EvilIcons.ttf; path = "../node_modules/react-native-vector-icons/Fonts/EvilIcons.ttf"; sourceTree = "<group>"; };
+		E669B5651C8E4E8DBB4022EA /* Foundation.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = Foundation.ttf; path = "../node_modules/react-native-vector-icons/Fonts/Foundation.ttf"; sourceTree = "<group>"; };
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
 		EDB6A838781EE21D215BE729 /* libPods-HICenter.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-HICenter.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		EE2E90E29B3346BD8B9066E6 /* MaterialCommunityIcons.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = MaterialCommunityIcons.ttf; path = "../node_modules/react-native-vector-icons/Fonts/MaterialCommunityIcons.ttf"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -169,10 +184,10 @@
 		4EE42EEF4E87BD140DB9CFC8 /* Pods */ = {
 			isa = PBXGroup;
 			children = (
-				B9A77CC9EE08D21FBF06DE62 /* Pods-HICenter.debug.xcconfig */,
-				9400C8A8BA9F33604FFD0FAB /* Pods-HICenter.release.xcconfig */,
-				A10475645F3E103CC7D92A2D /* Pods-HICenter-HICenterTests.debug.xcconfig */,
-				0A505C7959D17618D2D7E4F2 /* Pods-HICenter-HICenterTests.release.xcconfig */,
+				1530D3F6CB6C7CAE03E1F265 /* Pods-HICenter.debug.xcconfig */,
+				B7D12C6F381E30AD7A960C13 /* Pods-HICenter.release.xcconfig */,
+				51BD7331B6ADAAC75D55DF81 /* Pods-HICenter-HICenterTests.debug.xcconfig */,
+				10294F4C5E19B1BE5C340DA2 /* Pods-HICenter-HICenterTests.release.xcconfig */,
 			);
 			path = Pods;
 			sourceTree = "<group>";
@@ -197,6 +212,7 @@
 				83CBBA001A601CBA00E9B192 /* Products */,
 				2D16E6871FA4F8E400B85C8A /* Frameworks */,
 				4EE42EEF4E87BD140DB9CFC8 /* Pods */,
+				C6BE5502B39443DF988CE411 /* Resources */,
 			);
 			indentWidth = 2;
 			sourceTree = "<group>";
@@ -211,6 +227,32 @@
 				D3C04DC7270E95BE00A5A1F7 /* HICenterEx.appex */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		C6BE5502B39443DF988CE411 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				28FFD72DADA84A21A228CFF9 /* KHNPHDotfB.otf */,
+				C94C4A9855854BA7A6D8D8CD /* KHNPHDotfR.otf */,
+				0EFBBBC4AE5948B192E2E9AF /* KHNPHUotfR.otf */,
+				18D34EA1F9E54DFB88968CC5 /* AntDesign.ttf */,
+				94C9DC09A29641938CBBDD2E /* Entypo.ttf */,
+				E521B284B416480D84169D9E /* EvilIcons.ttf */,
+				42E3DE4974094CDFA12EC81B /* Feather.ttf */,
+				523B99D7CFCC42A8AB36676D /* FontAwesome.ttf */,
+				44CE93EFD33448D6BAC2E944 /* FontAwesome5_Brands.ttf */,
+				894C1E12557B4241B1A42AFC /* FontAwesome5_Regular.ttf */,
+				1ECF3C99483546CAA3A99230 /* FontAwesome5_Solid.ttf */,
+				CD5A89A8438043C3822A73F0 /* Fontisto.ttf */,
+				E669B5651C8E4E8DBB4022EA /* Foundation.ttf */,
+				8DAC50171D234660B4C09044 /* Ionicons.ttf */,
+				EE2E90E29B3346BD8B9066E6 /* MaterialCommunityIcons.ttf */,
+				66F679F38A004E06850A3D8B /* MaterialIcons.ttf */,
+				74938E02972B43AC841F5EAB /* Octicons.ttf */,
+				45AE9B099B524496AD183D65 /* SimpleLineIcons.ttf */,
+				3CF7F40CF77D40EBBCACFCC0 /* Zocial.ttf */,
+			);
+			name = Resources;
 			sourceTree = "<group>";
 		};
 		D3C04DB8270E934700A5A1F7 /* HIServiceEx */ = {
@@ -238,9 +280,6 @@
 				D398135827352DD800E857A0 /* policy_service.html */,
 				D398135727352DD800E857A0 /* policy.html */,
 				D398135927352DD800E857A0 /* service.html */,
-				D3C9287D26D76B32005885DF /* KHNPHDotfB.otf */,
-				D3C9288126D76B32005885DF /* KHNPHDotfR.otf */,
-				D3C9287F26D76B32005885DF /* KHNPHUotfR.otf */,
 			);
 			path = Resourses;
 			sourceTree = "<group>";
@@ -364,18 +403,17 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				D3C9288526D76B32005885DF /* KHNPHUotfR.otf in Resources */,
 				D398135C27352DD800E857A0 /* service.html in Resources */,
 				D3FFF19326F04466000B4C12 /* GoogleService-Info.plist in Resources */,
-				D3C9288726D76B32005885DF /* KHNPHDotfR.otf in Resources */,
 				D398134F27320CF100E857A0 /* Assets.xcassets in Resources */,
-				D356E99729D13A1C00E9667B /* Pods-HICenter.debug.xcconfig in Resources */,
-				D3C9288326D76B32005885DF /* KHNPHDotfB.otf in Resources */,
 				81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */,
 				13B07FBF1A68108700A75B9A /* Images in Resources */,
 				D39813562735269F00E857A0 /* AppCenter-Config.plist in Resources */,
 				D398135B27352DD800E857A0 /* policy_service.html in Resources */,
 				D398135A27352DD800E857A0 /* policy.html in Resources */,
+				2F920EBF395940CFBBCCFE80 /* KHNPHDotfB.otf in Resources */,
+				DE43527601A942BBA680CF99 /* KHNPHDotfR.otf in Resources */,
+				25ED8C1EADC74EBB896A54DB /* KHNPHUotfR.otf in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -594,7 +632,7 @@
 /* Begin XCBuildConfiguration section */
 		00E356F61AD99517003FC87E /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = A10475645F3E103CC7D92A2D /* Pods-HICenter-HICenterTests.debug.xcconfig */;
+			baseConfigurationReference = 51BD7331B6ADAAC75D55DF81 /* Pods-HICenter-HICenterTests.debug.xcconfig */;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				DEVELOPMENT_TEAM = Q2PTQTBP3Y;
@@ -622,7 +660,7 @@
 		};
 		00E356F71AD99517003FC87E /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 0A505C7959D17618D2D7E4F2 /* Pods-HICenter-HICenterTests.release.xcconfig */;
+			baseConfigurationReference = 10294F4C5E19B1BE5C340DA2 /* Pods-HICenter-HICenterTests.release.xcconfig */;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				COPY_PHASE_STRIP = NO;
@@ -647,13 +685,13 @@
 		};
 		13B07F941A680F5B00A75B9A /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = B9A77CC9EE08D21FBF06DE62 /* Pods-HICenter.debug.xcconfig */;
+			baseConfigurationReference = 1530D3F6CB6C7CAE03E1F265 /* Pods-HICenter.debug.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = HICenter/HICenter.entitlements;
-				CURRENT_PROJECT_VERSION = 0.0.3;
+				CURRENT_PROJECT_VERSION = 0.0.1;
 				DEVELOPMENT_TEAM = ZL8254FRU4;
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = HICenter/Info.plist;
@@ -662,7 +700,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 3.0;
+				MARKETING_VERSION = 3.1;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",
@@ -679,13 +717,13 @@
 		};
 		13B07F951A680F5B00A75B9A /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 9400C8A8BA9F33604FFD0FAB /* Pods-HICenter.release.xcconfig */;
+			baseConfigurationReference = B7D12C6F381E30AD7A960C13 /* Pods-HICenter.release.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = HICenter/HICenter.entitlements;
-				CURRENT_PROJECT_VERSION = 0.0.3;
+				CURRENT_PROJECT_VERSION = 0.0.1;
 				DEVELOPMENT_TEAM = ZL8254FRU4;
 				INFOPLIST_FILE = HICenter/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
@@ -693,7 +731,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 3.0;
+				MARKETING_VERSION = 3.1;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",
@@ -756,7 +794,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 16.1;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					/usr/lib/swift,
 					"$(inherited)",
@@ -814,7 +852,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 16.1;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					/usr/lib/swift,
 					"$(inherited)",
@@ -844,7 +882,7 @@
 				DEVELOPMENT_TEAM = ZL8254FRU4;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				INFOPLIST_FILE = HICenterEx/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -874,7 +912,7 @@
 				DEVELOPMENT_TEAM = ZL8254FRU4;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				INFOPLIST_FILE = HICenterEx/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",

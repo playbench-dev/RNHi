@@ -1,5 +1,5 @@
 import React from 'react';
-import { SafeAreaView, View, Text, Image, Animated, Linking, Platform } from 'react-native';
+import { SafeAreaView, View, Text, Image, Animated, Linking, Platform, PermissionsAndroid } from 'react-native';
 import { StatusBar } from 'react-native';
 import AsyncStorage from '@react-native-community/async-storage';
 import Users from '../src/Common/User'
@@ -83,6 +83,9 @@ export default class Splash extends React.Component {
           }), () => {
 
           });
+          AsyncStorage.setItem('bryoDialogFlag', JSON.stringify({
+            'bryoFlag': json.Resources[0].embryo_notice_flag || 0
+          }))
           Users.userNo = json.Resources[0].user_no || '';
           Users.userName = json.Resources[0].user_name || '';
           Users.userBirthday = json.Resources[0].birth_date || '';
@@ -98,7 +101,7 @@ export default class Splash extends React.Component {
           Users.guest = false;
           Users.userPush = json.Resources[0].use_push || '';
           Users.kakaoPush = json.Resources[0].kakao_push || '';
-
+          Users.bryoFlag = json.Resources[0].embryo_notice_flag || 0
           if (this.props.route.params != undefined) {
             if (this.props.route.params.channelId == 'medicine') {
               this.props.navigation.reset({ index: 0, routes: [{ name: 'MedicineCalendar', params: { push: true } }] });
@@ -169,56 +172,65 @@ export default class Splash extends React.Component {
         useNativeDriver: true,
       }
     ).start((o) => {
+
       if (o.finished) {
-        remoteConfig().setDefaults({ version: '1', check: false })
-          .then(() => remoteConfig().fetchAndActivate())
-          .then((fetchedRemotely) => {
-            if (Platform.OS === 'android') {
-              console.log(TAG, remoteConfig().getValue('version'));
-              console.log(TAG, remoteConfig().getValue('check'));
-              console.log(`VersionInfo.appVersion : ${VersionInfo.buildVersion} , fetchedRemotely : ${fetchedRemotely}`)
-              if (parseInt(remoteConfig().getValue('version').asString()) <= parseInt(VersionInfo.buildVersion)) {
-                AsyncStorage.getItem('userInfo', (err, result) => {
-                  if (result != null) {
-                    const UserInfo = JSON.parse(result);
-                    console.log(TAG, UserInfo.user_name + " " + UserInfo.patient_no);
-                    this.state.name = UserInfo.user_name;
-                    this.state.patientNo = UserInfo.patient_no;
-                    this._Login();
-                    // this.props.navigation.reset({index:0, routes:[{name: 'AgreeDetail',mode : '2'}]})
-                  } else {
-                    this.props.navigation.reset({ index: 0, routes: [{ name: 'Login' }] })
-                  }
-                });
-              } else {
-                this.setState({
-                  oneBtnDialogVisible: true,
-                })
-              }
-            } else {
-              console.log(TAG, remoteConfig().getValue('version'));
-              console.log(TAG, remoteConfig().getValue('check'));
-              console.log(`VersionInfo.appVersion : ${VersionInfo.appVersion} , fetchedRemotely : ${fetchedRemotely}`)
-              if (parseInt(remoteConfig().getValue('version').asString().replace('.', '')) <= parseInt(VersionInfo.appVersion.replace('.', ''))) {
-                AsyncStorage.getItem('userInfo', (err, result) => {
-                  if (result != null) {
-                    const UserInfo = JSON.parse(result);
-                    console.log(TAG, UserInfo.user_name + " " + UserInfo.patient_no);
-                    this.state.name = UserInfo.user_name;
-                    this.state.patientNo = UserInfo.patient_no;
-                    this._Login();
-                    // this.props.navigation.reset({index:0, routes:[{name: 'AgreeDetail',mode : '2'}]})
-                  } else {
-                    this.props.navigation.reset({ index: 0, routes: [{ name: 'Login' }] })
-                  }
-                });
-              } else {
-                this.setState({
-                  oneBtnDialogVisible: true,
-                })
-              }
-            }
-          })
+        if (Platform.OS === "android") {
+          const OsVer = Platform.Version;
+          if (+OsVer >= 33) {
+            PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.POST_NOTIFICATION);
+          }
+        }
+        AsyncStorage.getItem('userInfo', (err, result) => {
+          if (result != null) {
+            const UserInfo = JSON.parse(result);
+            console.log(TAG, UserInfo.user_name + " " + UserInfo.patient_no);
+            this.state.name = UserInfo.user_name;
+            this.state.patientNo = UserInfo.patient_no;
+            this._Login();
+            // this.props.navigation.reset({index:0, routes:[{name: 'AgreeDetail',mode : '2'}]})
+          } else {
+            this.props.navigation.reset({ index: 0, routes: [{ name: 'Login' }] })
+          }
+        });
+
+        // remoteConfig().setDefaults({ version: '1', check: false })
+        //   .then(() => remoteConfig().fetchAndActivate())
+        //   .then((fetchedRemotely) => {
+        //     if (Platform.OS === 'android') {
+        //       console.log(TAG, remoteConfig().getValue('version'));
+        //       console.log(TAG, remoteConfig().getValue('check'));
+        //       console.log(`VersionInfo.appVersion : ${VersionInfo.buildVersion} , fetchedRemotely : ${fetchedRemotely}`)
+        //       if (parseInt(remoteConfig().getValue('version').asString()) <= parseInt(VersionInfo.buildVersion)) {
+
+        //       } else {
+        //         this.setState({
+        //           oneBtnDialogVisible: true,
+        //         })
+        //       }
+        //     } else {
+        //       console.log(TAG, remoteConfig().getValue('version'));
+        //       console.log(TAG, remoteConfig().getValue('check'));
+        //       console.log(`VersionInfo.appVersion : ${VersionInfo.appVersion} , fetchedRemotely : ${fetchedRemotely}`)
+        //       if (parseInt(remoteConfig().getValue('version').asString().replace('.', '')) <= parseInt(VersionInfo.appVersion.replace('.', ''))) {
+        //         AsyncStorage.getItem('userInfo', (err, result) => {
+        //           if (result != null) {
+        //             const UserInfo = JSON.parse(result);
+        //             console.log(TAG, UserInfo.user_name + " " + UserInfo.patient_no);
+        //             this.state.name = UserInfo.user_name;
+        //             this.state.patientNo = UserInfo.patient_no;
+        //             this._Login();
+        //             // this.props.navigation.reset({index:0, routes:[{name: 'AgreeDetail',mode : '2'}]})
+        //           } else {
+        //             this.props.navigation.reset({ index: 0, routes: [{ name: 'Login' }] })
+        //           }
+        //         });
+        //       } else {
+        //         this.setState({
+        //           oneBtnDialogVisible: true,
+        //         })
+        //       }
+        //     }
+        //   })
       }
     });
   }

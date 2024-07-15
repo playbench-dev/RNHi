@@ -17,4 +17,5 @@ export default class User {
   RefreshToken = '';
   userPush = '0';
   kakaoPush = '0';
+  bryoFlag = 0;
 }

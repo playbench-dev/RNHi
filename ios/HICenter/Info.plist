@@ -36,15 +36,12 @@
 		<true/>
 	</dict>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string></string>
+	<string/>
 	<key>UIAppFonts</key>
 	<array>
 		<string>KHNPHDotfB.otf</string>
 		<string>KHNPHDotfR.otf</string>
 		<string>KHNPHUotfR.otf</string>
-		<string>NotoSansCJKkr-Bold.otf</string>
-		<string>NotoSansCJKkr-Medium.otf</string>
-		<string>NotoSansCJKkr-Regular.otf</string>
 	</array>
 	<key>UIBackgroundModes</key>
 	<array>

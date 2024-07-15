@@ -67,6 +67,9 @@ export default class GuestLogin extends React.Component {
                     }), () => {
 
                     });
+                    AsyncStorage.setItem('bryoDialogFlag', JSON.stringify({
+                        'bryoFlag': json.Resources[0].embryo_notice_flag || 0
+                    }))
                     Users.userNo = json.Resources[0].user_no || '';
                     Users.userName = json.Resources[0].user_name || '';
                     Users.userBirthday = json.Resources[0].birth_date || '';
@@ -82,6 +85,7 @@ export default class GuestLogin extends React.Component {
                     Users.guest = false;
                     Users.userPush = json.Resources[0].use_push || '';
                     Users.kakaoPush = json.Resources[0].kakao_push || '';
+                    Users.bryoFlag = json.Resources[0].embryo_notice_flag || 0
                     // provision_yn == 0 일때 약관 동의 화면으로 이동
                     if (json.Resources[0].joined_date == null) {
                         this.props.navigation.navigate('HusbandInsert');

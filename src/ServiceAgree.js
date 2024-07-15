@@ -275,6 +275,9 @@ export default class ServiceAgree extends React.Component {
                     }), () => {
 
                     });
+                    AsyncStorage.setItem('bryoDialogFlag', JSON.stringify({
+                        'bryoFlag': json.Resources[0].embryo_notice_flag || 0
+                    }))
                     Users.userNo = json.Resources[0].user_no || '';
                     Users.userName = json.Resources[0].user_name || '';
                     Users.userBirthday = json.Resources[0].birth_date || '';

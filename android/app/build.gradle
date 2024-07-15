@@ -147,8 +147,8 @@ configurations.all {
         applicationId "com.hicenter"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 22
-        versionName "0.0.22"
+        versionCode 25
+        versionName "0.0.25"
         resConfigs "kr"
     }
     splits {
@@ -178,6 +178,7 @@ configurations.all {
     buildTypes {
         debug {
             signingConfig signingConfigs.debug
+//            minifyEnabled true
         }
         release {
             // Caution! In production, you need to generate your own keystore file.
@@ -213,7 +214,9 @@ dependencies {
     implementation 'com.google.firebase:firebase-analytics'
     implementation "androidx.swiperefreshlayout:swiperefreshlayout:1.0.0"
     implementation 'com.facebook.fresco:fresco:2.5.0'
-    implementation 'com.facebook.fresco:animated-gif:2.5.0'  
+    implementation 'com.facebook.fresco:animated-gif:2.5.0'
+    implementation 'org.jetbrains:annotations:16.0.2'
+
     implementation project(':react-native-version-info')
     debugImplementation("com.facebook.flipper:flipper:${FLIPPER_VERSION}") {
       exclude group:'com.facebook.fbjni'

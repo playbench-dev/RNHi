@@ -22,9 +22,25 @@
     self.bestAttemptContent = [request.content mutableCopy];
     
     // Modify the notification content here...
-    self.bestAttemptContent.title = [NSString stringWithFormat:@"%@ [modified]", self.bestAttemptContent.title];
+    self.bestAttemptContent.title = [NSString stringWithFormat:@"%@", self.bestAttemptContent.title];
 
-    self.contentHandler(self.bestAttemptContent);
+  self.bestAttemptContent.body = [NSString stringWithFormat:@"%@", self.bestAttemptContent.body];
+  
+  UNMutableNotificationContent *content = [self.bestAttemptContent mutableCopy];
+
+      NSString *urlString = [content.userInfo valueForKeyPath:@"image"];
+  
+      NSError *error;
+      
+      UNNotificationAttachment *attachment = [UNNotificationAttachment attachmentWithIdentifier:@"image" URL:[[NSBundle mainBundle] URLForResource: urlString withExtension:@"png"] options:nil error:&error];
+      
+      if (error) {
+          NSLog(@"Notification Extension Error : %@",error);
+      } else {
+          self.bestAttemptContent.attachments = @[attachment];
+      }
+      
+      self.contentHandler(self.bestAttemptContent);
 //  [[FIRMessaging extensionHelper] populateNotificationContent:self.bestAttemptContent withContentHandler:contentHandler];
 
 }
