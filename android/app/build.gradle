@@ -129,9 +129,6 @@ android {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
-<<<<<<< HEAD
-
-=======
 configurations.all {
         resolutionStrategy {
             force 'androidx.browser:browser:1.2.0'
@@ -146,18 +143,12 @@ configurations.all {
         pickFirst '**/libturbomodulejsijni.so'
         // Add more according to your error here
     }
->>>>>>> mw
     defaultConfig {
         applicationId "com.hicenter"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-<<<<<<< HEAD
-        versionCode 3
-        versionName "0.0.2"
-=======
-        versionCode 22
-        versionName "0.0.22"
->>>>>>> mw
+        versionCode 28
+        versionName "0.0.28"
         resConfigs "kr"
     }
     splits {
@@ -187,6 +178,7 @@ configurations.all {
     buildTypes {
         debug {
             signingConfig signingConfigs.debug
+//            minifyEnabled true
         }
         release {
             // Caution! In production, you need to generate your own keystore file.
@@ -221,11 +213,10 @@ dependencies {
     implementation platform('com.google.firebase:firebase-bom:28.2.0')
     implementation 'com.google.firebase:firebase-analytics'
     implementation "androidx.swiperefreshlayout:swiperefreshlayout:1.0.0"
-<<<<<<< HEAD
-=======
     implementation 'com.facebook.fresco:fresco:2.5.0'
-    implementation 'com.facebook.fresco:animated-gif:2.5.0'  
->>>>>>> mw
+    implementation 'com.facebook.fresco:animated-gif:2.5.0'
+    implementation 'org.jetbrains:annotations:16.0.2'
+    
     implementation project(':react-native-version-info')
     debugImplementation("com.facebook.flipper:flipper:${FLIPPER_VERSION}") {
       exclude group:'com.facebook.fbjni'

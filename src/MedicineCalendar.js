@@ -1,5 +1,9 @@
 import React from 'react';
-import { SafeAreaView, View, Text, Image, ScrollView, StatusBar, StyleSheet, TouchableWithoutFeedback, LogBox, Modal, BackHandler, ActivityIndicator, Animated, RefreshControl, TouchableOpacity } from 'react-native';
+import {
+    SafeAreaView, View, Text, Image, ScrollView, StatusBar, StyleSheet,
+    TouchableWithoutFeedback, LogBox, Modal, BackHandler, ActivityIndicator,
+    Animated, RefreshControl, TouchableOpacity, Platform
+} from 'react-native';
 import Elevations from 'react-native-elevation';
 import SwitchToggle from 'react-native-switch-toggle';
 import FetchingIndicator from 'react-native-fetching-indicator'
@@ -190,6 +194,9 @@ export default class MedicineCalendar extends React.Component {
                     }), () => {
 
                     });
+                    AsyncStorage.setItem('bryoDialogFlag', JSON.stringify({
+                        'bryoFlag': json.Resources[0].embryo_notice_flag || 0
+                    }))
                     Users.userNo = json.Resources[0].user_no || '';
                     Users.userName = json.Resources[0].user_name || '';
                     Users.userBirthday = json.Resources[0].birth_date || '';
@@ -295,6 +302,7 @@ export default class MedicineCalendar extends React.Component {
             response => response.json()
         ).then(
             json => {
+                console.log('medicine')
                 console.log(TAG, json);
                 if (json.Error_Cd == "0000") {
                     if (this.state.requestType == 1) {
@@ -500,19 +508,19 @@ export default class MedicineCalendar extends React.Component {
             <View style={{ height: '100%', width: '100%', justifyContent: 'flex-end', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.3)', }}>
                 <View style={{ width: '90%', height: 340, backgroundColor: '#fff', borderRadius: 12, alignItems: 'center', marginBottom: 20 }}>
                     <View style={{ alignItems: 'center', justifyContent: 'center', marginTop: 20 }}>
-                        <Text style={{ fontSize: 16, fontFamily: 'KHNPHDotfR', color: '#000' }}>{this.state.selectMedicineName}</Text>
+                        <Text style={{ fontSize: 16, color: '#000' }}>{this.state.selectMedicineName}</Text>
                     </View>
 
                     <DatePicker androidVariant="iosClone" textColor={"#000000"} date={new Date()} onDateChange={(value) => str = value} mode={"time"} locale="ko" style={{ flex: 1 }} />
                     <View style={{ flexDirection: 'row', flexWrap: 'nowrap', height: 50, marginBottom: 20, paddingLeft: 20, paddingRight: 20 }}>
                         <TouchableWithoutFeedback onPress={() => this.setState({ calendarVisible: false, })}>
                             <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: '#9699D6', borderRadius: 24 }}>
-                                <Text style={{ color: '#fff', fontSize: 16, fontFamily: 'KHNPHDotfR', }}>취소</Text>
+                                <Text style={{ color: '#fff', fontSize: 16, }}>취소</Text>
                             </View>
                         </TouchableWithoutFeedback>
                         <TouchableWithoutFeedback onPress={() => this._TimeUpdate(str)}>
                             <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: '#4A50CA', borderRadius: 24, marginLeft: 23 }}>
-                                <Text style={{ color: '#fff', fontSize: 16, fontFamily: 'KHNPHDotfR', }}>투약완료</Text>
+                                <Text style={{ color: '#fff', fontSize: 16, }}>투약완료</Text>
                             </View>
                         </TouchableWithoutFeedback>
                     </View>
@@ -775,7 +783,7 @@ export default class MedicineCalendar extends React.Component {
                                     <View key={index} style={{ flex: 1, alignItems: 'center', backgroundColor: (this.state.selectedDay == days.format('YYYYMMDD') ? '#F1F1F1' : '#fff'), marginLeft: (index == 0 ? 0 : 0.5) }}>
                                         <View style={{ width: '100%', marginTop: 4, paddingLeft: 5, paddingRight: 5, paddingTop: 3, paddingBottom: 3 }}>
                                             <View style={{ alignItems: 'center', justifyContent: 'center', }}>
-                                                <Text style={{ color: (holidayKr.isSolarHoliday(new Date(Moment(days.format('YYYYMMDD')))) == true ? this.state.holidayColor : (this.state.selectedDay == days.format('YYYYMMDD') ? '#4A4FC3' : ('20230124' == days.format('YYYYMMDD') ? this.state.holidayColor : '#000'))), fontSize: 12, fontFamily: 'KHNPHDotfR', }}>{days.format('D')}</Text>
+                                                <Text style={{ color: (holidayKr.isSolarHoliday(new Date(Moment(days.format('YYYYMMDD')))) == true ? this.state.holidayColor : (this.state.selectedDay == days.format('YYYYMMDD') ? '#4A4FC3' : ('20230124' == days.format('YYYYMMDD') ? this.state.holidayColor : '#000'))), fontSize: 12, fontWeight: Platform.OS === 'ios' ? 'bold' : 'normal', }}>{days.format('D')}</Text>
                                             </View>
                                         </View>
                                         {this.state.calendarStatus == 1 ? (this.state.dateList.includes(days.format('YYYY-MM-DD')) ? <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', width: '100%', height: 30 }}>
@@ -877,7 +885,7 @@ export default class MedicineCalendar extends React.Component {
                             return (
                                 <TouchableWithoutFeedback onPress={() => this.setState({ oneBtnDialogVisible: true })}>
                                     <View key={index} style={{ flex: 1, alignItems: 'center', backgroundColor: ((this.state.selectedDay == days.format('YYYYMMDD') && days.format('MM') === this.state.today.format('MM')) ? '#F1F1F1' : '#fff'), marginLeft: (index == 0 ? 0 : 0.5) }}>
-                                        <Text style={{ color: '#AFAFAF', marginTop: 7, fontSize: 12, fontFamily: 'KHNPHDotfR' }}>{days.format('D')}</Text>
+                                        <Text style={{ color: '#AFAFAF', marginTop: 7, fontSize: 12, fontWeight: Platform.OS === 'ios' ? 'bold' : 'normal', }}>{days.format('D')}</Text>
                                     </View>
                                 </TouchableWithoutFeedback>
                             )
@@ -887,7 +895,7 @@ export default class MedicineCalendar extends React.Component {
                                     <View key={index} style={{ flex: 1, alignItems: 'center', backgroundColor: (this.state.selectedDay == days.format('YYYYMMDD') ? '#F1F1F1' : '#fff'), marginLeft: (index == 0 ? 0 : 0.5) }}>
                                         <View style={{ width: '100%', marginTop: 4, paddingLeft: 5, paddingRight: 5, paddingTop: 3, paddingBottom: 3 }}>
                                             <View style={{ alignItems: 'center', justifyContent: 'center', }}>
-                                                <Text style={{ color: (holidayKr.isSolarHoliday(new Date(Moment(days.format('YYYYMMDD')))) == true ? this.state.holidayColor : (this.state.selectedDay == days.format('YYYYMMDD') ? '#4A4FC3' : ('20230124' == days.format('YYYYMMDD') ? this.state.holidayColor : '#000'))), fontSize: 12, fontFamily: 'KHNPHDotfR', }}>{days.format('D')}</Text>
+                                                <Text style={{ color: (holidayKr.isSolarHoliday(new Date(Moment(days.format('YYYYMMDD')))) == true ? this.state.holidayColor : (this.state.selectedDay == days.format('YYYYMMDD') ? '#4A4FC3' : ('20230124' == days.format('YYYYMMDD') ? this.state.holidayColor : '#000'))), fontSize: 12, fontWeight: Platform.OS === 'ios' ? 'bold' : 'normal', }}>{days.format('D')}</Text>
                                             </View>
                                         </View>
 
@@ -1032,7 +1040,7 @@ export default class MedicineCalendar extends React.Component {
 
                         <TouchableWithoutFeedback onPress={() => this.setState({ calendarStatus: (this.state.calendarStatus == 0 ? 1 : 0) })}>
                             <View style={{ justifyContent: 'center', backgroundColor: '#63beb1', height: 35, marginRight: 12, alignItems: 'center', paddingLeft: 10, paddingRight: 10, borderRadius: 8 }}>
-                                <Text style={{ color: '#fff', fontSize: 12, fontFamily: 'KHNPHDotfR' }}>{this.state.calendarStatus == 0 ? "축소" : "크게보기"}</Text>
+                                <Text style={{ color: '#fff', fontSize: 12, }}>{this.state.calendarStatus == 0 ? "축소" : "크게보기"}</Text>
                             </View>
                         </TouchableWithoutFeedback>
                     </View>
@@ -1044,7 +1052,7 @@ export default class MedicineCalendar extends React.Component {
                             </TouchableWithoutFeedback>
 
                             <View style={{ alignItems: 'center', justifyContent: 'center', width: 140, height: 40, backgroundColor: '#D5D6E2', borderRadius: 20, marginLeft: 20, marginRight: 20 }}>
-                                <Text style={{ color: 'black', fontSize: 14, fontFamily: 'KHNPHDotfR' }}>{this.state.today.format('YYYY년 MM월')}</Text>
+                                <Text style={{ color: 'black', fontSize: 14, }}>{this.state.today.format('YYYY년 MM월')}</Text>
                             </View>
 
                             <TouchableWithoutFeedback onPress={() => this._CalendarMove("2")}>
@@ -1068,7 +1076,7 @@ export default class MedicineCalendar extends React.Component {
                                 <View style={{ width: '100%', height: 32, flexDirection: 'row', flexWrap: 'nowrap', backgroundColor: '#fff', }}>
                                     {this.state.dayTitleText.map((item, index) =>
                                         <View key={index} style={{ flex: 1, justifyContent: 'center', alignItems: 'center', marginLeft: (index == 0 ? 0 : 0.5), }}>
-                                            <Text style={{ color: (index == 0 ? this.state.holidayColor : '#000'), fontSize: 12, fontFamily: 'KHNPHUotfR' }}>{this.state.dayTitleText[index]}</Text>
+                                            <Text style={{ color: (index == 0 ? this.state.holidayColor : '#000'), fontSize: 12, }}>{this.state.dayTitleText[index]}</Text>
                                         </View>)}
                                 </View>
 
@@ -1090,24 +1098,24 @@ export default class MedicineCalendar extends React.Component {
                             </View>
 
                             {this.state.calendarStatus == 1 && (<View style={{ paddingLeft: 20, paddingRight: 20 }}>
-                                <Text style={{ marginTop: 24, fontSize: 14, color: (holidayKr.isSolarHoliday(new Date(Moment(this.state.selectedDay))) == true ? this.state.holidayColor : (Moment(this.state.selectedDay).format('YYYYMMDD') == '20230124' ? this.state.holidayColor : '#4A50CA')), fontFamily: 'KHNPHDotfR' }}>{Moment(this.state.selectedDay).format("YYYY년 M월 D일") + " " + this.state.dayText[Moment(this.state.selectedDay).day()]}</Text>
+                                <Text style={{ marginTop: 24, fontSize: 14, color: (holidayKr.isSolarHoliday(new Date(Moment(this.state.selectedDay))) == true ? this.state.holidayColor : (Moment(this.state.selectedDay).format('YYYYMMDD') == '20230124' ? this.state.holidayColor : '#4A50CA')), }}>{Moment(this.state.selectedDay).format("YYYY년 M월 D일") + " " + this.state.dayText[Moment(this.state.selectedDay).day()]}</Text>
 
                                 <View style={{ marginTop: 21, borderRadius: 24, backgroundColor: "rgba(219,227,241,0.5)", paddingLeft: 10, paddingRight: 10, width: '100%', }}>
                                     <View style={{ marginTop: 12, flexDirection: 'row', justifyContent: 'center', alignItems: 'center', }}>
                                         <View style={{ borderRadius: 40, width: 12, height: 12, backgroundColor: '#EDA6CA' }}></View>
-                                        <Text style={{ marginLeft: 4, fontSize: 13, fontFamily: 'KHNPHUotfR', color: '#000' }}>주사</Text>
+                                        <Text style={{ marginLeft: 4, fontSize: 13, color: '#000' }}>주사</Text>
 
                                         <View style={{ borderRadius: 40, width: 12, height: 12, backgroundColor: '#63BEB1', marginLeft: 12 }}></View>
-                                        <Text style={{ marginLeft: 4, fontSize: 13, fontFamily: 'KHNPHUotfR', color: '#000' }}>경구약</Text>
+                                        <Text style={{ marginLeft: 4, fontSize: 13, color: '#000' }}>경구약</Text>
 
                                         <View style={{ borderRadius: 40, width: 12, height: 12, backgroundColor: '#499BD5', marginLeft: 12 }}></View>
-                                        <Text style={{ marginLeft: 4, fontSize: 13, fontFamily: 'KHNPHUotfR', color: '#000' }}>질정</Text>
+                                        <Text style={{ marginLeft: 4, fontSize: 13, color: '#000' }}>질정</Text>
 
                                         <View style={{ borderRadius: 40, width: 12, height: 12, backgroundColor: '#AE91F8', marginLeft: 12 }}></View>
-                                        <Text style={{ marginLeft: 4, fontSize: 13, fontFamily: 'KHNPHUotfR', color: '#000' }}>시술</Text>
+                                        <Text style={{ marginLeft: 4, fontSize: 13, color: '#000' }}>시술</Text>
 
                                         <View style={{ borderRadius: 40, width: 12, height: 12, backgroundColor: '#FAED7D', marginLeft: 12 }}></View>
-                                        <Text style={{ marginLeft: 4, fontSize: 13, fontFamily: 'KHNPHUotfR', color: '#000' }}>내원</Text>
+                                        <Text style={{ marginLeft: 4, fontSize: 13, color: '#000' }}>내원</Text>
                                     </View>
                                     {/* <View style={{ marginTop: 12, flexDirection: 'row', justifyContent: 'center', alignItems: 'center', }}>
                                         <View style={{ borderRadius: 40, width: 16, height: 16, backgroundColor: '#AE91F8', marginLeft: 24 }}></View>
@@ -1119,25 +1127,25 @@ export default class MedicineCalendar extends React.Component {
 
                                     {(this.state.opuDateList.length > 0 && this.state.opuDateList.includes(Moment(this.state.selectedDay).format('YYYY-MM-DD'))) ? (
                                         <View style={{ width: '100%', alignItems: 'center', justifyContent: 'center', marginTop: 20 }}>
-                                            <Text style={{ fontSize: 14, fontFamily: 'KHNPHDotfB', color: '#000' }}>{"* 오늘은 난자채취일입니다."}</Text>
+                                            <Text style={{ fontSize: 14, color: '#000' }}>{"* 오늘은 난자채취일입니다."}</Text>
                                         </View>
                                     ) : (
                                         (this.state.etDateList.length > 0 && this.state.etDateList.includes(Moment(this.state.selectedDay).format('YYYY-MM-DD'))) ? (
                                             <View style={{ width: '100%', alignItems: 'center', justifyContent: 'center', marginTop: 20 }}>
-                                                <Text style={{ fontSize: 14, fontFamily: 'KHNPHDotfB', color: '#000' }}>{"* 오늘은 배아이식일입니다."}</Text>
+                                                <Text style={{ fontSize: 14, color: '#000' }}>{"* 오늘은 배아이식일입니다."}</Text>
                                             </View>
                                         ) : (this.state.iuiDateList.length > 0 && this.state.iuiDateList.includes(Moment(this.state.selectedDay).format('YYYY-MM-DD'))) ? (
                                             <View style={{ width: '100%', alignItems: 'center', justifyContent: 'center', marginTop: 20 }}>
-                                                <Text style={{ fontSize: 14, fontFamily: 'KHNPHDotfB', color: '#000' }}>{"* 오늘은 인공수정 시술일입니다."}</Text>
+                                                <Text style={{ fontSize: 14, color: '#000' }}>{"* 오늘은 인공수정 시술일입니다."}</Text>
                                             </View>) : (this.state.injectionTimeDatas.length > 0 && this.state.injectionTimes.includes(Moment(this.state.selectedDay).format('YYYY-MM-DD'))) ? (
                                                 <View style={{ width: '100%', alignItems: 'center', justifyContent: 'center', marginTop: 20 }}>
-                                                    <Text style={{ fontSize: 14, fontFamily: 'KHNPHDotfB', color: '#000', textAlign: 'center', lineHeight: 22 }}>{"* 배란유도 주사 시간 : " + Moment(this.state.injectionTimeDatas[this.state.injectionTimes.indexOf(Moment(this.state.selectedDay).format('YYYY-MM-DD'))].time).format('오늘 a h시 mm분') + "\n(시술 " + this.state.injectionTimeDatas[this.state.injectionTimes.indexOf(Moment(this.state.selectedDay).format('YYYY-MM-DD'))].before + "시간 전)"}</Text>
+                                                    <Text style={{ fontSize: 14, color: '#000', textAlign: 'center', lineHeight: 22 }}>{"* 배란유도 주사 시간 : " + Moment(this.state.injectionTimeDatas[this.state.injectionTimes.indexOf(Moment(this.state.selectedDay).format('YYYY-MM-DD'))].time).format('오늘 a h시 mm분') + "\n(시술 " + this.state.injectionTimeDatas[this.state.injectionTimes.indexOf(Moment(this.state.selectedDay).format('YYYY-MM-DD'))].before + "시간 전)"}</Text>
                                                 </View>) : (this.state.visitDateList.length > 0 && this.state.visitDateList.includes(Moment(this.state.selectedDay).format('YYYY-MM-DD'))) ? (
                                                     <View style={{ width: '100%', alignItems: 'center', justifyContent: 'center', marginTop: 20 }}>
-                                                        <Text style={{ fontSize: 14, fontFamily: 'KHNPHDotfB', color: '#000' }}>{"* 오늘은 내원일입니다."}</Text>
+                                                        <Text style={{ fontSize: 14, color: '#000' }}>{"* 오늘은 내원일입니다."}</Text>
                                                     </View>) : (this.state.bhcgDateList.length > 0 && this.state.bhcgDateList.includes(Moment(this.state.selectedDay).format('YYYY-MM-DD'))) ? (
                                                         <View style={{ width: '100%', alignItems: 'center', justifyContent: 'center', marginTop: 20 }}>
-                                                            <Text style={{ fontSize: 14, fontFamily: 'KHNPHDotfB', color: '#000' }}>{"* 오늘은 임신확인일입니다."}</Text>
+                                                            <Text style={{ fontSize: 14, color: '#000' }}>{"* 오늘은 임신확인일입니다."}</Text>
                                                         </View>) : null)}
 
                                     <View style={{ marginBottom: 28 }}>
@@ -1149,12 +1157,12 @@ export default class MedicineCalendar extends React.Component {
 
                                                         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingTop: 12, paddingBottom: 12 }}>
                                                             <Image source={(item.type == '주사' ? imgCirclePink : (item.type == '약' ? imgCircleGreen : imgCircleBlue))} style={{ width: 8, height: 8, resizeMode: 'contain', }}></Image>
-                                                            <Text style={{ marginLeft: 8, fontSize: 14, fontFamily: 'KHNPHDotfR', color: '#000', flex: 1 }}>{item.medicine_app_name.length == 0 ? item.medicine_name : item.medicine_app_name}</Text>
-                                                            <Text style={{ fontSize: 14, fontFamily: 'KHNPHDotfR', color: '#000', flex: 1 }}>{item.amount + item.unit}</Text>
+                                                            <Text style={{ marginLeft: 8, fontSize: 14, color: '#000', flex: 1 }}>{item.medicine_app_name.length == 0 ? item.medicine_name : item.medicine_app_name}</Text>
+                                                            <Text style={{ fontSize: 14, color: '#000', flex: 1 }}>{item.amount + item.unit}</Text>
                                                         </View>
 
                                                         {item.memo.length > 0 && <View style={{ height: 30 }}>
-                                                            <Text style={{ fontSize: 12, fontFamily: 'KHNPHUotfR', color: '#000', marginLeft: 8 }}>{"* " + item.memo}</Text>
+                                                            <Text style={{ fontSize: 12, color: '#000', marginLeft: 8 }}>{"* " + item.memo}</Text>
                                                         </View>}
 
                                                     </View>
@@ -1163,11 +1171,11 @@ export default class MedicineCalendar extends React.Component {
                                                         ((item.medicine_name == '오비드렐' || item.medicine_name == '데카펩틸' || item.medicine_name == '가니레버' || item.medicine_name == '유레릭스' || item.medicine_name == '오가루트')) ?
                                                             <View style={{ flex: 0.4, justifyContent: 'flex-end', flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', paddingRight: 12 }}>
                                                                 <Image source={imgClock} style={{ width: 12, height: 12, resizeMode: 'contain', }}></Image>
-                                                                <Text style={{ marginLeft: 7, fontSize: 12, fontFamily: 'KHNPHUotfR', color: '#000' }}>{Moment(Moment().format('YYYY-MM-DD') + " " + item.take_time).format('a h시 mm분')}</Text>
+                                                                <Text style={{ marginLeft: 7, fontSize: 12, color: '#000' }}>{Moment(Moment().format('YYYY-MM-DD') + " " + item.take_time).format('a h시 mm분')}</Text>
                                                             </View>
                                                             :
                                                             <View style={{ flex: 0.35, alignItems: 'flex-end', justifyContent: 'flex-end', justifyContent: 'center', paddingRight: 12 }}>
-                                                                <Text style={{ fontSize: 12, fontFamily: 'KHNPHUotfR', color: '#000' }}>{(item.type == '주사' ? '주사완료' : (item.type == '약' ? '복용완료' : '사용완료'))}</Text>
+                                                                <Text style={{ fontSize: 12, color: '#000' }}>{(item.type == '주사' ? '주사완료' : (item.type == '약' ? '복용완료' : '사용완료'))}</Text>
                                                             </View>)
                                                         :
                                                         <View style={{ flex: 0.35, alignItems: 'flex-end', justifyContent: 'center' }}>
@@ -1176,7 +1184,7 @@ export default class MedicineCalendar extends React.Component {
                                                 </View>
 
                                             </TouchableWithoutFeedback>
-                                        </View>) : ((this.state.opuDate.length > 0 && Moment(this.state.selectedDay).format('YYYY-MM-DD') == this.state.opuDate) == false ? <View style={{ width: '100%', alignItems: 'center', justifyContent: 'center', marginTop: 20 }}><Text style={{ fontSize: 14, fontFamily: 'KHNPHDotfB', color: '#000' }}>{"해당일에는 복약정보가 없습니다."}</Text></View> : null)}
+                                        </View>) : ((this.state.opuDate.length > 0 && Moment(this.state.selectedDay).format('YYYY-MM-DD') == this.state.opuDate) == false ? <View style={{ width: '100%', alignItems: 'center', justifyContent: 'center', marginTop: 20 }}><Text style={{ fontSize: 14, color: '#000' }}>{"해당일에는 복약정보가 없습니다."}</Text></View> : null)}
                                     </View>
                                 </View>
                             </View>)}

@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { StatusBar, Platform, Alert } from 'react-native';
+import { StatusBar, Platform, Alert, PermissionsAndroid } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import Stack from './src/Common/Stack';
 import Users from './src/Common/User';
@@ -30,6 +30,34 @@ export default class App extends React.Component {
   }
 
   async componentDidMount() {
+    // if (Platform.OS === "android") {
+    //   try {
+    //     console.log('1')
+    //     const OsVer = Platform.Version;
+    //     console.log('2')
+    //     if (+OsVer >= 33) {
+    //       console.log('3')
+    //       const res = await PermissionsAndroid.request(
+    //         PermissionsAndroid.PERMISSIONS.POST_NOTIFICATION,
+    //       );
+    //       console.log(res)
+    //       console.log('4')
+    //       if (res === "granted") {
+    //         console.log('5')
+    //         console.log(TAG, messaging().hasPermission());
+    //         this._Notification();
+    //       }
+    //     }
+    //     else {
+    //       console.log(TAG, messaging().hasPermission());
+    //       this._Notification();
+    //     }
+    //   } catch (err) {
+    //     console.log(TAG, err)
+    //   }
+    // } else {
+    //   this._Notification();
+    // }
     console.log(TAG, messaging().hasPermission());
     this._Notification();
   }
@@ -38,7 +66,7 @@ export default class App extends React.Component {
     // this.messageListener();
   }
 
-  _Notification() {
+  async _Notification() {
     this.messageListener = messaging().onMessage(async remoteMessage => {
       PushNotification.configure({
         onNotification: function (notification) {
@@ -54,6 +82,8 @@ export default class App extends React.Component {
               navigationRef.current.navigate('Home', { orderNo: notification.no })
             } else if (remoteMessage.data.android_channel_id == "empty1") {
               navigationRef.current.navigate('AlarmList', { orderNo: notification.no })
+            } else if (remoteMessage.data.android_channel_id == "empty2") {
+              navigationRef.current.navigate('AboutWebview', { tag: 'inspection', survey: remoteMessage.data.survey })
             } else {
               navigationRef.current.navigate('Home', { orderNo: notification.no })
             }
@@ -76,7 +106,8 @@ export default class App extends React.Component {
         largeIcon: remoteMessage.data.image,
         no: remoteMessage.data.no,
         picture: remoteMessage.data.image,
-        largeIconUrl: remoteMessage.data.image
+        largeIconUrl: remoteMessage.data.image,
+        survey: remoteMessage?.data?.survey
       });
 
       console.log("App", remoteMessage.data.image)
@@ -95,7 +126,7 @@ export default class App extends React.Component {
     });
 
     // messaging().getToken().then(token => AsyncStorage.setItem('token',token));
-    messaging().getToken().then(token => Users.token = token);
+    await messaging().getToken().then(token => Users.token = token);
 
     console.log('token : ' + Users.token);
 
@@ -105,7 +136,7 @@ export default class App extends React.Component {
         "App onNotificationOpenedApp : ",
         remoteMessage.data
       );
-      navigationRef.current.navigate('Splash', { orderNo: remoteMessage.data.no, channelId: remoteMessage.data.android_channel_id })
+      navigationRef.current.navigate('Splash', { orderNo: remoteMessage.data.no, channelId: remoteMessage.data.android_channel_id, survey: remoteMessage?.data?.survey })
       // navigation.navigate(remoteMessage.data.type);
     });
 
@@ -119,7 +150,7 @@ export default class App extends React.Component {
             remoteMessage.data
           );
           console.log(TAG, "id : " + remoteMessage.data.android_channel_id + " no : " + remoteMessage.data.no);
-          navigationRef.current.navigate('Splash', { orderNo: remoteMessage.data.no, channelId: remoteMessage.data.android_channel_id })
+          navigationRef.current.navigate('Splash', { orderNo: remoteMessage.data.no, channelId: remoteMessage.data.android_channel_id, survey: remoteMessage?.data?.survey })
         }
       });
   }

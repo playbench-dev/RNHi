@@ -145,6 +145,7 @@ export default class AdminUserSelect extends React.Component {
                             userPhone: json.Resources[i].phone_num || '',
                             userPatientNo: json.Resources[i].patient_no || '',
                             userBirth: json.Resources[i].birth_date || '',
+                            bryoFlag: json.Resources[i].embryo_notice_flag || 0,
                         }
                         this.state.datas.push(obj);
                     }
@@ -376,7 +377,7 @@ export default class AdminUserSelect extends React.Component {
                                         </View>
                                     </TouchableWithoutFeedback>
 
-                                    <TouchableWithoutFeedback onPress={() => this.props.navigation.navigate('AdminCellDevelop', { userNo: obj.item.userNo, userName: obj.item.userName, patientNo: obj.item.userPatientNo })}>
+                                    <TouchableWithoutFeedback onPress={() => this.props.navigation.navigate('AdminCellDevelop', { userNo: obj.item.userNo, userName: obj.item.userName, patientNo: obj.item.userPatientNo, bryoFlag: obj.item.bryoFlag })}>
                                         <View style={{ width: 70, alignItems: 'center', justifyContent: 'center', borderRadius: 8, backgroundColor: "#673AB7", marginLeft: 14, height: 40 }}>
                                             <Text style={{
                                                 fontSize: 14,

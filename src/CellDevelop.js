@@ -19,6 +19,7 @@ import RNAnimated from 'react-native-animated-component'
 import FetchingIndicator from 'react-native-fetching-indicator'
 =======
 import InformationDialog from './Common/InformationDialog'
+import BryoInfoDialog from './Common/BryoInfoDialog'
 import RNAnimated from 'react-native-animated-component'
 import FetchingIndicator from 'react-native-fetching-indicator'
 import SwitchToggle from 'react-native-switch-toggle';
@@ -209,6 +210,7 @@ export default class CellDevelop extends React.Component {
         embryoAllDatas: [],
         oOcyteAllDatas: [],
         refreshing: false,
+        bryoInfoDialogVisible: false,
     }
 
     componentDidMount() {
@@ -720,6 +722,9 @@ export default class CellDevelop extends React.Component {
                     }), () => {
 
                     });
+                    AsyncStorage.setItem('bryoDialogFlag', JSON.stringify({
+                        'bryoFlag': json.Resources[0].embryo_notice_flag || 0
+                    }))
                     Users.userNo = json.Resources[0].user_no || '';
                     Users.userName = json.Resources[0].user_name || '';
                     Users.userBirthday = json.Resources[0].birth_date || '';
@@ -735,6 +740,7 @@ export default class CellDevelop extends React.Component {
                     Users.guest = false;
                     Users.userPush = json.Resources[0].use_push || '';
                     Users.kakaoPush = json.Resources[0].kakao_push || '';
+                    Users.bryoFlag = json.Resources[0].embryo_notice_flag || 0
                     this._IVFInfo();
                 }
             }
@@ -1432,7 +1438,6 @@ export default class CellDevelop extends React.Component {
     }
 
     _ChartSelect = value => {
-
         this.state.requestType = 2;
         this.state.selectPosition = value;
         this.scrChart.scrollTo({ x: ((20 * value) + (160 * value)) - 100, animated: true })
@@ -1480,6 +1485,51 @@ export default class CellDevelop extends React.Component {
     _SnapTo(value) {
         this.state.clickItemPosition = value;
         this.setState({ imgMagnify: true })
+    }
+
+    _BryoInfoDialogVisible = value => {
+        console.log(value)
+        if (value != undefined) {
+            this.setState({
+                bryoInfoDialogVisible: value.visible,
+            }, () => {
+                let url = ServerUrl.emBryoNoticeFlagUrl;
+                let details = {
+                    'user_no': Users.userNo,
+                    'embryo_notice_flag': 1
+                };
+
+                var formBody = [];
+
+                for (var property in details) {
+                    var encodedKey = encodeURIComponent(property);
+                    var encodedValue = encodeURIComponent(details[property]);
+                    formBody.push(encodedKey + "=" + encodedValue);
+                }
+
+                formBody = formBody.join("&");
+
+                fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
+                    },
+                    mode: 'cors',
+                    cache: 'default',
+                    body: formBody,
+                }).then(
+                    response => response.json()
+                ).then(
+                    json => {
+                        Users.bryoFlag = 1
+                        console.log(json)
+                    }
+                )
+            })
+        }
+        if (this.state.bryoInfoDialogVisible) {
+            return <BryoInfoDialog clcik={this._BryoInfoDialogVisible} bryoFlag={Users.bryoFlag}></BryoInfoDialog>
+        }
     }
 
     _ImageMagnify() {
@@ -2034,6 +2084,7 @@ export default class CellDevelop extends React.Component {
                     {this._OneDialogVisible()}
                     {this._ImageMagnify()}
                     {this._InformationPopup()}
+                    {this._BryoInfoDialogVisible()}
                     <View style={{ width: '100%', height: 48, justifyContent: 'center' }}>
                         <TouchableWithoutFeedback onPress={() => this._goBack()}>
                             <View style={{ width: 40, height: 48, justifyContent: 'center' }}>
@@ -2280,6 +2331,13 @@ export default class CellDevelop extends React.Component {
                                             <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center' }}>
                                                 <Image source={imgCell} style={{ width: 28, height: 28, resizeMode: 'contain' }}></Image>
                                                 <Text style={{ fontSize: 18, fontFamily: 'KHNPHDotfR', color: "#000", marginLeft: 8 }}>{"나의 보존 배아"}</Text>
+                                                <View style={{ flex: 1 }}></View>
+                                                <TouchableWithoutFeedback onPress={() => this.setState({ bryoInfoDialogVisible: true })}>
+                                                    <View style={{ paddingLeft: 12, paddingRight: 12, paddingTop: 8, paddingBottom: 8, backgroundColor: '#7E57C2', borderRadius: 20, marginRight: 12 }} >
+                                                        <Text style={{ fontSize: 12, fontFamily: 'KHNPHDotfR', color: "#fff", }}>{"주의사항"}</Text>
+                                                    </View>
+                                                </TouchableWithoutFeedback>
+
                                             </View>
                                         </View>
 

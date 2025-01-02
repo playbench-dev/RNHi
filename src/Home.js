@@ -150,6 +150,8 @@ export default class Home extends React.Component {
     injectionTimeDatas: [],
     pregnancyDialogVisible: false,
     pregnancyCautionDialogVisible: false,
+    selectedDay: Moment().format('YYYYMMDD'),
+    // selectedDay: '20240710',
   }
 
   componentWillUnmount() {
@@ -316,7 +318,6 @@ export default class Home extends React.Component {
           this.state.noticeMessageExistence = false;
         }
         this._HopeMessages();
-        this._RandomMessages();
       }
     )
   }
@@ -338,67 +339,39 @@ export default class Home extends React.Component {
 
     formBody = formBody.join("&");
 
-    fetch(ServerUrl.hopeMessagesUrl, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
-      },
-      mode: 'cors',
-      cache: 'default',
-      body: null,
-    }).then(
-      response => response.json()
+    fetch(ServerUrl.hopeMessagesUrl
+    ).then(
+      response => response.text()
     ).then(
       json => {
         this.state.messageDates = [];
-        console.log(Object.keys(json.data).length)
-        if (Object.keys(json.data).length > 10) {
+        let data = JSON.parse(json)
+
+        if (data.length > 10) {
           for (let i = 0; i < 10; i++) {
             const obj = ({
-              kind: json.data[i].kind || '',
-              cont1: json.data[i].cont1 || '',
-              cont2: json.data[i].cont2 || '',
-              customerName: json.data[i].customerName || '',
-              kind2Childbirth: json.data[i].kind2Childbirth || '',
-              kind2BirthType: json.data[i].kind2BirthType || '',
-              kind2Baby1: json.data[i].kind2Baby1 || '',
-              kind2Baby2: json.data[i].kind2Baby2 || '',
-              kind2Baby3: json.data[i].kind2Baby3 || '',
-              answerCont: json.data[i].answerCont || '',
-              answerDate: json.data[i].answerDate || '',
-              answerYn: json.data[i].answerYn || '',
-              kind1Age: json.data[i].kind1Age || '',
-              kind1Term: json.data[i].kind1Term || '',
-              kind1Sisul: json.data[i].kind1Sisul || '',
-              kind1Effort: json.data[i].kind1Effort || '',
+              acf: data[i].acf,
+              title: data[i].title,
+              content: data[i].content,
+              date: data[i].date
             })
             this.state.messageDatas.push(obj);
           }
           this.state.messageLengthOver = true;
         } else {
-          for (let i = 0; i < Object.keys(json.data).length; i++) {
+          let data = JSON.parse(json)
+          for (let i = 0; i < data.length; i++) {
             const obj = ({
-              kind: json.data[i].kind || '',
-              cont1: json.data[i].cont1 || '',
-              cont2: json.data[i].cont2 || '',
-              customerName: json.data[i].customerName || '',
-              kind2Childbirth: json.data[i].kind2Childbirth || '',
-              kind2BirthType: json.data[i].kind2BirthType || '',
-              kind2Baby1: json.data[i].kind2Baby1 || '',
-              kind2Baby2: json.data[i].kind2Baby2 || '',
-              kind2Baby3: json.data[i].kind2Baby3 || '',
-              answerCont: json.data[i].answerCont || '',
-              answerDate: json.data[i].answerDate || '',
-              answerYn: json.data[i].answerYn || '',
-              kind1Age: json.data[i].kind1Age || '',
-              kind1Term: json.data[i].kind1Term || '',
-              kind1Sisul: json.data[i].kind1Sisul || '',
-              kind1Effort: json.data[i].kind1Effort || '',
+              acf: data[i].acf,
+              title: data[i].title,
+              content: data[i].content,
+              date: data[i].date
             })
             this.state.messageDatas.push(obj);
           }
           this.state.messageLengthOver = false;
         }
+        this._RandomMessages();
       }
     )
   }
@@ -459,6 +432,7 @@ export default class Home extends React.Component {
         'refresh_token': Users.RefreshToken,
         'user_no': Users.userNo,
         'cel_date_pick': Moment().format('YYYYMMDD'),
+        // 'cel_date_pick': '20240710',
       };
     } else if (this.state.requestType == 2) {
       this.setState({ isFetching: true })
@@ -496,7 +470,6 @@ export default class Home extends React.Component {
 
         if (json.Error_Cd == "0000") {
           if (this.state.requestType == 1) {
-            console.log(TAG, JSON.stringify(json) + ' 1111');
             this.state.datas = [];
             this.state.scheduleNo = [];
             this.state.namesList = [];
@@ -797,7 +770,10 @@ export default class Home extends React.Component {
       this.props.navigation.navigate('Business')
     } else if (name == 'ChartWebview') {
       Users.guest == false ? this._ChartCheck() : this.props.navigation.navigate('AboutWebview', { tag: 'loginStatusChart' })
+    } else if (name == 'inspectionWebview') {
+      Users.guest == false ? this.props.navigation.navigate('AboutWebview', { tag: 'inspection' }) : this.props.navigation.navigate('AboutWebview', { tag: 'inspection' })
     }
+
   };
 
   onMessage = (event) => {
@@ -1237,6 +1213,17 @@ export default class Home extends React.Component {
                   </View>
                 </TouchableWithoutFeedback>
 
+                <Text style={{ marginTop: 16, fontSize: 16, color: '#AFAFAF', fontFamily: 'KHNPHDotfR' }}>{'나의 설문 조사'}</Text>
+                <TouchableWithoutFeedback onPress={() => this.playPause('inspectionWebview', '')}>
+                  <View style={{ marginTop: 10, borderRadius: 12, backgroundColor: "rgba(219,227,241,0.5)", paddingLeft: 16, paddingRight: 31.5, flexDirection: 'row', width: '100%', height: 56, alignItems: 'center' }}>
+                    <View style={{ flex: 1 }}>
+                      <Text style={{ marginLeft: 0, fontSize: 16, fontFamily: 'KHNPHDotfR', color: '#000', }}>{"여성의 신체활동과 건강에 관한 설문"}</Text>
+                      <Text style={{ marginLeft: 0, fontSize: 10, fontFamily: 'KHNPHDotfB', color: '#AFAFAF', marginTop: 4 }}>{"난임 여성 참여 가능, 24년 12월까지 참여하신 분들께 선물 증정"}</Text>
+                    </View>
+                    <Image source={imgArrow} style={{ width: 8, height: 12, resizeMode: 'contain', }}></Image>
+                  </View>
+                </TouchableWithoutFeedback>
+
 
                 <Text style={{ marginTop: 32, fontSize: 16, color: '#AFAFAF', fontFamily: 'KHNPHDotfR' }}>HI의료진이 알려주는</Text>
 
@@ -1299,17 +1286,17 @@ export default class Home extends React.Component {
               <Text style={{ marginTop: 15, fontSize: 20, color: '#000', fontFamily: 'KHNPHDotfB', paddingLeft: 20, }}>희망의 메세지</Text>
 
               <ScrollView style={{ marginTop: 20, paddingLeft: 20, }} horizontal={true} showsVerticalScrollIndicator={false} showsHorizontalScrollIndicator={false}>
-                {this.state.messageDatas.map((item, index) => (index != 9 ? <View key={index} style={{ width: 292, height: 232, backgroundColor: "rgb(236,233,228)", borderRadius: 24, marginLeft: index == 0 ? 0 : 20, marginRight: 0, paddingTop: 24, paddingLeft: 20, paddingRight: 18, paddingBottom: 15 }}>
-                  <Text style={{ fontSize: 14, fontFamily: 'KHNPHDotfR', color: item.kind == 1 ? '#E39C42' : '#4A50CA' }}>{(item.kind == 1 ? "임신했어요" : "출산했어요")}</Text>
-                  <Text style={{ fontSize: 18, fontFamily: 'KHNPHDotfB', color: '#000', marginTop: 13 }}>{(item.kind == 1 ? "아이를 기다리는 난임부부에게 전하고 싶은 말" : "주치의에게 전하고 싶은 말")}</Text>
-                  <Text style={{ flex: 1, fontSize: 14, color: '#000', marginTop: 20, fontFamily: 'KHNPHUotfR', lineHeight: 20 }} ellipsizeMode="tail" numberOfLines={3}>{(item.kind == 1 ? item.cont1.replace(/&quot;/gi, "\"").replace(/&ldquo;/gi, '\"').replace(/&rdquo;/gi, '\"').replace(/&iexcl;/gi, '¡') : item.cont2.replace(/&quot;/gi, "\"").replace(/&ldquo;/gi, '\"').replace(/&rdquo;/gi, '\"').replace(/&iexcl;/gi, '¡'))}</Text>
+                {this.state.messageDatas.map((item, index) => (index != 9 ? <View key={index} style={{ width: 292, height: 232, backgroundColor: "#fff", borderWidth: 1, borderColor: '#333', borderRadius: 24, marginLeft: index == 0 ? 0 : 20, marginRight: 0, paddingTop: 24, paddingLeft: 20, paddingRight: 18, paddingBottom: 15 }}>
+                  {/* <Text style={{ fontSize: 14, fontFamily: 'KHNPHDotfR', color: item.acf.msg_type_form == 34 ? '#E39C42' : item.acf.msg_type_form == 35 ? '#4A50CA' : '#333' }}>{(item.acf.msg_type_form == 34 ? "임신했어요" : item.acf.msg_type_form == 35 ? "출산했어요" : "감사합니다")}</Text> */}
+                  <Text style={{ fontSize: 18, fontFamily: 'KHNPHDotfB', color: '#000', marginTop: 13 }}>{item.acf.name_prefix.replace(/<[^>]+>/g, '').replace(/&nbsp;/g, ' ') + item.title.rendered.replace(/<[^>]+>/g, '').replace(/&nbsp;/g, ' ') + item.acf.name_suffix.replace(/<[^>]+>/g, '').replace(/&nbsp;/g, ' ')}</Text>
+                  <Text style={{ flex: 1, fontSize: 14, color: '#000', marginTop: 16, fontFamily: 'KHNPHUotfR', lineHeight: 20 }} ellipsizeMode="tail" numberOfLines={4}>{item.content.rendered.replace(/<[^>]+>/g, '').replace(/&nbsp;/g, ' ')}</Text>
                   <TouchableWithoutFeedback onPress={() => this.playPause('HopeMessageDetail', this.state.messageDatas[index])}>
                     <View style={{ justifyContent: 'flex-end', width: '100%', flexDirection: 'row', alignItems: 'center', height: 30 }}>
                       <Text style={{ fontSize: 14, fontFamily: 'KHNPHDotfB', color: '#AFAFAF' }}>more</Text>
                       <Image source={imgArrow} style={{ width: 4, height: 8, resizeMode: 'contain', marginLeft: 10, marginTop: 2 }}></Image>
                     </View>
                   </TouchableWithoutFeedback>
-                </View> : <View key={index} style={{ width: 292, height: 232, backgroundColor: 'rgb(236,233,228)', borderRadius: 24, marginLeft: index == 0 ? 0 : 20, marginRight: 20, paddingTop: 24, paddingLeft: 20, paddingRight: 18, paddingBottom: 15 }}>
+                </View> : <View key={index} style={{ width: 292, height: 232, backgroundColor: "#fff", borderWidth: 1, borderColor: '#333', borderRadius: 24, marginLeft: index == 0 ? 0 : 20, marginRight: 20, paddingTop: 24, paddingLeft: 20, paddingRight: 18, paddingBottom: 15 }}>
                   <TouchableWithoutFeedback onPress={() => this.playPause('AboutWebview', 'pregnancy')}>
                     <View style={{ flex: 1, paddingTop: 0 }}>
                       <Text style={{ flex: 1, fontSize: 18, fontFamily: 'KHNPHDotfB', color: '#000', lineHeight: 30 }}>{"HI홈페이지에서\n더 많은 메시지를\n확인해보세요."}</Text>
@@ -1366,10 +1353,10 @@ export default class Home extends React.Component {
                 </View>
 
                 <View style={{ marginTop: 20, flexDirection: 'row', alignItems: 'center' }}>
-                  <TouchableWithoutFeedback onPress={() => this.playPause('HINews', '')}>
+                  <TouchableWithoutFeedback onPress={() => this.playPause('AboutWebview', 'room')}>
                     <View style={{ flex: 1, aspectRatio: 1, backgroundColor: '#fff', borderRadius: 24, alignItems: 'center', justifyContent: 'center' }}>
                       <Image source={imgNews} style={{ width: 60, height: 60, resizeMode: 'contain', }}></Image>
-                      <Text style={{ marginTop: 16, fontSize: 16, fontFamily: 'KHNPHDotfB', color: '#000' }}>HI 새소식</Text>
+                      <Text style={{ marginTop: 16, fontSize: 16, fontFamily: 'KHNPHDotfB', color: '#000' }}>HI Room</Text>
                     </View>
                   </TouchableWithoutFeedback>
 

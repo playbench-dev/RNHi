@@ -118,6 +118,7 @@ export default class AdminAlarmList extends React.Component {
                                     push_title: json.Resources[i].push_title || '',
                                     push_type: json.Resources[i].push_type || '',
                                     reg_date: json.Resources[i].reg_date || '',
+                                    survey: json.Resources[i].survey || '',
                                 })
                                 this.state.datas.push(obj);
                                 this.state.checks.push(false);
