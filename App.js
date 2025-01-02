@@ -126,7 +126,6 @@ export default class App extends React.Component {
     });
 
     // messaging().getToken().then(token => AsyncStorage.setItem('token',token));
-
     await messaging().getToken().then(token => Users.token = token);
 
     console.log('token : ' + Users.token);

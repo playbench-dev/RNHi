@@ -216,7 +216,7 @@ dependencies {
     implementation 'com.facebook.fresco:fresco:2.5.0'
     implementation 'com.facebook.fresco:animated-gif:2.5.0'
     implementation 'org.jetbrains:annotations:16.0.2'
-
+    
     implementation project(':react-native-version-info')
     debugImplementation("com.facebook.flipper:flipper:${FLIPPER_VERSION}") {
       exclude group:'com.facebook.fbjni'

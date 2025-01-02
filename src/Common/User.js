@@ -1,6 +1,10 @@
 import React from 'react';
 
+<<<<<<< HEAD
+export default class User{
+=======
 export default class User {
+>>>>>>> mw
   token = '';
   userNo = '';
   userName = '';
@@ -9,7 +13,10 @@ export default class User {
   paitentNo = '';
   spouseName = '';
   spousePhoneNumber = '';
+<<<<<<< HEAD
+=======
   spouseBirthday = '';
+>>>>>>> mw
   userDirectDoctor = '';
   guest = false;
   provisionYN = 0;
