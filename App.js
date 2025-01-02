@@ -66,7 +66,7 @@ export default class App extends React.Component {
     // this.messageListener();
   }
 
-  _Notification() {
+  async _Notification() {
     this.messageListener = messaging().onMessage(async remoteMessage => {
       PushNotification.configure({
         onNotification: function (notification) {
@@ -82,6 +82,8 @@ export default class App extends React.Component {
               navigationRef.current.navigate('Home', { orderNo: notification.no })
             } else if (remoteMessage.data.android_channel_id == "empty1") {
               navigationRef.current.navigate('AlarmList', { orderNo: notification.no })
+            } else if (remoteMessage.data.android_channel_id == "empty2") {
+              navigationRef.current.navigate('AboutWebview', { tag: 'inspection', survey: remoteMessage.data.survey })
             } else {
               navigationRef.current.navigate('Home', { orderNo: notification.no })
             }
@@ -105,7 +107,7 @@ export default class App extends React.Component {
         no: remoteMessage.data.no,
         picture: remoteMessage.data.image,
         largeIconUrl: remoteMessage.data.image,
-
+        survey: remoteMessage?.data?.survey
       });
 
       console.log("App", remoteMessage.data.image)
@@ -125,7 +127,7 @@ export default class App extends React.Component {
 
     // messaging().getToken().then(token => AsyncStorage.setItem('token',token));
 
-    messaging().getToken().then(token => Users.token = token);
+    await messaging().getToken().then(token => Users.token = token);
 
     console.log('token : ' + Users.token);
 
@@ -135,7 +137,7 @@ export default class App extends React.Component {
         "App onNotificationOpenedApp : ",
         remoteMessage.data
       );
-      navigationRef.current.navigate('Splash', { orderNo: remoteMessage.data.no, channelId: remoteMessage.data.android_channel_id })
+      navigationRef.current.navigate('Splash', { orderNo: remoteMessage.data.no, channelId: remoteMessage.data.android_channel_id, survey: remoteMessage?.data?.survey })
       // navigation.navigate(remoteMessage.data.type);
     });
 
@@ -149,7 +151,7 @@ export default class App extends React.Component {
             remoteMessage.data
           );
           console.log(TAG, "id : " + remoteMessage.data.android_channel_id + " no : " + remoteMessage.data.no);
-          navigationRef.current.navigate('Splash', { orderNo: remoteMessage.data.no, channelId: remoteMessage.data.android_channel_id })
+          navigationRef.current.navigate('Splash', { orderNo: remoteMessage.data.no, channelId: remoteMessage.data.android_channel_id, survey: remoteMessage?.data?.survey })
         }
       });
   }

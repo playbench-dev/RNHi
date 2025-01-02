@@ -147,8 +147,8 @@ configurations.all {
         applicationId "com.hicenter"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 25
-        versionName "0.0.25"
+        versionCode 28
+        versionName "0.0.28"
         resConfigs "kr"
     }
     splits {

@@ -146,6 +146,7 @@ export default class AlarmList extends React.Component {
                                     push_title: json.Resources[i].push_title || '',
                                     push_type: json.Resources[i].push_type || '',
                                     reg_date: json.Resources[i].reg_date || '',
+                                    survey: json.Resources[i]?.survey || '',
                                 })
                                 this.state.datas.push(obj);
                                 this.state.checks.push(false);
@@ -268,7 +269,7 @@ export default class AlarmList extends React.Component {
                     </View>
                     {this.state.datas.length > 0 ? <FlatList style={{ marginTop: 16, paddingRight: 20, paddingLeft: 20 }} data={this.state.datas} keyExtractor={(item, index) => index.toString()} renderItem={(obj) => {
                         return <View key={obj.index} style={{ width: '100%', backgroundColor: '#fff', borderRadius: 24, paddingLeft: 20, paddingRight: 20, paddingTop: 16, paddingBottom: 16, marginTop: 16 }}>
-                            <TouchableWithoutFeedback>
+                            <TouchableWithoutFeedback disabled={this.state.deleteMode == true ? true : false} onPress={() => obj.item.push_type == 4 && this.props.navigation.navigate('AboutWebview', { tag: 'inspection', push: this.state.routePush, survey: this.state.datas[obj?.index]?.survey })}>
                                 <View style={{ flexDirection: this.state.deleteMode == false ? "column" : 'row', alignItems: this.state.deleteMode == false ? null : 'center' }}>
                                     {this.state.deleteMode && <TouchableWithoutFeedback onPress={() => this._ChildCheckEvent(obj.index)}>
                                         <Image source={(this.state.checks[obj.index] == true) ? imgCheckTrue : imgCheckFalse} style={{ width: 24, height: 24, marginRight: 20 }}></Image>

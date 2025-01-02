@@ -42,31 +42,16 @@ class BryoInfoDialog extends Component {
                             <View style={{ flexDirection: 'column', paddingLeft: 12, paddingRight: 12, marginTop: this.state.bryoFlag == 0 ? 40 : 0, }}>
                                 <ScrollView persistentScrollbar={true}>
                                     <View style={{ flexDirection: 'column', paddingLeft: 12, paddingRight: 12, marginTop: 0, }}>
-                                        <Text style={{ fontSize: 15, fontFamily: 'KHNPHUotfR', textAlign: 'left', lineHeight: 22 }}>{"본원의 최초 동결 보존기간은 1년입니다.\n1년 단위로 추가 연장이 가능하며 비용이 발생합니다.\n만료일 이전에 연장 및 폐기에 관한 안내를 드리겠습니다."}</Text>
+                                        <Text style={{ fontSize: 15, fontFamily: 'KHNPHUotfR', textAlign: 'left', lineHeight: 22 }}>{"본원의 최초 동결 보존기간은 1년입니다. 1년 단위로 추가 연장이 가능하며 비용이 발생합니다. 만료일 이전에 연장 및 폐기에 관한 안내를 드리겠습니다."}</Text>
 
-                                        <Text style={{ fontSize: 15, fontFamily: 'KHNPHUotfR', textAlign: 'left', marginTop: 20, lineHeight: 22 }}>{"본인 및 배우자의 연락처 또는 주소 변경이 있을 시\n반드시 본원으로 알려주셔야 합니다."}</Text>
+                                        <Text style={{ fontSize: 15, fontFamily: 'KHNPHUotfR', textAlign: 'left', marginTop: 20, lineHeight: 22 }}>{"본인 및 배우자의 연락처 또는 주소 변경이 있을 시 반드시 본원으로 알려주셔야 합니다."}</Text>
 
                                         <Text style={{ fontSize: 15, fontFamily: 'KHNPHUotfR', textAlign: 'left', marginTop: 20, lineHeight: 22 }}>{"연락이 불가능하여 보존기간 만료일이 지난 배아는 자동으로 폐기됩니다."}</Text>
 
                                         <View style={{ height: 2, backgroundColor: '#ddd', marginTop: 20 }}></View>
-                                        <Text style={{ fontSize: 14, fontFamily: 'KHNPHUotfR', textAlign: 'left', marginTop: 14, lineHeight: 22 }}>{"배아의 보존 기간은 최초 배아 생성일부터 5년까지이며, 다음과 같은 경우에는 5년 이상 보관 가능합니다."}</Text>
+                                        <Text style={{ fontSize: 14, fontFamily: 'KHNPHUotfR', textAlign: 'left', marginTop: 14, lineHeight: 22 }}>{"배아의 보존 기간은 최초 배아 생성일로터 5년입니다. 단, 항암 치료를 받았거나 예정인 경우, 또는 의료기관에서 5년 이상 보관이 필요하다고 인정하는 경우에는 5년을 초과하여 보관할 수 있습니다.이에 해당하시는분은 반드시 만료일 전에 본원으로 연락 주시기 바랍니다."}</Text>
 
-                                        <View style={{ flexDirection: 'row', marginTop: 10 }}>
-                                            <Text style={{ fontSize: 16, fontFamily: 'KHNPHUotfR', textAlign: 'left', marginTop: 0, }}>{"·"}</Text>
-                                            <Text style={{ fontSize: 12, fontFamily: 'KHNPHUotfR', textAlign: 'left', marginTop: 0, marginLeft: 8 }}>{"항암치료를 받았거나 받을 예정인 경우"}</Text>
-                                        </View>
 
-                                        <View style={{ flexDirection: 'row', marginTop: 10 }}>
-                                            <Text style={{ fontSize: 16, fontFamily: 'KHNPHUotfR', textAlign: 'left', marginTop: 0, }}>{"·"}</Text>
-                                            <Text style={{ fontSize: 12, fontFamily: 'KHNPHUotfR', textAlign: 'left', marginTop: 0, marginLeft: 8, lineHeight: 20 }}>{"해당 배아를 생성한 의료기관의 기관위원회가 동의자의 건강상 문제로 인해 생식세포 채취나 배아 생성이 어려울 것으로 판단한 경우"}</Text>
-                                        </View>
-
-                                        <View style={{ flexDirection: 'row', marginTop: 10 }}>
-                                            <Text style={{ fontSize: 16, fontFamily: 'KHNPHUotfR', textAlign: 'left', marginTop: 0, }}>{"·"}</Text>
-                                            <Text style={{ fontSize: 12, fontFamily: 'KHNPHUotfR', textAlign: 'left', marginTop: 0, marginLeft: 8 }}>{"그 외에 기관위원회가 배아를 5년 이상 보관할 필요가 있다고 인정하는 경우"}</Text>
-                                        </View>
-
-                                        <Text style={{ fontSize: 14, fontFamily: 'KHNPHUotfR', textAlign: 'left', marginTop: 14, lineHeight: 22 }}>{"5년 이상 보관을 원하시는 경우, 만료일 전까지 본원에 연락해주셔야 합니다.(*심사에 시간이 필요하므로 최소 만료일 한달 전까지 연락주시기 바랍니다)"}</Text>
                                         <View style={{ marginTop: 0 }}></View>
                                     </View>
                                 </ScrollView>

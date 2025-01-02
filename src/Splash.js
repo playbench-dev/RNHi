@@ -111,6 +111,8 @@ export default class Splash extends React.Component {
               this.props.navigation.reset({ index: 0, routes: [{ name: 'Home' }] });
             } else if (this.props.route.params.channelId == 'empty1') {
               this.props.navigation.reset({ index: 0, routes: [{ name: 'AlarmList', params: { push: true } }] });
+            } else if (this.props.route.params.channelId == 'empty2') {
+              this.props.navigation.reset({ index: 0, routes: [{ name: 'AboutWebview', params: { push: true, tag: 'inspection', survey: this.props.route.params?.survey } }] });
             } else {
               this.props.navigation.reset({ index: 0, routes: [{ name: 'Home' }] });
             }
@@ -177,7 +179,7 @@ export default class Splash extends React.Component {
         if (Platform.OS === "android") {
           const OsVer = Platform.Version;
           if (+OsVer >= 33) {
-            PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.POST_NOTIFICATION);
+            PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS);
           }
         }
         AsyncStorage.getItem('userInfo', (err, result) => {
